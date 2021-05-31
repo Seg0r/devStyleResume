@@ -1,7 +1,7 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import * as THREE from 'three';
 
-export class GreetingBox extends THREE.Mesh {
+export class GreetingBox {
 
     greetingBox:THREE.Mesh;
  
@@ -27,7 +27,6 @@ export class GreetingBox extends THREE.Mesh {
 
 
 	constructor(){
-        super()
         const geometry = new THREE.BoxGeometry(10,10,10);
         const material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
         this.greetingBox = new THREE.Mesh(geometry,material);
@@ -38,9 +37,6 @@ export class GreetingBox extends THREE.Mesh {
         this.greetingBox.add(worldAxis);
         this.startRot = this.greetingBox.quaternion.clone();
 	}
-	
-
-
 
 
     animateBox(inputOffset: number,startOffset: number, endOffset: number){
@@ -54,11 +50,10 @@ export class GreetingBox extends THREE.Mesh {
         const pos2End = startOffset + 2* positionSize;
         const pos3End = startOffset + 3* positionSize;
 
-        if(startOffset>=pos1End && inputOffset<pos1End && this.currRotateState != this.rotateState.pos0){
+        if(inputOffset<pos1End && this.currRotateState != this.rotateState.pos0){
             this.rotateToPos(this.startRot);
             this.currRotateState=this.rotateState.pos0;
-        }
-        if(inputOffset>=pos1End && inputOffset<pos2End && this.currRotateState != this.rotateState.pos1){
+        } else if(inputOffset>=pos1End && inputOffset<pos2End && this.currRotateState != this.rotateState.pos1){
             this.rotateToPos(this.q1);
             this.currRotateState=this.rotateState.pos1;
         } else if (inputOffset>pos2End && inputOffset<pos3End && this.currRotateState != this.rotateState.pos2){

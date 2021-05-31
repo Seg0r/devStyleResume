@@ -3,32 +3,30 @@ import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import {GreetingBox} from './GreetingBox'
 
-
 import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
 
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight,0.1,1000);
-//const box = new GreetingBox();
+const box = new GreetingBox();
 const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector('#bg') as HTMLCanvasElement,
 });
-const controls = new OrbitControls(camera, renderer.domElement);;
-const pointLight = new THREE.PointLight(0xFFFFFF);
-const pointLightHelper = new THREE.PointLightHelper(pointLight);
-const gridHelper = new THREE.GridHelper(200,200)
 
 //Scene
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth,window.innerHeight);
 camera.position.setZ(15);
-//scene.add(box);
+scene.add(box.greetingBox);
+renderer.render(scene, camera);
 
 //Lights
-
+const pointLight = new THREE.PointLight(0xFFFFFF);
+const pointLightHelper = new THREE.PointLightHelper(pointLight);
 pointLight.position.set(0,0,200);
 
 //Helpers
+const controls = new OrbitControls(camera, renderer.domElement);;
+const gridHelper = new THREE.GridHelper(200,200)
 scene.add(pointLight,pointLightHelper,gridHelper);
 
 
@@ -39,7 +37,7 @@ function tellTheStory() {
     console.log(currOffsetPerc);
 
     if(currOffsetPerc<20){
-        //box.animateBox(currOffsetPerc,0,20);
+        box.animateBox(currOffsetPerc,0,20);
     }
     else if(currOffsetPerc>=20 && currOffsetPerc<40){
         console.log("Druga animacja");
@@ -48,6 +46,10 @@ function tellTheStory() {
     }
 }
 
+document.body.onscroll=tellTheStory;
+tellTheStory();
+
+
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -55,6 +57,8 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 
 }
+
+window.addEventListener( 'resize', onWindowResize, false );
 
 function animate(){
     requestAnimationFrame(animate);
@@ -65,6 +69,4 @@ function animate(){
 }
 
 
-document.body.onscroll=tellTheStory;
-window.addEventListener( 'resize', onWindowResize, false );
-animate;
+animate();
