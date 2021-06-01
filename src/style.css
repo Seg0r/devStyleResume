@@ -3,6 +3,7 @@
 :root {
   --dark-bg: rgba(15, 15, 15, 0.95);
   --spacing: 350px;
+  --empty: 5000px;
 
   font-family: brandon-grotesque, sans-serif;
   font-weight: 400;
@@ -51,6 +52,13 @@ canvas {
     font-size: 1.25rem;
     line-height: 1.5;
     margin-bottom: var(--spacing);
+  }
+
+  space {
+    margin: 0;
+    padding: 0;
+    grid-column: 5 / span 2;
+    margin-bottom: var(--empty);
   }
 
   blockquote {
