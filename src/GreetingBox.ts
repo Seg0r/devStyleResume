@@ -3,6 +3,7 @@ import * as THREE from 'three';
 
 export class GreetingBox {
 
+
     greetingBox:THREE.Mesh;
  
     readonly boxZeroX = 0;
@@ -22,8 +23,10 @@ export class GreetingBox {
     readonly q2 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 0, 1), this.deg90);
     readonly q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-this.deg90);
     
-    currRotateState: number = 0;
-    startRot : THREE.Quaternion;
+    private currRotateState: number = 0;
+    private startRot : THREE.Quaternion;
+
+    //private _tweens: TWEEN.Tween<any>[] = [];
 
 
 	constructor(){
@@ -51,31 +54,42 @@ export class GreetingBox {
         const pos3End = startOffset + 3* positionSize;
 
         if(inputOffset<pos1End && this.currRotateState != this.rotateState.pos0){
-            this.rotateToPos(this.startRot);
             this.currRotateState=this.rotateState.pos0;
+            this.rotateToPos(this.startRot);            
         } else if(inputOffset>=pos1End && inputOffset<pos2End && this.currRotateState != this.rotateState.pos1){
-            this.rotateToPos(this.q1);
             this.currRotateState=this.rotateState.pos1;
+            this.rotateToPos(this.q1);            
         } else if (inputOffset>pos2End && inputOffset<pos3End && this.currRotateState != this.rotateState.pos2){
-            this.rotateToPos(this.q1.multiply(this.q2));
             this.currRotateState=this.rotateState.pos2;
+            this.rotateToPos(this.q1.multiply(this.q2));
         } else if (inputOffset>=pos3End && inputOffset<=endOffset && this.currRotateState != this.rotateState.pos3){
-            this.rotateToPos(this.q1.multiply(this.q2.multiply(this.q3)));
             this.currRotateState=this.rotateState.pos3;
+            this.rotateToPos(this.q1.multiply(this.q2.multiply(this.q3)));
         }
+
+        console.log("input: "+inputOffset + " state: "+this.currRotateState + " tweens: "+ TWEEN.getAll().length);
     }
 
     rotateToPos(destquat:THREE.Quaternion) {
-
-        let time = {t: 0};
+        console.log("destquat: "+ destquat);
+        const time = {t: 0};
     
         new TWEEN.Tween(time)
         .to({t: 1}, 2000)
         .onUpdate((tween) => {
-             this.greetingBox.quaternion.slerp(destquat,tween.t);
+            this.greetingBox.quaternion.slerp(destquat,tween.t);
         })
         .easing(TWEEN.Easing.Quartic.InOut)
-        .start();
-    
+        .start()
+        ;
+
+        
     };
+
+    updateTweens() {
+        /* this._tweens.forEach(tween => {
+            tween.update();
+        }) */
+        TWEEN.update();
+    }
 }

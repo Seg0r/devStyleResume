@@ -1,6 +1,5 @@
 import './style.css'
 import * as THREE from 'three';
-import * as TWEEN from '@tweenjs/tween.js';
 import {GreetingBox} from './GreetingBox'
 
 import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -15,7 +14,9 @@ const renderer = new THREE.WebGLRenderer({
 //Scene
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth,window.innerHeight);
-camera.position.setZ(15);
+camera.position.setZ(30);
+camera.position.setX(10);
+camera.position.setY(10);
 scene.add(box.greetingBox);
 renderer.render(scene, camera);
 
@@ -34,8 +35,6 @@ function tellTheStory() {
     const main: HTMLElement = document.getElementById("main")!;
     const currOffsetPerc:number = Math.round(document.body.getBoundingClientRect().top / main.offsetHeight *-100)
 
-    console.log(currOffsetPerc);
-
     if(currOffsetPerc<20){
         box.animateBox(currOffsetPerc,0,20);
     }
@@ -45,9 +44,8 @@ function tellTheStory() {
         console.log("Trzecia animacja");
     }
 }
-
-document.body.onscroll=tellTheStory;
 tellTheStory();
+document.body.onscroll=tellTheStory;
 
 
 function onWindowResize() {
@@ -62,10 +60,9 @@ window.addEventListener( 'resize', onWindowResize, false );
 
 function animate(){
     requestAnimationFrame(animate);
-    TWEEN.update();
+    box.updateTweens();
     controls.update();
     renderer.render(scene,camera);
-
 }
 
 
