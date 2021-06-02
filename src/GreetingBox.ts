@@ -18,16 +18,9 @@ export class GreetingBox {
         pos2: 2,
         pos3: 3,
     }
-
-    readonly q1 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 1, 0),-(this.deg90));
-    readonly q2 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 0, 1), this.deg90);
-    readonly q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-(this.deg90));
     
     private currRotateState: number = -1;
     private startRot : THREE.Quaternion;
-
-    private _tweens: TWEEN.Tween<any>[] = [];
-    lastTween: TWEEN.Tween<any> | undefined;
 
 
 	constructor(){
@@ -75,54 +68,23 @@ export class GreetingBox {
             this.rotateToPos((q1.multiply(q2)).multiply(q3));
         }
 
-        console.log("input: "+inputOffset + " state: "+this.currRotateState + " tweens: "+ TWEEN.getAll().length);
+        //console.log("input: "+inputOffset + " state: "+this.currRotateState + " tweens: "+ TWEEN.getAll().length);
         
     }
 
     rotateToPos(destquat:THREE.Quaternion){
         let time = {t: 0};
-
-        console.log(this.greetingBox.quaternion);
-        console.log(destquat);
-    
-        this._tweens.push(
-            new TWEEN.Tween(time)
-            .to({t: 1}, 2000)
-            .onUpdate((tw) => {
-                this.greetingBox.quaternion.slerp(destquat,tw.t);
-            })
-            .easing(TWEEN.Easing.Quartic.InOut)
-        )
-        
-        if(TWEEN.getAll.length==0 && this._tweens.length>0){
-            this._tweens.shift()!.start();
-        }
-
-        console.log(this._tweens);
-
-    }
-
-    static sRotateToPos(object: THREE.Mesh, destquat:THREE.Quaternion) {
-        let time = {t: 0};
-
-        console.log(object.quaternion);
-        console.log(destquat);
     
         new TWEEN.Tween(time)
         .to({t: 1}, 2000)
         .onUpdate((tween) => {
-            object.quaternion.slerp(destquat,tween.t);
+            this.greetingBox.quaternion.slerp(destquat,tween.t);
         })
         .easing(TWEEN.Easing.Quartic.InOut)
-        .start()
-        ;
-
-    };
+        .start();
+    }
 
     static updateTweens() {
-        /* this._tweens.forEach(tween => {
-            tween.update();
-        }) */
         TWEEN.update();
     }
 }
