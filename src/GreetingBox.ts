@@ -19,14 +19,15 @@ export class GreetingBox {
         pos3: 3,
     }
 
-    readonly q1 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 1, 0),-this.deg90);
+    readonly q1 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 1, 0),-(this.deg90));
     readonly q2 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 0, 1), this.deg90);
-    readonly q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-this.deg90);
+    readonly q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-(this.deg90));
     
-    private currRotateState: number = 0;
+    private currRotateState: number = -1;
     private startRot : THREE.Quaternion;
 
-    //private _tweens: TWEEN.Tween<any>[] = [];
+    private _tweens: TWEEN.Tween<any>[] = [];
+    lastTween: TWEEN.Tween<any> | undefined;
 
 
 	constructor(){
@@ -34,11 +35,12 @@ export class GreetingBox {
         const material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
         this.greetingBox = new THREE.Mesh(geometry,material);
 
-        this.greetingBox.rotation.fromArray([this.boxZeroX,this.boxZeroY,this.boxZeroZ]);
+        //this.greetingBox.rotation.fromArray([this.boxZeroX,this.boxZeroY,this.boxZeroZ]);
 
         var worldAxis = new THREE.AxesHelper(100);
         this.greetingBox.add(worldAxis);
         this.startRot = this.greetingBox.quaternion.clone();
+        this.rotateToPos(this.startRot);
 	}
 
 
@@ -47,46 +49,77 @@ export class GreetingBox {
         if(inputOffset<startOffset || inputOffset>endOffset){
             throw new Error('Current offset beyond start-end range');
         }
+        
 
         const positionSize = (endOffset - startOffset)/4;
         const pos1End = startOffset + positionSize;
         const pos2End = startOffset + 2* positionSize;
         const pos3End = startOffset + 3* positionSize;
 
+        const q1 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 1, 0),-(this.deg90));
+        const q2 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 0, 1), this.deg90);
+        const q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-(this.deg90));
+        
+
         if(inputOffset<pos1End && this.currRotateState != this.rotateState.pos0){
             this.currRotateState=this.rotateState.pos0;
-            this.rotateToPos(this.startRot);            
+            this.rotateToPos(this.startRot);
         } else if(inputOffset>=pos1End && inputOffset<pos2End && this.currRotateState != this.rotateState.pos1){
             this.currRotateState=this.rotateState.pos1;
-            this.rotateToPos(this.q1);            
-        } else if (inputOffset>pos2End && inputOffset<pos3End && this.currRotateState != this.rotateState.pos2){
+            this.rotateToPos(q1);            
+        } else if (inputOffset>=pos2End && inputOffset<pos3End && this.currRotateState != this.rotateState.pos2){
             this.currRotateState=this.rotateState.pos2;
-            this.rotateToPos(this.q1.multiply(this.q2));
+            this.rotateToPos(q1.multiply(q2));
         } else if (inputOffset>=pos3End && inputOffset<=endOffset && this.currRotateState != this.rotateState.pos3){
             this.currRotateState=this.rotateState.pos3;
-            this.rotateToPos(this.q1.multiply(this.q2.multiply(this.q3)));
+            this.rotateToPos((q1.multiply(q2)).multiply(q3));
         }
 
         console.log("input: "+inputOffset + " state: "+this.currRotateState + " tweens: "+ TWEEN.getAll().length);
+        
     }
 
-    rotateToPos(destquat:THREE.Quaternion) {
-        console.log("destquat: "+ destquat);
-        const time = {t: 0};
+    rotateToPos(destquat:THREE.Quaternion){
+        let time = {t: 0};
+
+        console.log(this.greetingBox.quaternion);
+        console.log(destquat);
+    
+        this._tweens.push(
+            new TWEEN.Tween(time)
+            .to({t: 1}, 2000)
+            .onUpdate((tw) => {
+                this.greetingBox.quaternion.slerp(destquat,tw.t);
+            })
+            .easing(TWEEN.Easing.Quartic.InOut)
+        )
+        
+        if(TWEEN.getAll.length==0 && this._tweens.length>0){
+            this._tweens.shift()!.start();
+        }
+
+        console.log(this._tweens);
+
+    }
+
+    static sRotateToPos(object: THREE.Mesh, destquat:THREE.Quaternion) {
+        let time = {t: 0};
+
+        console.log(object.quaternion);
+        console.log(destquat);
     
         new TWEEN.Tween(time)
         .to({t: 1}, 2000)
         .onUpdate((tween) => {
-            this.greetingBox.quaternion.slerp(destquat,tween.t);
+            object.quaternion.slerp(destquat,tween.t);
         })
         .easing(TWEEN.Easing.Quartic.InOut)
         .start()
         ;
 
-        
     };
 
-    updateTweens() {
+    static updateTweens() {
         /* this._tweens.forEach(tween => {
             tween.update();
         }) */
