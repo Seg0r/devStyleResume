@@ -3,7 +3,7 @@
 :root {
   --dark-bg: rgba(15, 15, 15, 0.95);
   --spacing: 350px;
-  --empty: 5000px;
+  --empty: 50000px;
 
   font-family: brandon-grotesque, sans-serif;
   font-weight: 400;
@@ -12,11 +12,11 @@
 
 
 main {
-  width: 100vw;
+  width: 80vw;
   color: white;
   z-index: 99;
   position: absolute;
-  margin: 10px auto;
+  margin: 100px auto;
   padding: 120px 0px;
   
   display: grid;
@@ -57,7 +57,7 @@ canvas {
   space {
     margin: 0;
     padding: 0;
-    grid-column: 5 / span 2;
+    grid-column: 1 ;
     margin-bottom: var(--empty);
   }
 
