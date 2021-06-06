@@ -71,19 +71,19 @@ export class GreetingBox {
         if(inputOffset<pos1End && this.currRotateState != this.rotateState.pos0){
             this.currRotateState=this.rotateState.pos0;
             this.rotateToPos(this.startRot);
-            //console.log("Box - animacja 1");
+            console.log("Box - animacja 1");
         } else if(inputOffset>=pos1End && inputOffset<pos2End && this.currRotateState != this.rotateState.pos1){
             this.currRotateState=this.rotateState.pos1;
             this.rotateToPos(this.pos1);
-            //console.log("Box - animacja 2");
+            console.log("Box - animacja 2");
         } else if (inputOffset>=pos2End && inputOffset<pos3End && this.currRotateState != this.rotateState.pos2){
             this.currRotateState=this.rotateState.pos2;
             this.rotateToPos(this.pos2);
-            //console.log("Box - animacja 3");
+            console.log("Box - animacja 3");
         } else if (inputOffset>=pos3End && inputOffset<=endOffset && this.currRotateState != this.rotateState.pos3){
             this.currRotateState=this.rotateState.pos3;        
             this.rotateToPos(this.pos3);
-            //console.log("Box - animacja 4");
+            console.log("Box - animacja 4");
         }
 
         //console.log("input: "+inputOffset + " state: "+this.currRotateState + " tweens: "+ TWEEN.getAll().length);
