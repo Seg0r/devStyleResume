@@ -1,14 +1,16 @@
 import './style.css'
-import * as THREE from 'three';
+//import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import {GreetingBox} from './GreetingBox'
+import Stats from 'stats.js'
 
-import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper, Object3D } from 'three';
-import { cameraTweenToPos, cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
+//import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper } from 'three';
+import { cameraTweenLook,  cameraTweenToPosAtCurve } from './cameraUtils';
+import { SolarSystem } from './SolarSystem';
 
 //Scene
-const scene  = new Scene();
+const scene:Scene = new Scene();
 export const camera = new PerspectiveCamera(60, window.innerWidth/window.innerHeight,0.1);
 
 const renderer = new WebGLRenderer({
@@ -17,13 +19,17 @@ const renderer = new WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth,window.innerHeight);
 
+var stats = new Stats();
+stats.showPanel( 0 );
+document.querySelector('#main')!.appendChild( stats.dom );
 
 //GreetingBox
 const box = new GreetingBox();
 scene.add(box.greetingBox);
 
 //SolarSystem
-//const solarSystem = new SolarSystem();
+const solarSystem = new SolarSystem(100);
+solarSystem.addToScene(scene);
 
 //Lights
 const pointLight = new PointLight(0xFFFFFF);
@@ -50,13 +56,13 @@ const cameraSolarPos = new Vector3(400,-150,1000);
 
 const curveToSolar = new QuadraticBezierCurve3(
 	cameraBoxPos,
-	new Vector3( 800, -300, 500 ),
+	new Vector3( 300, -200, 400 ),
 	cameraSolarPos
 );
 
 const curveFromSolar = new QuadraticBezierCurve3(
 	cameraSolarPos,
-	new Vector3( 800, -300, 500 ),
+	new Vector3( 300, -200, 400 ),
 	cameraBoxPos
 );
 
@@ -67,7 +73,7 @@ const curveObject = new Line( geometry, material );
 scene.add(curveObject);
 
 
-const cameraLookAtPoint = new Vector3(600,-100,0);
+const cameraLookAtPoint = new Vector3(700,-100,0);
 
 
 //First render
@@ -93,9 +99,9 @@ function tellTheStory() {
     if(currOffsetPerc<20){
         if(currentStory != storyStage.stage0){
             currentStory = storyStage.stage0;
-            //cameraTweenToPos(camera, cameraBoxPos,3000);
-            cameraTweenToPosAtCurve(camera, curveFromSolar,3000);
-            cameraTweenLook(camera, cameraBoxPos, box.greetingBox.position,5000);
+            //cameraTweenToPos(camera, curveToSolar.getPoint(0),3000);
+            cameraTweenToPosAtCurve(camera, curveFromSolar,5000);
+            cameraTweenLook(camera, cameraBoxPos, box.greetingBox.position,8000,TWEEN.Easing.Linear.None);
             console.log("Pierwsza animacja");
         }
         box.animateBox(currOffsetPerc,0,20);
@@ -103,9 +109,11 @@ function tellTheStory() {
     else if(currOffsetPerc>=20 && currOffsetPerc<40){
         if(currentStory != storyStage.stage1){
             currentStory = storyStage.stage1;
-            cameraTweenToPosAtCurve(camera, curveToSolar,3000);
-            cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint ,5000);
+            //cameraTweenToPos(camera, curveToSolar.getPoint(1),3000);
+            cameraTweenToPosAtCurve(camera, curveToSolar,5000);
+            cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint ,8000,TWEEN.Easing.Linear.None);
             console.log("Druga animacja");
+            solarSystem.toggleSolarSystem();
         }
 
     } else {
@@ -116,7 +124,17 @@ function tellTheStory() {
         
     }
 }
-document.body.onscroll=tellTheStory;
+
+var scrolled = false;
+function checkScroll(){
+    if(!scrolled){
+        scrolled = true;
+        tellTheStory();
+        setTimeout(function () { scrolled = false; }, 100);
+        console.log(TWEEN.getAll().length)
+    };
+}
+document.body.onscroll=checkScroll;;
 
 
 //resize callback
@@ -133,10 +151,16 @@ window.addEventListener( 'resize', onWindowResize, false );
 
 //animate loop
 function animate(){
-    requestAnimationFrame(animate);
+    //requestAnimationFrame(animate);
+    setTimeout( function() {
+
+        requestAnimationFrame( animate );
+
+    }, 10 );
     //GreetingBox.updateTweens();
     TWEEN.update()
-    //controls.update();
+    //controls.update(); 
+    //stats.update();
     renderer.render(scene,camera);
 }
 animate();

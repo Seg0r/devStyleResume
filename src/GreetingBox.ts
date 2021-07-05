@@ -2,8 +2,6 @@ import * as TWEEN from '@tweenjs/tween.js';
 import * as THREE from 'three';
 
 export class GreetingBox {
-
-
     greetingBox:THREE.Mesh;
  
     readonly boxZeroX = 0;
@@ -32,9 +30,24 @@ export class GreetingBox {
 
 
 	constructor(){
-        const geometry = new THREE.BoxGeometry(10,10,10);
-        const material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
-        this.greetingBox = new THREE.Mesh(geometry,material);
+        //const geometry = new THREE.BoxGeometry(10,10,10);
+
+
+        let loader = new THREE.TextureLoader();
+        loader.setPath('/assets/');
+        let materialArray = [
+            new THREE.MeshBasicMaterial( { map: loader.load("2.png") } ),
+            new THREE.MeshBasicMaterial( { map: loader.load("empty.png") } ),
+            new THREE.MeshBasicMaterial( { map: loader.load("empty.png") } ),
+            new THREE.MeshBasicMaterial( { map: loader.load("3.png") } ),
+            new THREE.MeshBasicMaterial( { map: loader.load("1.png") } ),
+            new THREE.MeshBasicMaterial( { map: loader.load("4.png") } )];
+
+        var geometry = new THREE.BoxGeometry(10, 10, 10);
+
+        //const material = new THREE.MeshBasicMaterial( { color: 0xffffff} );
+
+        this.greetingBox = new THREE.Mesh(geometry,materialArray);
 
         //this.greetingBox.rotation.fromArray([this.boxZeroX,this.boxZeroY,this.boxZeroZ]);
 
@@ -98,7 +111,7 @@ export class GreetingBox {
         .onUpdate((tween) => {
             this.greetingBox.quaternion.slerp(destquat,tween.t);
         })
-        .easing(TWEEN.Easing.Quartic.InOut)
+        .easing(TWEEN.Easing.Cubic.InOut)
         .start();
     }
 

@@ -6,7 +6,7 @@ export function cameraTweenToPos(camera: Readonly<PerspectiveCamera>, cameraPos:
 
     new TWEEN.Tween(camera.position)
         .to(cameraPos, time)
-        .easing(TWEEN.Easing.Quartic.InOut)
+        .easing(TWEEN.Easing.Cubic.InOut)
         .start();
 }
 
@@ -19,11 +19,13 @@ export function cameraTweenToPosAtCurve(camera: Readonly<PerspectiveCamera>,curv
         .onUpdate((tween) => {
             camera.position.copy(curve.getPoint(tween.p));
         })
-        .easing(TWEEN.Easing.Quartic.InOut)
+        .easing(TWEEN.Easing.Cubic.InOut)
         .start();
 }
 
-export function cameraTweenLook(camera: Readonly<Camera>, viewFromPoint: Readonly<Vector3>, lookAtPoint: Readonly<Vector3>, time: number) {
+export function cameraTweenLook(camera: Readonly<Camera>, viewFromPoint: Readonly<Vector3>, 
+    lookAtPoint: Readonly<Vector3>, time: number,
+    easingFun: (amount: number) => number) {
     // backup original rotation
     const startQuaternion = new Quaternion().copy(camera.quaternion);
     // final rotation (with lookAt)
@@ -42,6 +44,9 @@ export function cameraTweenLook(camera: Readonly<Camera>, viewFromPoint: Readonl
     .onUpdate((tween) => {
         camera.quaternion.slerp(endQuaternion,tween.t);
     })
-    .easing(TWEEN.Easing.Quartic.In)
+    .easing(easingFun)
     .start();
 }
+
+
+
