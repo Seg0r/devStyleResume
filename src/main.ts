@@ -2,9 +2,9 @@ import './style.css'
 //import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import {GreetingBox} from './GreetingBox'
-import Stats from 'stats.js'
+//import Stats from 'stats.js'
 
-//import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper } from 'three';
 import { cameraTweenLook,  cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
@@ -19,16 +19,18 @@ const renderer = new WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth,window.innerHeight);
 
-var stats = new Stats();
+/* var stats = new Stats();
 stats.showPanel( 0 );
-document.querySelector('#main')!.appendChild( stats.dom );
+document.querySelector('#main')!.appendChild( stats.dom ); */
 
 //GreetingBox
 const box = new GreetingBox();
 scene.add(box.greetingBox);
 
+
 //SolarSystem
-const solarSystem = new SolarSystem(100);
+const solarCenter: Vector3 = new Vector3(700,-100,300);
+const solarSystem = new SolarSystem(solarCenter,50, 100);
 solarSystem.addToScene(scene);
 
 //Lights
@@ -39,7 +41,7 @@ pointLight.position.set(0,0,200);
 const ambientLight = new AmbientLight(0xFFFFFF,0.6);
 
 //Helpers
-//const controls = new OrbitControls(camera, renderer.domElement);;
+const controls = new OrbitControls(camera, renderer.domElement);;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
@@ -114,6 +116,7 @@ function tellTheStory() {
             cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint ,8000,TWEEN.Easing.Linear.None);
             console.log("Druga animacja");
             solarSystem.toggleSolarSystem();
+            controls.target.copy(solarCenter);
         }
 
     } else {
@@ -153,14 +156,13 @@ window.addEventListener( 'resize', onWindowResize, false );
 function animate(){
     //requestAnimationFrame(animate);
     setTimeout( function() {
-
         requestAnimationFrame( animate );
-
     }, 10 );
     //GreetingBox.updateTweens();
     TWEEN.update()
-    //controls.update(); 
+    controls.update(); 
     //stats.update();
     renderer.render(scene,camera);
+    solarSystem.renderSolarSystem();
 }
 animate();
