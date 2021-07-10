@@ -5,7 +5,7 @@ import {GreetingBox} from './GreetingBox'
 //import Stats from 'stats.js'
 
 import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper, Fog, Color } from 'three';
 import { cameraTweenLook,  cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 
@@ -27,10 +27,12 @@ document.querySelector('#main')!.appendChild( stats.dom ); */
 const box = new GreetingBox();
 scene.add(box.greetingBox);
 
+scene.background = new Color().setHSL( 0.51, 0.4, 0.01 );
+scene.fog = new Fog( scene.background, 3500, 15000 );
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(700,-100,300);
-const solarSystem = new SolarSystem(solarCenter,50, 100);
+const solarSystem = new SolarSystem(solarCenter,100, 100);
 solarSystem.addToScene(scene);
 
 //Lights
@@ -38,15 +40,15 @@ const pointLight = new PointLight(0xFFFFFF);
 //const pointLightHelper = new PointLightHelper(pointLight);
 pointLight.position.set(0,0,200);
 
-const ambientLight = new AmbientLight(0xFFFFFF,0.6);
+//const ambientLight = new AmbientLight(0xFFFFFF,0.6);
 
 //Helpers
 const controls = new OrbitControls(camera, renderer.domElement);;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-scene.add(ambientLight);
-scene.add(pointLight);
+//scene.add(ambientLight);
+//scene.add(pointLight);
 
 const worldAxis = new AxesHelper(100);
 scene.add(worldAxis);
@@ -54,7 +56,7 @@ scene.add(worldAxis);
 
 //Camera positions
 const cameraBoxPos = new Vector3(0,0,15);
-const cameraSolarPos = new Vector3(400,-150,1000);
+const cameraSolarPos = new Vector3(400,-150,100);
 
 const curveToSolar = new QuadraticBezierCurve3(
 	cameraBoxPos,
@@ -68,11 +70,11 @@ const curveFromSolar = new QuadraticBezierCurve3(
 	cameraBoxPos
 );
 
-const points = curveToSolar.getPoints( 500 );
+/* const points = curveToSolar.getPoints( 500 );
 const geometry = new BufferGeometry().setFromPoints( points );
 const material = new LineBasicMaterial( { color : 0xff0000 } );
 const curveObject = new Line( geometry, material );
-scene.add(curveObject);
+scene.add(curveObject); */
 
 
 const cameraLookAtPoint = new Vector3(700,-100,0);
@@ -132,13 +134,15 @@ var scrolled = false;
 function checkScroll(){
     if(!scrolled){
         scrolled = true;
-        tellTheStory();
+        //tellTheStory();
         setTimeout(function () { scrolled = false; }, 100);
-        console.log(TWEEN.getAll().length)
     };
 }
 document.body.onscroll=checkScroll;;
 
+solarSystem.toggleSolarSystem();
+controls.target.copy(solarCenter);
+camera.position.copy(solarCenter.addScalar(100));
 
 //resize callback
 function onWindowResize() {
