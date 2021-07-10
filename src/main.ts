@@ -159,9 +159,9 @@ window.addEventListener( 'resize', onWindowResize, false );
 //animate loop
 function animate(){
     //requestAnimationFrame(animate);
-    setTimeout( function() {
+    //setTimeout( function() {
         requestAnimationFrame( animate );
-    }, 10 );
+    //}, 5 );
     //GreetingBox.updateTweens();
     TWEEN.update()
     controls.update(); 

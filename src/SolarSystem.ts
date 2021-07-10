@@ -20,7 +20,7 @@ export class SolarSystem {
     private size: number;
     visible: Boolean = false;
     private lensflare: Lensflare;
-    
+
     public constructor(center: Vector3, size: number, count: number){
         
         const geometry = new SphereGeometry( 0.1, 32, 16 );
@@ -38,7 +38,8 @@ export class SolarSystem {
             pivot.add(mesh);
             
             
-            pivot.rotation.z=Math.random()*Math.PI;
+            pivot.rotateZ(Math.random()*Math.PI);
+            pivot.rotateY(-Math.random()*Math.PI);
             mesh.position.x = Math.random() * size - size/2;
             //mesh.position.y = Math.random() * size - size/2;
             //mesh.position.z = Math.random() * size - size/2;
@@ -51,7 +52,7 @@ export class SolarSystem {
 
             this.pivots.push(pivot);
             
-            this.pivotSpeed.push(Math.random()*size/(Math.abs(mesh.position.x*2)+0.0001)+0.1);
+            this.pivotSpeed.push(Math.random()*size/(Math.abs(mesh.position.x)+0.0001)+0.3);
             this.meshes.push(mesh);
 
         }
@@ -93,7 +94,8 @@ export class SolarSystem {
             //const timer = 0.0001 * Date.now();
             for ( let i = 0, il = this.meshes.length; i < il; i ++ ) {
                 const pivot = this.pivots[i];
-                pivot.rotateY(this.pivotSpeed[i]*0.05);
+                pivot.rotateY(this.pivotSpeed[i]*0.015);
+                pivot.rotateOnWorldAxis(new Vector3(0,0,1),0.01);
             }
         }
     }
