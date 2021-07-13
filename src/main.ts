@@ -142,11 +142,11 @@ document.body.onscroll=checkScroll;;
 
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
-camera.position.copy(solarCenter.addScalar(200));
-const geo = solarSystem.generateGeometry();
+camera.position.copy(new Vector3(50,50,50).add(solarCenter));
+const geo = solarSystem.generateGeometry(10);
 const edges = new THREE.EdgesGeometry( geo );
-const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-line.position.copy(solarCenter.add(new Vector3(800,0,0)));
+const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
+line.position.copy(solarCenter);
 scene.add( line );
 //const material = 
 

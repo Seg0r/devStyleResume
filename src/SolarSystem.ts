@@ -1,7 +1,9 @@
 import * as THREE from 'three';
-import { DodecahedronGeometry, Group, Light, Material, Mesh, MeshToonMaterial, Object3D, PointLight, PolyhedronGeometry, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { DodecahedronGeometry, Group, Light, Material, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
 // @ts-ignore
 import { Lensflare, LensflareElement } from './utils/LensFlare.js'
+// @ts-ignore
+import { ConvexGeometry } from './utils/ConvexGeometry.js'
 
 export class SolarSystem {
 
@@ -25,7 +27,7 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count,center, size);
+        this.bornMoons(count, center, size);
     }
 
     public bornMoons(count: number, center: THREE.Vector3, size: number) {
@@ -36,8 +38,8 @@ export class SolarSystem {
 
         for (let i = 0; i < count / 40; i++) {
             const type = Math.random();
-            geometry = this.generateGeometry();
-            
+            geometry = this.generateGeometry(10);
+
             // if(type <= 0.2){
             //     geometry = new DodecahedronGeometry(1+Math.random()*size/20);
             // }else if(0.2 < type && type <= 0.4){
@@ -47,33 +49,27 @@ export class SolarSystem {
             // }
 
             const finish = Math.random();
-            if(finish <= 0.2){
+            if (finish <= 0.2) {
                 //material =
-            }else if(0.2 < finish && finish <= 0.4){
-            }else if(0.4 < finish && finish <= 0.6){
-            }else if(0.6 < finish && finish <= 0.8){
-            }else if(0.8 < finish ){
+            } else if (0.2 < finish && finish <= 0.4) {
+            } else if (0.4 < finish && finish <= 0.6) {
+            } else if (0.6 < finish && finish <= 0.8) {
+            } else if (0.8 < finish) {
             }
         }
     }
 
 
-    public generateGeometry (): PolyhedronGeometry {
-        const verticesOfCube = [
-            -1,-1,-1,    1,-1,-1,    1, 1,-1,    -1, 1,-1,
-            -1,-1, 1,    1,-1, 1,    1, 1, 1,    -1, 1, 1,
-        ];
-        
-        const indicesOfFaces = [
-            2,1,0,    0,3,2,
-            0,4,7,    7,3,0,
-            0,1,5,    5,4,0,
-            1,2,6,    6,5,1,
-            2,3,7,    7,6,2,
-            4,5,6,    6,7,4
-        ];
-        
-        const geometry = new THREE.PolyhedronGeometry( verticesOfCube, indicesOfFaces, 6, 2 );
+    public generateGeometry(size: number): ConvexGeometry {
+
+        const points: Vector3[] = [];
+        const pointsNumber = 4 + Math.random() * 5
+        for (let i = 0; i < pointsNumber; i++) {
+            points.push(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+                .normalize()
+                .multiplyScalar(size * (1 + Math.random())));
+        }
+        const geometry = new ConvexGeometry( points );
 
         return geometry;
     }
