@@ -1,108 +1,141 @@
 import * as THREE from 'three';
-import { Light, Mesh, MeshBasicMaterial, MeshLambertMaterial, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { DodecahedronGeometry, Group, Light, Material, Mesh, MeshToonMaterial, Object3D, PointLight, PolyhedronGeometry, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
 // @ts-ignore
 import { Lensflare, LensflareElement } from './utils/LensFlare.js'
 
 export class SolarSystem {
 
-    private _meshes: Mesh[] = [];
+    private solarSystem: Group;
+    private orbiters: Mesh[] = [];
     private pivots: Object3D[] = [];
     private pivotSpeed: number[] = [];
-    public get meshes(): Mesh[] {
-        return this._meshes;
-    }
-    public set meshes(value: Mesh[]) {
-        this._meshes = value;
-    }
     //private sunMesh: Mesh;
     private sunLight: Light;
-    private center: Vector3;
-    private size: number;
     visible: Boolean = false;
     private lensflare: Lensflare;
 
     public constructor(center: Vector3, size: number, count: number) {
 
+        this.solarSystem = new Group();
+
+        this.bornOrbiters(count, center, size);
+
+        this.sunLight = new PointLight(0xfe9b14, 200, size, 7);
+        this.sunLight.position.copy(center);
+
+        this.lensflare = this.createLensflare(size);
+
+        this.bornMoons(count,center, size);
+    }
+
+    public bornMoons(count: number, center: THREE.Vector3, size: number) {
+
+        let geometry: DodecahedronGeometry;
+        let material: Material;
+        const radius = size / 2;
+
+        for (let i = 0; i < count / 40; i++) {
+            const type = Math.random();
+            geometry = this.generateGeometry();
+            
+            // if(type <= 0.2){
+            //     geometry = new DodecahedronGeometry(1+Math.random()*size/20);
+            // }else if(0.2 < type && type <= 0.4){
+            //     geometry = new IcosahedronGeometry(1+Math.random()*size/20);
+            // }else if(0.4 < type ) {
+            //     geometry = this.generateGeometry();
+            // }
+
+            const finish = Math.random();
+            if(finish <= 0.2){
+                //material =
+            }else if(0.2 < finish && finish <= 0.4){
+            }else if(0.4 < finish && finish <= 0.6){
+            }else if(0.6 < finish && finish <= 0.8){
+            }else if(0.8 < finish ){
+            }
+        }
+    }
+
+
+    public generateGeometry (): PolyhedronGeometry {
+        const verticesOfCube = [
+            -1,-1,-1,    1,-1,-1,    1, 1,-1,    -1, 1,-1,
+            -1,-1, 1,    1,-1, 1,    1, 1, 1,    -1, 1, 1,
+        ];
+        
+        const indicesOfFaces = [
+            2,1,0,    0,3,2,
+            0,4,7,    7,3,0,
+            0,1,5,    5,4,0,
+            1,2,6,    6,5,1,
+            2,3,7,    7,6,2,
+            4,5,6,    6,7,4
+        ];
+        
+        const geometry = new THREE.PolyhedronGeometry( verticesOfCube, indicesOfFaces, 6, 2 );
+
+        return geometry;
+    }
+
+    private createLensflare(size: number): Lensflare {
+        const textureLoader = new TextureLoader();
+        const textureFlare0 = textureLoader.load('assets/lensflare0.png');
+        const textureFlare3 = textureLoader.load('assets/lensflare3.png');
+
+        const lensflare = new Lensflare();
+        lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new THREE.Color(0xfe9b14)));
+        lensflare.addElement(new LensflareElement(textureFlare3, 60, 1));
+        lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.4));
+        lensflare.addElement(new LensflareElement(textureFlare3, 120, 1.6));
+        lensflare.addElement(new LensflareElement(textureFlare3, 70, 2));
+
+        return lensflare;
+    }
+
+    private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
+
         const geometry = new SphereGeometry(0.2, 32, 16);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
-        this.center = center;
-        this.size = size;
         const radius = size / 2;
-        const xs: number[] = [];
 
         for (let i = 0; i < count; i++) {
 
             const mesh = new Mesh(geometry, material);
             //const meshLight = new PointLight( 0xfedd1f, 0.05 );
+            //mesh.add(meshLight);
             const pivot = new Object3D();
             pivot.position.copy(center);
-            //mesh.add(meshLight);
-            pivot.add(mesh);
 
+            //attach mesh to pivot to be able to rotate mesh around pivot
+            pivot.add(mesh);
 
             pivot.rotateZ(Math.random() * Math.PI);
             pivot.rotateY(-Math.random() * Math.PI);
 
-            /*
-            
-            const x = 0;
-            do{
-                const x = Math.random() * size - radius;
-                mesh.position.x = x;
-            }while (Math.abs(radius*0.3 - Math.abs(x))*Math.random() > radius*0.15) */
-
             const orbitLevel = Math.random();
             if (orbitLevel > 0.5) {
-                mesh.position.x = this.gaussianRandom(0, radius * 0.2)
+                mesh.position.x = this.gaussianRandom(0, radius * 0.2);
 
             } else if (orbitLevel < 0.5 && orbitLevel > 0.1) {
 
-                mesh.position.x = this.gaussianRandom(radius * 0.2, radius * 0.7)
+                mesh.position.x = this.gaussianRandom(radius * 0.2, radius * 0.7);
             }
             else {
-                mesh.position.x = this.gaussianRandom(radius * 0.7, radius)
+                mesh.position.x = this.gaussianRandom(radius * 0.7, radius);
             }
-
-            xs.push(mesh.position.x);
-
-            //mesh.position.y = Math.random() * size - size/2;
-            //mesh.position.z = Math.random() * size - size/2;
 
             mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 5 + 1;
 
             mesh.visible = false;
 
-
-
             this.pivots.push(pivot);
 
             this.pivotSpeed.push(Math.random() * size / (Math.abs(mesh.position.x) + 0.0001) + 0.3);
-            this.meshes.push(mesh);
+            this.orbiters.push(mesh);
 
+            this.solarSystem.add(pivot);
         }
-
-        console.group(xs)
-
-        this.sunLight = new PointLight(0xfe9b14, 200, size, 7);
-        this.sunLight.position.copy(center);
-        //const sunGeometry = new SphereGeometry( 5, 32, 16 );
-        //const sunMaterial = new MeshLambertMaterial( { color: 0xfe9b14 , emissive: 0xfe9b14 } );
-        //this.sunMesh = new Mesh( sunGeometry, sunMaterial );
-        //this.sunMesh.position.copy(center);
-
-        const textureLoader = new TextureLoader();
-        const textureFlare0 = textureLoader.load('assets/lensflare0.png');
-        const textureFlare3 = textureLoader.load('assets/lensflare3.png');
-
-        this.lensflare = new Lensflare();
-        this.lensflare.addElement(new LensflareElement(textureFlare0, size/10, 0, new THREE.Color(0xfe9b14)));
-        this.lensflare.addElement(new LensflareElement(textureFlare3, 60, 1));
-        this.lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.4));
-        this.lensflare.addElement(new LensflareElement(textureFlare3, 120, 1.6));
-        this.lensflare.addElement(new LensflareElement(textureFlare3, 70, 2));
-
-
-
     }
 
     private gaussianRand(): number {
@@ -120,10 +153,7 @@ export class SolarSystem {
     }
 
     public addToScene(scene: Scene) {
-        for (let i = 0, il = this.meshes.length; i < il; i++) {
-            scene.add(this.pivots[i]);
-        }
-        //scene.add(this.sunMesh);
+        scene.add(this.solarSystem);
         scene.add(this.sunLight);
         this.sunLight.add(this.lensflare);
     }
@@ -131,21 +161,19 @@ export class SolarSystem {
     public renderSolarSystem() {
         if (this.visible) {
             //const timer = 0.0001 * Date.now();
-            for (let i = 0, il = this.meshes.length; i < il; i++) {
+            for (let i = 0, il = this.orbiters.length; i < il; i++) {
                 const pivot = this.pivots[i];
                 pivot.rotateY(this.pivotSpeed[i] * 0.015);
                 pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
+                pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);
             }
         }
     }
 
     public toggleSolarSystem() {
-        /* object.traverse ( function (child) {
-            child.visible = false;
-        } */
 
-        for (let i = 0, il = this.meshes.length; i < il; i++) {
-            this.meshes[i].visible = !this.meshes[i].visible;
+        for (let i = 0, il = this.orbiters.length; i < il; i++) {
+            this.orbiters[i].visible = !this.orbiters[i].visible;
         }
         this.visible = !this.visible;
 

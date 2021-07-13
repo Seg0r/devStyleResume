@@ -1,11 +1,11 @@
 import './style.css'
-//import * as THREE from 'three';
+import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import {GreetingBox} from './GreetingBox'
 //import Stats from 'stats.js'
 
 import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, BufferGeometry, LineBasicMaterial, Line, AmbientLight, AxesHelper, Fog, Color } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color } from 'three';
 import { cameraTweenLook,  cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 
@@ -25,14 +25,14 @@ document.querySelector('#main')!.appendChild( stats.dom ); */
 
 //GreetingBox
 const box = new GreetingBox();
-scene.add(box.greetingBox);
+box.addToScene(scene);
 
 scene.background = new Color().setHSL( 0.51, 0.4, 0.01 );
 scene.fog = new Fog( scene.background, 3500, 15000 );
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(700,-100,300);
-const solarSystem = new SolarSystem(solarCenter,100, 100);
+const solarSystem = new SolarSystem(solarCenter,200, 800);
 solarSystem.addToScene(scene);
 
 //Lights
@@ -105,7 +105,7 @@ function tellTheStory() {
             currentStory = storyStage.stage0;
             //cameraTweenToPos(camera, curveToSolar.getPoint(0),3000);
             cameraTweenToPosAtCurve(camera, curveFromSolar,5000);
-            cameraTweenLook(camera, cameraBoxPos, box.greetingBox.position,8000,TWEEN.Easing.Linear.None);
+            cameraTweenLook(camera, cameraBoxPos, box.getPosition(),8000,TWEEN.Easing.Linear.None);
             console.log("Pierwsza animacja");
         }
         box.animateBox(currOffsetPerc,0,20);
@@ -141,8 +141,15 @@ function checkScroll(){
 document.body.onscroll=checkScroll;;
 
 solarSystem.toggleSolarSystem();
-controls.target.copy(solarCenter);
-camera.position.copy(solarCenter.addScalar(100));
+controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
+camera.position.copy(solarCenter.addScalar(200));
+const geo = solarSystem.generateGeometry();
+const edges = new THREE.EdgesGeometry( geo );
+const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+line.position.copy(solarCenter.add(new Vector3(800,0,0)));
+scene.add( line );
+//const material = 
+
 
 //resize callback
 function onWindowResize() {

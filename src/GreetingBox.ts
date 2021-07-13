@@ -1,8 +1,9 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import * as THREE from 'three';
+import { Scene } from 'three';
 
 export class GreetingBox {
-    greetingBox:THREE.Mesh;
+    private greetingBox:THREE.Mesh;
  
     readonly boxZeroX = 0;
     readonly boxZeroY = 0;
@@ -30,8 +31,6 @@ export class GreetingBox {
 
 
 	constructor(){
-        //const geometry = new THREE.BoxGeometry(10,10,10);
-
 
         let loader = new THREE.TextureLoader();
         loader.setPath('/assets/');
@@ -45,20 +44,12 @@ export class GreetingBox {
 
         var geometry = new THREE.BoxGeometry(10, 10, 10);
 
-        //const material = new THREE.MeshBasicMaterial( { color: 0xffffff} );
-
         this.greetingBox = new THREE.Mesh(geometry,materialArray);
-
-        //this.greetingBox.rotation.fromArray([this.boxZeroX,this.boxZeroY,this.boxZeroZ]);
-
-        //var boxAxis = new THREE.AxesHelper(100);
-        //this.greetingBox.add(boxAxis);
 
         const edges = new THREE.EdgesGeometry( geometry );
         const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xFF2D00 } ) );
         this.greetingBox.add( line );
 
-        //this.greetingBox.rotateZ(10);
 
         this.startRot = this.greetingBox.quaternion.clone();
 
@@ -117,5 +108,13 @@ export class GreetingBox {
 
     static updateTweens() {
         TWEEN.update();
+    }
+
+    public addToScene(scene: Scene){
+        scene.add(this.greetingBox);
+    }
+
+    public getPosition(){
+        return this.greetingBox.position;
     }
 }
