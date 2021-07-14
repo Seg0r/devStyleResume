@@ -32,7 +32,8 @@ scene.fog = new Fog( scene.background, 3500, 15000 );
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(700,-100,300);
-const solarSystem = new SolarSystem(solarCenter,200, 800);
+const solarSize: number = 200;
+const solarSystem = new SolarSystem(solarCenter,solarSize, 800);
 solarSystem.addToScene(scene);
 
 //Lights
@@ -141,13 +142,15 @@ function checkScroll(){
 document.body.onscroll=checkScroll;;
 
 solarSystem.toggleSolarSystem();
-controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
-camera.position.copy(new Vector3(50,50,50).add(solarCenter));
-const geo = solarSystem.generateGeometry(10);
-const edges = new THREE.EdgesGeometry( geo );
-const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
-line.position.copy(solarCenter);
-scene.add( line );
+controls.target.copy(solarCenter);
+camera.position.copy(new Vector3(0,solarSize,solarSize * 4).add(solarCenter));
+// controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
+// camera.position.copy(new Vector3(50,50,50).add(solarCenter));
+// const geo = solarSystem.generateGeometry(10);
+// const edges = new THREE.EdgesGeometry( geo );
+// const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
+// line.position.copy(solarCenter);
+// scene.add( line );
 //const material = 
 
 

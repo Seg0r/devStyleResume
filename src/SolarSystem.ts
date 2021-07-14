@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DodecahedronGeometry, Group, Light, Material, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
 // @ts-ignore
 import { Lensflare, LensflareElement } from './utils/LensFlare.js'
 // @ts-ignore
@@ -9,8 +9,13 @@ export class SolarSystem {
 
     private solarSystem: Group;
     private orbiters: Mesh[] = [];
-    private pivots: Object3D[] = [];
-    private pivotSpeed: number[] = [];
+    private orbiterPivots: Object3D[] = [];
+    private orbiterSpeeds: number[] = [];
+
+    private moons: LineSegments[] = [];
+    private moonPivots: Object3D[] = [];
+    private moonSpeeds: number[] = [];
+
     //private sunMesh: Mesh;
     private sunLight: Light;
     visible: Boolean = false;
@@ -34,19 +39,32 @@ export class SolarSystem {
 
         let geometry: DodecahedronGeometry;
         let material: Material;
-        const radius = size / 2;
 
-        for (let i = 0; i < count / 40; i++) {
-            const type = Math.random();
-            geometry = this.generateGeometry(10);
+        for (let i = 0; i < count / 20; i++) {
 
-            // if(type <= 0.2){
-            //     geometry = new DodecahedronGeometry(1+Math.random()*size/20);
-            // }else if(0.2 < type && type <= 0.4){
-            //     geometry = new IcosahedronGeometry(1+Math.random()*size/20);
-            // }else if(0.4 < type ) {
-            //     geometry = this.generateGeometry();
-            // }
+            geometry = this.generateGeometry(size/10);
+
+            const edges = new THREE.EdgesGeometry( geometry );
+            const moon = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
+
+            const pivot = new Object3D();
+            pivot.position.copy(center);
+
+            //attach moon to pivot to be able to rotate mesh around pivot
+            pivot.add(moon);
+
+            pivot.rotateY(Math.random() * Math.PI*2);
+            
+
+            moon.position.x = size * 2;
+            moon.position.y = (Math.random() - 0.5) * size/2;
+            
+
+            this.moonSpeeds.push(Math.random() * 0.1);
+            this.moonPivots.push(pivot);
+            this.moons.push(moon);
+
+            this.solarSystem.add(pivot);
 
             const finish = Math.random();
             if (finish <= 0.2) {
@@ -63,7 +81,7 @@ export class SolarSystem {
     public generateGeometry(size: number): ConvexGeometry {
 
         const points: Vector3[] = [];
-        const pointsNumber = 4 + Math.random() * 5
+        const pointsNumber = 5 + Math.random() * 5
         for (let i = 0; i < pointsNumber; i++) {
             points.push(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
                 .normalize()
@@ -76,11 +94,11 @@ export class SolarSystem {
 
     private createLensflare(size: number): Lensflare {
         const textureLoader = new TextureLoader();
-        const textureFlare0 = textureLoader.load('assets/lensflare0.png');
+        //const textureFlare0 = textureLoader.load('assets/lensflare0.png');
         const textureFlare3 = textureLoader.load('assets/lensflare3.png');
 
         const lensflare = new Lensflare();
-        lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new THREE.Color(0xfe9b14)));
+        //lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new THREE.Color(0xfe9b14)));
         lensflare.addElement(new LensflareElement(textureFlare3, 60, 1));
         lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.4));
         lensflare.addElement(new LensflareElement(textureFlare3, 120, 1.6));
@@ -123,11 +141,11 @@ export class SolarSystem {
 
             mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 5 + 1;
 
-            mesh.visible = false;
+            //mesh.visible = false;
 
-            this.pivots.push(pivot);
+            this.orbiterPivots.push(pivot);
 
-            this.pivotSpeed.push(Math.random() * size / (Math.abs(mesh.position.x) + 0.0001) + 0.3);
+            this.orbiterSpeeds.push(Math.random() * size / (Math.abs(mesh.position.x) + 0.0001) + 0.3);
             this.orbiters.push(mesh);
 
             this.solarSystem.add(pivot);
@@ -149,29 +167,38 @@ export class SolarSystem {
     }
 
     public addToScene(scene: Scene) {
+        this.solarSystem.visible = false;
         scene.add(this.solarSystem);
         scene.add(this.sunLight);
         this.sunLight.add(this.lensflare);
     }
 
     public renderSolarSystem() {
-        if (this.visible) {
+        if (this.solarSystem.visible) {
             //const timer = 0.0001 * Date.now();
-            for (let i = 0, il = this.orbiters.length; i < il; i++) {
-                const pivot = this.pivots[i];
-                pivot.rotateY(this.pivotSpeed[i] * 0.015);
+            for (let i = 0, il = this.orbiterPivots.length; i < il; i++) {
+                const pivot = this.orbiterPivots[i];
+                pivot.rotateY(this.orbiterSpeeds[i] * 0.015);
                 pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
                 pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);
+            }
+
+            for (let i = 0, il = this.moonPivots.length; i < il; i++) {
+                const pivot = this.moonPivots[i];
+                pivot.rotateY(0.001);
+                if(i<=this.moons.length){
+                    const moon = this.moons[i];
+                    moon.rotateX(this.moonSpeeds[i]*0.15);
+                    moon.rotateY(this.moonSpeeds[i]*0.05);
+                    moon.rotateZ(this.moonSpeeds[i]*0.05);
+                }
+                //pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
+                //pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);
             }
         }
     }
 
     public toggleSolarSystem() {
-
-        for (let i = 0, il = this.orbiters.length; i < il; i++) {
-            this.orbiters[i].visible = !this.orbiters[i].visible;
-        }
-        this.visible = !this.visible;
-
+        this.solarSystem.visible = !this.solarSystem.visible;
     }
 }
