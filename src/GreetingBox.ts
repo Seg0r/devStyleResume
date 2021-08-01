@@ -33,7 +33,7 @@ export class GreetingBox {
 	constructor(){
 
         let loader = new THREE.TextureLoader();
-        loader.setPath('/assets/');
+        loader.setPath('/assets/box/');
         let materialArray = [
             new THREE.MeshBasicMaterial( { map: loader.load("2.png") } ),
             new THREE.MeshBasicMaterial( { map: loader.load("empty.png") } ),

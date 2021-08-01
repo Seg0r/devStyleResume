@@ -5,6 +5,12 @@ import { Lensflare, LensflareElement } from './utils/LensFlare.js'
 // @ts-ignore
 import { ConvexGeometry } from './utils/ConvexGeometry.js'
 
+
+enum MoonOrbits {
+    First,
+    Second
+}
+
 export class SolarSystem {
 
     private solarSystem: Group;
@@ -15,6 +21,7 @@ export class SolarSystem {
     private moons: LineSegments[] = [];
     private moonPivots: Object3D[] = [];
     private moonSpeeds: number[] = [];
+    private moonAxis: number[] = [];
 
     //private sunMesh: Mesh;
     private sunLight: Light;
@@ -39,25 +46,38 @@ export class SolarSystem {
 
         let geometry: DodecahedronGeometry;
         let material: Material;
+        let axis: number = 1;
 
-        for (let i = 0; i < count / 20; i++) {
+        for (let i = 0; i < count / 10; i++) {
 
-            geometry = this.generateGeometry(size/10);
+            geometry = this.generateGeometry(size / 10);
 
-            const edges = new THREE.EdgesGeometry( geometry );
-            const moon = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
+            const edges = new THREE.EdgesGeometry(geometry);
+            const moon = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xff0000 }));
 
             const pivot = new Object3D();
             pivot.position.copy(center);
 
             //attach moon to pivot to be able to rotate mesh around pivot
             pivot.add(moon);
+            this.moonAxis.push(axis);
 
-            pivot.rotateY(Math.random() * Math.PI*2);
-            
+            if (axis == 0) {
+                //axis = 1;
+                pivot.rotateX(0.2)
+                pivot.rotateY(Math.random() * Math.PI * 2);
+                moon.position.x = size * 2;
+                moon.position.y = (Math.random() - 0.5) * size / 2;
+                
+            }
+            if (axis == 1) {
+                axis = 0;
+                pivot.rotateX(0.7)
+                pivot.rotateZ(Math.random() * Math.PI * 2)
+                moon.position.x = size * 2.2;
+                moon.position.z = (Math.random() - 0.5) * size / 2;
+            }
 
-            moon.position.x = size * 2;
-            moon.position.y = (Math.random() - 0.5) * size/2;
             
 
             this.moonSpeeds.push(Math.random() * 0.1);
@@ -87,7 +107,7 @@ export class SolarSystem {
                 .normalize()
                 .multiplyScalar(size * (1 + Math.random())));
         }
-        const geometry = new ConvexGeometry( points );
+        const geometry = new ConvexGeometry(points);
 
         return geometry;
     }
@@ -184,13 +204,15 @@ export class SolarSystem {
             }
 
             for (let i = 0, il = this.moonPivots.length; i < il; i++) {
-                const pivot = this.moonPivots[i];
-                pivot.rotateY(0.001);
-                if(i<=this.moons.length){
+                if(this.moonAxis[i] == 0)
+                    this.moonPivots[i].rotateY(0.001);
+                else
+                    this.moonPivots[i].rotateZ(0.001);
+                if (i <= this.moons.length) {
                     const moon = this.moons[i];
-                    moon.rotateX(this.moonSpeeds[i]*0.15);
-                    moon.rotateY(this.moonSpeeds[i]*0.05);
-                    moon.rotateZ(this.moonSpeeds[i]*0.05);
+                    //moon.rotateX(this.moonSpeeds[i]*0.15);
+                    //moon.rotateY(this.moonSpeeds[i]*0.05);
+                    //moon.rotateZ(this.moonSpeeds[i]*0.05);
                 }
                 //pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
                 //pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);

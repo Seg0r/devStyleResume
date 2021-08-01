@@ -5,7 +5,7 @@ import {GreetingBox} from './GreetingBox'
 //import Stats from 'stats.js'
 
 import {OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2 } from 'three';
 import { cameraTweenLook,  cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 
@@ -18,6 +18,8 @@ const renderer = new WebGLRenderer({
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth,window.innerHeight);
+//renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMapping = THREE.CineonToneMapping;
 
 /* var stats = new Stats();
 stats.showPanel( 0 );
@@ -28,13 +30,49 @@ const box = new GreetingBox();
 box.addToScene(scene);
 
 scene.background = new Color().setHSL( 0.51, 0.4, 0.01 );
-scene.fog = new Fog( scene.background, 3500, 15000 );
+//scene.fog = new Fog( scene.background,1000, 1600 );
+
+// scene.fog = new FogExp2( 0xc6c6c6, 0.00051 );
+// renderer.setClearColor(scene.fog.color)
+
+// const cloudParticles:THREE.Mesh[] = [];
+// let loader = new THREE.TextureLoader();
+// loader.setPath('/assets/');
+// loader.load("smoke.png", function(texture){
+//   const cloudGeo = new THREE.PlaneBufferGeometry(500,500);
+//   const cloudMaterial = new THREE.MeshLambertMaterial({
+//     map: texture,
+//     transparent: true
+//   });
+//   for(let p=0; p<30; p++) {
+//     let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
+//     cloud.position.set(
+//       Math.random()*800 -400,
+//       Math.random()*800 -400,
+//       Math.random()*100-50
+//     );
+//     cloud.rotation.x = 0;
+//     cloud.rotation.y = 0;
+//     cloud.rotation.z = Math.random()*2*Math.PI;
+//     cloud.material.opacity = 0.55;
+//     cloudParticles.push(cloud);
+//     scene.add(cloud);
+//   }
+// });
+
+
+// let directionalLight = new THREE.DirectionalLight(0xff8c19);
+// directionalLight.position.set(0,0,1);
+// scene.add(directionalLight);
+
+
+
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(700,-100,300);
 const solarSize: number = 200;
 const solarSystem = new SolarSystem(solarCenter,solarSize, 800);
-solarSystem.addToScene(scene);
+//solarSystem.addToScene(scene);
 
 //Lights
 const pointLight = new PointLight(0xFFFFFF);
@@ -51,8 +89,8 @@ const controls = new OrbitControls(camera, renderer.domElement);;
 //scene.add(ambientLight);
 //scene.add(pointLight);
 
-const worldAxis = new AxesHelper(100);
-scene.add(worldAxis);
+//const worldAxis = new AxesHelper(100);
+//scene.add(worldAxis);
 
 
 //Camera positions
@@ -142,8 +180,11 @@ function checkScroll(){
 document.body.onscroll=checkScroll;;
 
 solarSystem.toggleSolarSystem();
-controls.target.copy(solarCenter);
-camera.position.copy(new Vector3(0,solarSize,solarSize * 4).add(solarCenter));
+//controls.target.copy(solarCenter);
+//camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
+
+camera.position.add(new Vector3(0,0,500));
+
 // controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
 // camera.position.copy(new Vector3(50,50,50).add(solarCenter));
 // const geo = solarSystem.generateGeometry(10);
@@ -168,6 +209,9 @@ window.addEventListener( 'resize', onWindowResize, false );
 
 //animate loop
 function animate(){
+    // cloudParticles.forEach(p => {
+    //     p.rotation.z -=0.001;
+    //  });
     //requestAnimationFrame(animate);
     //setTimeout( function() {
         requestAnimationFrame( animate );
