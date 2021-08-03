@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { DodecahedronGeometry, Group, Light, LineSegments, Material, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
 // @ts-ignore
-import { Lensflare, LensflareElement } from './utils/LensFlare.js'
+import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 // @ts-ignore
-import { ConvexGeometry } from './utils/ConvexGeometry.js'
+import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 
 
 enum MoonOrbits {
@@ -44,7 +44,7 @@ export class SolarSystem {
 
     public bornMoons(count: number, center: THREE.Vector3, size: number) {
 
-        let geometry: DodecahedronGeometry;
+        let geometry: ConvexGeometry;
         let material: Material;
         let axis: number = 1;
 
