@@ -5,12 +5,18 @@ import { GreetingBox } from './GreetingBox'
 //import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight } from 'three';
 import { cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 // @ts-ignore
-import * as POSTPROCESSING from "postprocessing";
-// @ts-ignore
+//import * as POSTPROCESSING from "postprocessing";
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
+import { FXAAShader  } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { TGALoader } from 'three/examples/jsm/loaders/TGALoader.js';
 
 //Scene
@@ -25,7 +31,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 //renderer.toneMapping = THREE.ReinhardToneMapping;
 renderer.toneMapping = THREE.CineonToneMapping;
 
-/* var stats = new Stats();
+/* const stats = new Stats();
 stats.showPanel( 0 );
 document.querySelector('#main')!.appendChild( stats.dom ); */
 
@@ -46,10 +52,10 @@ const box = new GreetingBox();
 //scene.fog = new THREE.FogExp2(0x000000, 0.001);
 //renderer.setClearColor(scene.fog.color);
 
-// camera.position.z = 1;
-// camera.rotation.x = 1.16;
-// camera.rotation.y = -0.12;
-// camera.rotation.z = 0.27;
+camera.position.z = 1;
+camera.rotation.x = 2;
+camera.rotation.y = 0;
+camera.rotation.z = 0;
 
 // let ambient = new THREE.AmbientLight(0x555555);
 // scene.add(ambient);
@@ -68,7 +74,7 @@ const box = new GreetingBox();
 // blueLight.position.set(300, 300, 200);
 // scene.add(blueLight);
 
-let cloudParticles: THREE.Mesh[] = [];
+// let cloudParticles: THREE.Mesh[] = [];
 // let loader = new THREE.TextureLoader()
 // .setPath('/assets/scene/')
 // .load("smoke.png", function (texture) {
@@ -94,46 +100,38 @@ let cloudParticles: THREE.Mesh[] = [];
 //     }
 // });
 
-let composer: POSTPROCESSING.EffectComposer;
+// const fileFormat = ".jpg"
+// const sceneLoader = new THREE.CubeTextureLoader()
+// 	.setPath( '/assets/scene/' )
+// 	.load( [
+// 		'nebula_right1'+fileFormat,
+// 		'nebula_left2'+fileFormat,
+// 		'nebula_top3'+fileFormat,
+// 		'nebula_bottom4'+fileFormat,
+// 		'nebula_front5'+fileFormat,
+// 		'nebula_back6'+fileFormat
+// 	] , function(texture){
+//     scene.background = texture;
+//   });
+
+
+
 const fileFormat = ".jpg"
-const sceneLoader = new THREE.CubeTextureLoader()
-	.setPath( '/assets/scene/' )
-	.load( [
-		'nebula_right1'+fileFormat,
-		'nebula_left2'+fileFormat,
-		'nebula_top3'+fileFormat,
-		'nebula_bottom4'+fileFormat,
-		'nebula_front5'+fileFormat,
-		'nebula_back6'+fileFormat
-	] , function(texture){
-    scene.background = texture;
-  });
+//let loader = new TGALoader();
+let loader = new THREE.TextureLoader();
+loader.setPath( '/assets/scene/' );
+let materialArray = [
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_right1'+fileFormat) } ),
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_left2'+fileFormat) } ),
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_top3'+fileFormat) } ),
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_bottom4'+fileFormat) } ),
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_front5'+fileFormat) } ),
+    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_back6'+fileFormat) } ),
+];
 
-// const textureEffect = new POSTPROCESSING.TextureEffect({
-//   blendFunction: POSTPROCESSING.BlendFunction.COLOR_DODGE,
-//   texture: texture
-// });
-// textureEffect.blendMode.opacity.value = 0.2;
-
-const bloomEffect = new POSTPROCESSING.BloomEffect({
-    //   blendFunction: POSTPROCESSING.BlendFunction.SCREEN,
-        blendFunction: POSTPROCESSING.BlendFunction.COLOR_DODGE,
-      kernelSize: POSTPROCESSING.KernelSize.SMALL,
-      useLuminanceFilter: true,
-      luminanceThreshold: 0.3,
-      luminanceSmoothing: 0.75
-    });
-bloomEffect.blendMode.opacity.value = 1.5;
-
-let effectPass = new POSTPROCESSING.EffectPass(
-  camera,
-  bloomEffect
-);
-effectPass.renderToScreen = true;
-
-composer = new POSTPROCESSING.EffectComposer(renderer);
-composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
-composer.addPass(effectPass);
+const geometry = new THREE.BoxGeometry(10, 10, 10);
+var mesh = new THREE.Mesh( geometry, materialArray );
+scene.add( mesh );
 
 
 //SolarSystem
@@ -150,14 +148,14 @@ const pointLight = new PointLight(0xFFFFFF);
 //const pointLightHelper = new PointLightHelper(pointLight);
 pointLight.position.set(0, 0, 200);
 
-//const ambientLight = new AmbientLight(0xFFFFFF,0.6);
+const ambientLight = new AmbientLight(0xFFFFFF,10);
 
 //Helpers
 const controls = new OrbitControls(camera, renderer.domElement);;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-//scene.add(ambientLight);
+scene.add(ambientLight);
 //scene.add(pointLight);
 
 //const worldAxis = new AxesHelper(100);
@@ -165,20 +163,20 @@ const controls = new OrbitControls(camera, renderer.domElement);;
 
 
 //Camera positions
-const cameraBoxPos = new Vector3(0, 0, 15);
-const cameraSolarPos = new Vector3(400, -150, 100);
+// const cameraBoxPos = new Vector3(0, 0, 15);
+// const cameraSolarPos = new Vector3(400, -150, 100);
 
-const curveToSolar = new QuadraticBezierCurve3(
-    cameraBoxPos,
-    new Vector3(300, -200, 400),
-    cameraSolarPos
-);
+// const curveToSolar = new QuadraticBezierCurve3(
+//     cameraBoxPos,
+//     new Vector3(300, -200, 400),
+//     cameraSolarPos
+// );
 
-const curveFromSolar = new QuadraticBezierCurve3(
-    cameraSolarPos,
-    new Vector3(300, -200, 400),
-    cameraBoxPos
-);
+// const curveFromSolar = new QuadraticBezierCurve3(
+//     cameraSolarPos,
+//     new Vector3(300, -200, 400),
+//     cameraBoxPos
+// );
 
 /* const points = curveToSolar.getPoints( 500 );
 const geometry = new BufferGeometry().setFromPoints( points );
@@ -187,21 +185,21 @@ const curveObject = new Line( geometry, material );
 scene.add(curveObject); */
 
 
-const cameraLookAtPoint = new Vector3(700, -100, 0);
+// const cameraLookAtPoint = new Vector3(700, -100, 0);
 
 
 //First render
-camera.position.copy(cameraBoxPos);
-renderer.render(scene, camera);
+//camera.position.copy(cameraBoxPos);
+//renderer.render(scene, camera);
 
-const storyStage = {
-    stage0: 0,
-    stage1: 1,
-    stage2: 2,
-    stage3: 3,
-}
+// const storyStage = {
+//     stage0: 0,
+//     stage1: 1,
+//     stage2: 2,
+//     stage3: 3,
+// }
 
-let currentStory: number = storyStage.stage0;
+// let currentStory: number = storyStage.stage0;
 
 function addStars() {
 
@@ -212,9 +210,9 @@ function addStars() {
 
     for (let i = 0; i < 1000; i++) {
 
-        const x = THREE.MathUtils.randFloatSpread(3000);
-        const y = THREE.MathUtils.randFloatSpread(3000);
-        const z = THREE.MathUtils.randFloatSpread(3000);
+        const x = THREE.MathUtils.randFloatSpread(200);
+        const y = THREE.MathUtils.randFloatSpread(200);
+        const z = THREE.MathUtils.randFloatSpread(200);
 
         vertices.push(x, y, z);
 
@@ -232,53 +230,53 @@ function addStars() {
 }
 
 //scroll callback
-function tellTheStory() {
-    const main: HTMLElement = document.getElementById("main")!;
-    const currOffsetPerc: number = Math.round(document.body.getBoundingClientRect().top / main.offsetHeight * -100)
+// function tellTheStory() {
+//     const main: HTMLElement = document.getElementById("main")!;
+//     const currOffsetPerc: number = Math.round(document.body.getBoundingClientRect().top / main.offsetHeight * -100)
 
-    console.log(currOffsetPerc);
+//     console.log(currOffsetPerc);
 
-    if (currOffsetPerc < 20) {
-        if (currentStory != storyStage.stage0) {
-            currentStory = storyStage.stage0;
-            //cameraTweenToPos(camera, curveToSolar.getPoint(0),3000);
-            cameraTweenToPosAtCurve(camera, curveFromSolar, 5000);
-            cameraTweenLook(camera, cameraBoxPos, box.getPosition(), 8000, TWEEN.Easing.Linear.None);
-            console.log("Pierwsza animacja");
-        }
-        box.animateBox(currOffsetPerc, 0, 20);
-    }
-    else if (currOffsetPerc >= 20 && currOffsetPerc < 40) {
-        if (currentStory != storyStage.stage1) {
-            currentStory = storyStage.stage1;
-            //cameraTweenToPos(camera, curveToSolar.getPoint(1),3000);
-            cameraTweenToPosAtCurve(camera, curveToSolar, 5000);
-            cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint, 8000, TWEEN.Easing.Linear.None);
-            console.log("Druga animacja");
-            solarSystem.toggleSolarSystem();
-            //controls.target.copy(solarCenter);
-        }
+//     if (currOffsetPerc < 20) {
+//         if (currentStory != storyStage.stage0) {
+//             currentStory = storyStage.stage0;
+//             //cameraTweenToPos(camera, curveToSolar.getPoint(0),3000);
+//             cameraTweenToPosAtCurve(camera, curveFromSolar, 5000);
+//             cameraTweenLook(camera, cameraBoxPos, box.getPosition(), 8000, TWEEN.Easing.Linear.None);
+//             console.log("Pierwsza animacja");
+//         }
+//         box.animateBox(currOffsetPerc, 0, 20);
+//     }
+//     else if (currOffsetPerc >= 20 && currOffsetPerc < 40) {
+//         if (currentStory != storyStage.stage1) {
+//             currentStory = storyStage.stage1;
+//             //cameraTweenToPos(camera, curveToSolar.getPoint(1),3000);
+//             cameraTweenToPosAtCurve(camera, curveToSolar, 5000);
+//             cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint, 8000, TWEEN.Easing.Linear.None);
+//             console.log("Druga animacja");
+//             solarSystem.toggleSolarSystem();
+//             //controls.target.copy(solarCenter);
+//         }
 
-    } else {
-        if (currentStory != storyStage.stage2) {
-            currentStory = storyStage.stage2;
-            console.log("Trzecia animacja");
-        }
+//     } else {
+//         if (currentStory != storyStage.stage2) {
+//             currentStory = storyStage.stage2;
+//             console.log("Trzecia animacja");
+//         }
 
-    }
-}
+//     }
+// }
 
-var scrolled = false;
-function checkScroll() {
-    if (!scrolled) {
-        scrolled = true;
-        //tellTheStory();
-        setTimeout(function () { scrolled = false; }, 100);
-    };
-}
-document.body.onscroll = checkScroll;;
+// let scrolled = false;
+// function checkScroll() {
+//     if (!scrolled) {
+//         scrolled = true;
+//         //tellTheStory();
+//         setTimeout(function () { scrolled = false; }, 100);
+//     };
+// }
+// document.body.onscroll = checkScroll;;
 
-solarSystem.toggleSolarSystem();
+// solarSystem.toggleSolarSystem();
 //controls.target.copy(solarCenter);
 //camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
 
@@ -310,9 +308,9 @@ window.addEventListener('resize', onWindowResize, false);
 
 //animate loop
 function animate() {
-    cloudParticles.forEach(p => {
-        p.rotation.z -=0.001;
-      });
+    // cloudParticles.forEach(p => {
+    //     p.rotation.z -=0.001;
+    //   });
     //camera.position.add(new Vector3(0, 0.1, 0))
     //camera.lookAt(new Vector3(0, 0, 0))
     //middle.rotateOnWorldAxis(new Vector3(1,0,0),0.1)
@@ -327,8 +325,8 @@ function animate() {
     TWEEN.update()
     controls.update(); 
     //stats.update();
-    //renderer.render(scene, camera);
-    composer.render(0.1);
+    renderer.render(scene, camera);
+    //composer.render(0.1);
     solarSystem.renderSolarSystem();
 }
 animate();
