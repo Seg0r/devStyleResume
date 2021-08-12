@@ -12,16 +12,13 @@ import { SolarSystem } from './SolarSystem';
 //import * as POSTPROCESSING from "postprocessing";
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
-import { FXAAShader  } from 'three/examples/jsm/shaders/FXAAShader.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { TGALoader } from 'three/examples/jsm/loaders/TGALoader.js';
+import { Universe } from './Universe';
 
 //Scene
 const scene: Scene = new Scene();
-export const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+camera.layers.enable(0);
+camera.layers.enable(1);
 
 const renderer = new WebGLRenderer({
     canvas: document.querySelector('#bg') as HTMLCanvasElement,
@@ -39,99 +36,14 @@ document.querySelector('#main')!.appendChild( stats.dom ); */
 const box = new GreetingBox();
 //box.addToScene(scene);
 
-//scene.background = new Color().setHSL(0.51, 0.4, 0.01);
-//scene.fog = new Fog( scene.background,1000, 1600 );
+//camera away from orbit control
+camera.position.z = 10;
 
-
-
-// let directionalLight = new THREE.DirectionalLight(0xff8c19);
-// directionalLight.position.set(0,0,1);
-// scene.add(directionalLight);
-
-
-//scene.fog = new THREE.FogExp2(0x000000, 0.001);
-//renderer.setClearColor(scene.fog.color);
-
-camera.position.z = 1;
-camera.rotation.x = 2;
-camera.rotation.y = 0;
-camera.rotation.z = 0;
-
-// let ambient = new THREE.AmbientLight(0x555555);
-// scene.add(ambient);
-
-// let directionalLight = new THREE.DirectionalLight(0xff8c19);
-// directionalLight.position.set(0, 0, 1);
-// scene.add(directionalLight);
-
-// let orangeLight = new THREE.PointLight(0xcc6600, 50, 450, 1.7);
-// orangeLight.position.set(200, 300, 100);
-// scene.add(orangeLight);
-// let redLight = new THREE.PointLight(0xd8547e, 50, 450, 1.7);
-// redLight.position.set(100, 300, 100);
-// scene.add(redLight);
-// let blueLight = new THREE.PointLight(0x3677ac, 50, 450, 1.7);
-// blueLight.position.set(300, 300, 200);
-// scene.add(blueLight);
-
-// let cloudParticles: THREE.Mesh[] = [];
-// let loader = new THREE.TextureLoader()
-// .setPath('/assets/scene/')
-// .load("smoke.png", function (texture) {
-//     let cloudGeo = new THREE.PlaneBufferGeometry(500, 500);
-//     let cloudMaterial = new THREE.MeshLambertMaterial({
-//         map: texture,
-//         transparent: true
-//     });
-
-//     for (let p = 0; p < 50; p++) {
-//         let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
-//         cloud.position.set(
-//             Math.random() * 800 - 400,
-//             500,
-//             Math.random() * 500 - 500
-//         );
-//         cloud.rotation.x = 1.16;
-//         cloud.rotation.y = -0.12;
-//         cloud.rotation.z = Math.random() * 2 * Math.PI;
-//         cloud.material.opacity = 0.55;
-//         cloudParticles.push(cloud);
-//         scene.add(cloud);
-//     }
-// });
-
-// const fileFormat = ".jpg"
-// const sceneLoader = new THREE.CubeTextureLoader()
-// 	.setPath( '/assets/scene/' )
-// 	.load( [
-// 		'nebula_right1'+fileFormat,
-// 		'nebula_left2'+fileFormat,
-// 		'nebula_top3'+fileFormat,
-// 		'nebula_bottom4'+fileFormat,
-// 		'nebula_front5'+fileFormat,
-// 		'nebula_back6'+fileFormat
-// 	] , function(texture){
-//     scene.background = texture;
-//   });
-
-
-
-const fileFormat = ".jpg"
-//let loader = new TGALoader();
-let loader = new THREE.TextureLoader();
-loader.setPath( '/assets/scene/' );
-let materialArray = [
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_right1'+fileFormat) } ),
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_left2'+fileFormat) } ),
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_top3'+fileFormat) } ),
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_bottom4'+fileFormat) } ),
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_front5'+fileFormat) } ),
-    new THREE.MeshBasicMaterial( {side: THREE.BackSide, opacity: 0.7, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('nebula_back6'+fileFormat) } ),
-];
-
-const geometry = new THREE.BoxGeometry(10, 10, 10);
-var mesh = new THREE.Mesh( geometry, materialArray );
-scene.add( mesh );
+const starsLayer = 1
+//Universe
+const universe = new Universe(starsLayer,renderer,scene,camera);
+universe.addNebulaToScene(scene);
+universe.addStarsToScene(scene);
 
 
 //SolarSystem
@@ -140,22 +52,18 @@ const solarSize: number = 200;
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
 //solarSystem.addToScene(scene);
 
-//Stars
-addStars();
 
 //Lights
 const pointLight = new PointLight(0xFFFFFF);
 //const pointLightHelper = new PointLightHelper(pointLight);
 pointLight.position.set(0, 0, 200);
 
-const ambientLight = new AmbientLight(0xFFFFFF,10);
-
 //Helpers
 const controls = new OrbitControls(camera, renderer.domElement);;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-scene.add(ambientLight);
+//scene.add(ambientLight);
 //scene.add(pointLight);
 
 //const worldAxis = new AxesHelper(100);
@@ -201,33 +109,7 @@ scene.add(curveObject); */
 
 // let currentStory: number = storyStage.stage0;
 
-function addStars() {
 
-    //const starParticles: THREE.Points[] = [];
-
-    const vertices = [];
-    const sizes = [];
-
-    for (let i = 0; i < 1000; i++) {
-
-        const x = THREE.MathUtils.randFloatSpread(200);
-        const y = THREE.MathUtils.randFloatSpread(200);
-        const z = THREE.MathUtils.randFloatSpread(200);
-
-        vertices.push(x, y, z);
-
-        sizes.push(Math.random() + 0.001);
-
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const material = new THREE.PointsMaterial({ color: 0xffffff, sizeAttenuation: false });
-    geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 3));
-    const points = new THREE.Points(geometry, material);
-
-    scene.add(points);
-}
 
 //scroll callback
 // function tellTheStory() {
@@ -305,6 +187,7 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize, false);
 
 
+renderer.autoClear = false;
 
 //animate loop
 function animate() {
@@ -325,8 +208,12 @@ function animate() {
     TWEEN.update()
     controls.update(); 
     //stats.update();
-    renderer.render(scene, camera);
-    //composer.render(0.1);
+
+
+    //render scene
+    renderer.clear();
+    universe.render();
+    renderer.render(scene,camera)
     solarSystem.renderSolarSystem();
 }
 animate();
