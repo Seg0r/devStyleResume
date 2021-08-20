@@ -41,13 +41,13 @@ camera.position.z = 10;
 
 const starsLayer = 1
 //Universe
-const universe = new Universe(700,1000,starsLayer,renderer,scene,camera);
-//universe.addNebulaToScene(scene);
+const universe = new Universe(2000,1000,starsLayer,renderer,scene,camera);
+universe.addNebulaToScene(scene);
 universe.addStarsToScene(scene);
 
 
 //SolarSystem
-const solarCenter: Vector3 = new Vector3(700, -100, 300);
+const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSize: number = 200;
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
 solarSystem.addToScene(scene);
