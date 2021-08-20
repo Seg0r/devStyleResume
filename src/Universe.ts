@@ -3,7 +3,9 @@ import { Scene } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
+import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { Group } from '@tweenjs/tween.js';
 
 export class Universe {
 
@@ -12,17 +14,19 @@ export class Universe {
     yellowNebula: THREE.Mesh;
     stars: THREE.Points;
     starsLayer: number;
+    starsCount: number;
     afterimagePass: any;
     composer: EffectComposer;
     renderer: THREE.WebGLRenderer;
     camera: THREE.Camera;
     
 
-    constructor(starsLayer: number, renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
+    constructor(univerSize: number, starsCount: number, starsLayer: number, renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
 
         this.starsLayer=starsLayer;
         this.renderer=renderer
         this.camera=camera
+        this.starsCount = starsCount;
 
         const fileFormat = ".jpg";
         const loader = new THREE.TextureLoader();
@@ -35,7 +39,7 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.5, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('blue_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.5, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('blue_back6' + fileFormat) }),
         ];
-        let geometry = new THREE.BoxGeometry(50, 50, 50);
+        let geometry = new THREE.BoxGeometry(univerSize, univerSize, univerSize);
         this.blueNebula = new THREE.Mesh(geometry, materialArray);
 
         materialArray = [
@@ -46,7 +50,7 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('pink_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('pink_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxGeometry(100, 100, 100);
+        geometry = new THREE.BoxGeometry(univerSize*2, univerSize*2, univerSize*2);
         this.pinkNebula = new THREE.Mesh(geometry, materialArray);
 
         materialArray = [
@@ -57,24 +61,31 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('yellow_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('yellow_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxGeometry(150, 150, 150);
+        geometry = new THREE.BoxGeometry(univerSize*3, univerSize*3, univerSize*3);
         this.yellowNebula = new THREE.Mesh(geometry, materialArray);
 
         //const starParticles: THREE.Points[] = [];
     
         const vertices = [];
         const sizes = [];
+        //this.stars = new THREE.Group();
     
-        for (let i = 0; i < 1000; i++) {
+        for (let i = 0; i < this.starsCount; i++) {
     
-            const x = THREE.MathUtils.randFloatSpread(200);
-            const y = THREE.MathUtils.randFloatSpread(200);
-            const z = THREE.MathUtils.randFloatSpread(200);
+            const x = THREE.MathUtils.randFloatSpread(univerSize*3);
+            const y = THREE.MathUtils.randFloatSpread(univerSize*3);
+            const z = THREE.MathUtils.randFloatSpread(univerSize*3);
     
             vertices.push(x, y, z);
     
             sizes.push(Math.random() + 0.001);
-    
+
+            // const buffGeometry = new THREE.SphereGeometry(Math.random()*0.1 + 0.001);
+            // const material = new THREE.MeshBasicMaterial({ color: 0xffffff});
+            // const star = new THREE.Mesh(buffGeometry, material);
+            // star.position.set(x,y,z)
+            // star.layers.set(starsLayer);
+            // this.stars.add( star );
         }
     
         const buffGeometry = new THREE.BufferGeometry();
@@ -86,12 +97,17 @@ export class Universe {
         
 
         this.composer = new EffectComposer( renderer );
-        this.composer.addPass( new RenderPass( scene, camera ) );
+        const renderPass = new RenderPass( scene, camera );
+        this.composer.addPass( renderPass );
 
-        this.afterimagePass = new AfterimagePass();
-        this.composer.addPass( this.afterimagePass );
+        //this.afterimagePass = new AfterimagePass();
+        //this.composer.addPass( this.afterimagePass );
 
-        this.createGUI();
+        const pass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
+        this.composer.addPass( pass );
+
+
+        //this.createGUI();
 
     }
 

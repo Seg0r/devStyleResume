@@ -21,19 +21,19 @@ camera.layers.enable(0);
 camera.layers.enable(1);
 
 const renderer = new WebGLRenderer({
-    canvas: document.querySelector('#bg') as HTMLCanvasElement,
+    canvas: document.querySelector('#bg') as HTMLCanvasElement
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 //renderer.toneMapping = THREE.ReinhardToneMapping;
-renderer.toneMapping = THREE.CineonToneMapping;
+//renderer.toneMapping = THREE.CineonToneMapping;
 
 /* const stats = new Stats();
 stats.showPanel( 0 );
 document.querySelector('#main')!.appendChild( stats.dom ); */
 
 //GreetingBox
-const box = new GreetingBox();
+//const box = new GreetingBox();
 //box.addToScene(scene);
 
 //camera away from orbit control
@@ -41,8 +41,8 @@ camera.position.z = 10;
 
 const starsLayer = 1
 //Universe
-const universe = new Universe(starsLayer,renderer,scene,camera);
-universe.addNebulaToScene(scene);
+const universe = new Universe(700,1000,starsLayer,renderer,scene,camera);
+//universe.addNebulaToScene(scene);
 universe.addStarsToScene(scene);
 
 
@@ -50,7 +50,7 @@ universe.addStarsToScene(scene);
 const solarCenter: Vector3 = new Vector3(700, -100, 300);
 const solarSize: number = 200;
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
-//solarSystem.addToScene(scene);
+solarSystem.addToScene(scene);
 
 
 //Lights
@@ -63,7 +63,8 @@ const controls = new OrbitControls(camera, renderer.domElement);;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-//scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(0xffffff,0.5);
+scene.add(ambientLight);
 //scene.add(pointLight);
 
 //const worldAxis = new AxesHelper(100);
@@ -158,9 +159,9 @@ scene.add(curveObject); */
 // }
 // document.body.onscroll = checkScroll;;
 
-// solarSystem.toggleSolarSystem();
-//controls.target.copy(solarCenter);
-//camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
+solarSystem.toggleSolarSystem();
+controls.target.copy(solarCenter);
+camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
 
 
 // camera.position.add(new Vector3(250, 250, 500));
