@@ -22,7 +22,6 @@ export class SolarSystem {
     private moons: Mesh[] = [];
     private moonPivots: Object3D[] = [];
     private moonSpeeds: number[] = [];
-    private moonAxis: number[] = [];
 
     //private sunMesh: Mesh;
     private sunLight: PointLight;
@@ -42,7 +41,8 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size,1.2,0);
+        this.bornMoons(count/3, center, size,1.6,0.6,2);
+        this.bornMoons(count*2/3, center, size,0,0.9,2.3);
 
         this.createGUI(center, size, count);
     }
@@ -52,8 +52,10 @@ export class SolarSystem {
         const options = {
             sunLightStrength: 100,
             sunLightDecay: 2,
-            pivot1: 0,
-            pivot2: 0
+            alpha1: 1.6,
+            alpha2: 0.6,
+            beta1: 0,
+            beta2: 0.9
         }
         var _this = this;
 
@@ -67,31 +69,35 @@ export class SolarSystem {
         } );
         lightFolder.open()
         const moonFolder = gui.addFolder('Moons')
-        moonFolder.add(options, 'pivot1', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.pivot1,options.pivot2);
+        moonFolder.add(options, 'alpha1', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
         } );
-        moonFolder.add(options, 'pivot2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.pivot1,options.pivot2);
+        moonFolder.add(options, 'alpha2', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+        } );
+        moonFolder.add(options, 'beta1', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+        } );
+        moonFolder.add(options, 'beta2', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
         } );
         moonFolder.open();
-
-
-        this.moonPivots
-
     }
 
-    public reBornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number ) {
+    public reBornMoons(count: number, center: THREE.Vector3, size: number, alphaRot1:number , alphaRot2:number , betaRot1:number, betaRot2:number ) {
 
-        this.moonAxis = [];
         this.moonSpeeds = [];
         this.moonPivots= [];
         this.moons= [];
         this.solarSystem.clear();
+        this.orbiterPivots.forEach(orb=>this.solarSystem.add(orb));
+        
 
-        this.bornMoons(count, center, size, alphaRot , betaRot )
+        this.bornMoons(count/3, center, size,alphaRot1,alphaRot2,2);
+        this.bornMoons(count*2/3, center, size,betaRot1,betaRot2,2.3);
     }
 
-    public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number ) {
+    public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number, distance: number ) {
 
         let geometry: ConvexGeometry;
         let material: Material;
@@ -131,23 +137,13 @@ export class SolarSystem {
 
             //attach moon to pivot to be able to rotate mesh around pivot
             pivot.add(moon);
-            axis = i % 10;
 
-            if (axis < 5) {
-                pivot.rotateZ(alphaRot)
-                pivot.rotateX(0.2)
-                pivot.rotateY(Math.random() * Math.PI * 2);
-                moon.position.x = size * 2;
-                moon.position.y = (Math.random() - 0.5) * size / 2;
-
-            } else {
-                pivot.rotateZ(betaRot)
-                pivot.rotateX(0.9)
-                pivot.rotateZ(Math.random() * Math.PI * 2)
-                moon.position.x = size * 2.3;
-                moon.position.z = (Math.random() - 0.5) * size / 2;
-            }
-            this.moonAxis.push(axis);
+            pivot.rotateZ(alphaRot)
+            pivot.rotateX(betaRot)
+            pivot.rotateY(Math.random() * Math.PI * 2);
+            moon.position.x = size * distance;
+            moon.position.y = (Math.random() - 0.5) * size / 2;
+            moon.position.y = (Math.random() - 0.5) * size / 2;
 
             this.moonSpeeds.push(Math.random() - 0.5);
             this.moonPivots.push(pivot);
@@ -268,10 +264,7 @@ export class SolarSystem {
             }
 
             for (let i = 0, il = this.moonPivots.length; i < il; i++) {
-                if (this.moonAxis[i] < 5)
-                    this.moonPivots[i].rotateY(0.001);
-                else
-                    this.moonPivots[i].rotateZ(0.001);
+                this.moonPivots[i].rotateY(0.001);
                 if (i <= this.moons.length) {
                     const moon = this.moons[i];
                     moon.rotateX(this.moonSpeeds[i]*0.005);
