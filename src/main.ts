@@ -164,7 +164,7 @@ scene.add(curveObject); */
 
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
-camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
+camera.position.copy(new Vector3(0,solarSize,solarSize * 4).add(solarCenter));
 cameraPivot.add(camera);
 
 // camera.position.add(new Vector3(250, 250, 500));
@@ -220,9 +220,9 @@ function animate() {
     renderer.render(scene,camera)
     solarSystem.renderSolarSystem();
 
-    var timer = new Date().getTime()*0.0005; 
-    camera.position.add(new Vector3(Math.cos( timer )*0.1,0,0));
-    camera.position.add(new Vector3(0,Math.sin( timer )*0.2,0));
+    var timer = new Date().getTime()*0.0001; 
+    camera.position.add(new Vector3(Math.cos( timer )*0.3,0,0));
+    camera.position.add(new Vector3(0,Math.sin( timer )*0.1,0));
     camera.lookAt(solarCenter);
 }
 animate();
