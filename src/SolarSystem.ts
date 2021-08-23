@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Quaternion, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
 // @ts-ignore
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 // @ts-ignore
@@ -42,49 +42,64 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size);
+        this.bornMoons(count, center, size,1.2,0);
 
-        //this.createGUI(size);
+        this.createGUI(center, size, count);
     }
 
-    createGUI(size:number) {
+    createGUI(center: Vector3, size: number, count: number) {
 
         const options = {
             sunLightStrength: 100,
-            sunLightDecay: 2
+            sunLightDecay: 2,
+            pivot1: 0,
+            pivot2: 0
         }
         var _this = this;
 
         const gui = new GUI()
-        const cubeFolder = gui.addFolder('SolarSystem')
-        cubeFolder.add(options, 'sunLightStrength', 0,200).onChange( function () {
+        const lightFolder = gui.addFolder('Lights')
+        lightFolder.add(options, 'sunLightStrength', 0,200).onChange( function () {
             _this.sunLight.intensity = options.sunLightStrength;
         } );
-        cubeFolder.add(options, 'sunLightDecay', 0,10).onChange( function () {
+        lightFolder.add(options, 'sunLightDecay', 0,10).onChange( function () {
             _this.sunLight.decay = options.sunLightDecay;
         } );
-        cubeFolder.open()
+        lightFolder.open()
+        const moonFolder = gui.addFolder('Moons')
+        moonFolder.add(options, 'pivot1', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.pivot1,options.pivot2);
+        } );
+        moonFolder.add(options, 'pivot2', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options.pivot1,options.pivot2);
+        } );
+        moonFolder.open();
+
+
+        this.moonPivots
 
     }
 
-    public bornMoons(count: number, center: THREE.Vector3, size: number) {
+    public reBornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number ) {
+
+        this.moonAxis = [];
+        this.moonSpeeds = [];
+        this.moonPivots= [];
+        this.moons= [];
+        this.solarSystem.clear();
+
+        this.bornMoons(count, center, size, alphaRot , betaRot )
+    }
+
+    public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number ) {
 
         let geometry: ConvexGeometry;
         let material: Material;
-        let axis: number = 1;
+        let axis: number = 0;
 
         for (let i = 0; i < count / 10; i++) {
 
             geometry = this.generateGeometry(size / 10);
-
-            //const edges = new THREE.EdgesGeometry(geometry);
-            const finish = Math.random();
-            if (finish <= 0.2) {
-            } else if (0.2 < finish && finish <= 0.4) {
-            } else if (0.4 < finish && finish <= 0.6) {
-            } else if (0.6 < finish && finish <= 0.8) {
-            } else if (0.8 < finish) {
-            }
 
             const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
             stoneTexture.wrapS = THREE.MirroredRepeatWrapping;
@@ -110,32 +125,31 @@ export class SolarSystem {
             //let three.js know
             geometry.attributes.uv.needsUpdate = true;
             const moon = new THREE.Mesh(geometry, material)
-            //const moon = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xff0000 }));
 
             const pivot = new Object3D();
             pivot.position.copy(center);
 
             //attach moon to pivot to be able to rotate mesh around pivot
             pivot.add(moon);
-            axis = i % 2;
+            axis = i % 10;
 
-            pivot.rotateY(1)
-
-            if (axis == 0) {
+            if (axis < 5) {
+                pivot.rotateZ(alphaRot)
                 pivot.rotateX(0.2)
                 pivot.rotateY(Math.random() * Math.PI * 2);
                 moon.position.x = size * 2;
                 moon.position.y = (Math.random() - 0.5) * size / 2;
 
             } else {
+                pivot.rotateZ(betaRot)
                 pivot.rotateX(0.9)
                 pivot.rotateZ(Math.random() * Math.PI * 2)
-                moon.position.x = size * 2.2;
+                moon.position.x = size * 2.3;
                 moon.position.z = (Math.random() - 0.5) * size / 2;
             }
             this.moonAxis.push(axis);
 
-            this.moonSpeeds.push(Math.random() * 0.1);
+            this.moonSpeeds.push(Math.random() - 0.5);
             this.moonPivots.push(pivot);
             this.moons.push(moon);
 
@@ -254,15 +268,15 @@ export class SolarSystem {
             }
 
             for (let i = 0, il = this.moonPivots.length; i < il; i++) {
-                if (this.moonAxis[i] == 0)
+                if (this.moonAxis[i] < 5)
                     this.moonPivots[i].rotateY(0.001);
                 else
                     this.moonPivots[i].rotateZ(0.001);
                 if (i <= this.moons.length) {
                     const moon = this.moons[i];
-                    //moon.rotateX(this.moonSpeeds[i]*0.15);
-                    //moon.rotateY(this.moonSpeeds[i]*0.05);
-                    //moon.rotateZ(this.moonSpeeds[i]*0.05);
+                    moon.rotateX(this.moonSpeeds[i]*0.005);
+                    moon.rotateY(this.moonSpeeds[i]*0.005);
+                    moon.rotateZ(this.moonSpeeds[i]*0.005);
                 }
                 //pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
                 //pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);

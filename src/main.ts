@@ -19,6 +19,8 @@ const scene: Scene = new Scene();
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
 camera.layers.enable(0);
 camera.layers.enable(1);
+const cameraPivot = new Object3D();
+
 
 const renderer = new WebGLRenderer({
     canvas: document.querySelector('#bg') as HTMLCanvasElement
@@ -38,6 +40,7 @@ document.querySelector('#main')!.appendChild( stats.dom ); */
 
 //camera away from orbit control
 camera.position.z = 10;
+
 
 const starsLayer = 1
 //Universe
@@ -162,7 +165,7 @@ scene.add(curveObject); */
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
 camera.position.copy(new Vector3(0,solarSize,solarSize * 5).add(solarCenter));
-
+cameraPivot.add(camera);
 
 // camera.position.add(new Vector3(250, 250, 500));
 
@@ -216,5 +219,10 @@ function animate() {
     universe.render();
     renderer.render(scene,camera)
     solarSystem.renderSolarSystem();
+
+    var timer = new Date().getTime()*0.0005; 
+    camera.position.add(new Vector3(Math.cos( timer )*0.1,0,0));
+    camera.position.add(new Vector3(0,Math.sin( timer )*0.2,0));
+    camera.lookAt(solarCenter);
 }
 animate();
