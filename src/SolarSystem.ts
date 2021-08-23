@@ -12,6 +12,11 @@ enum MoonOrbits {
     Second
 }
 
+const aplha1=1.7;
+const aplha2=0.5;
+const beta1=1.3;
+const beta2=-0.8;
+
 export class SolarSystem {
 
     private solarSystem: Group;
@@ -26,9 +31,11 @@ export class SolarSystem {
     //private sunMesh: Mesh;
     private sunLight: PointLight;
     private sunLightStrength: number = 100;
-    private sunLightDecay: number = 3;
+    private sunLightDecay: number = 4;
     visible: Boolean = false;
     private lensflare: Lensflare;
+
+    
 
     public constructor(center: Vector3, size: number, count: number) {
 
@@ -41,8 +48,8 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count/3, center, size,1.6,0.6,2);
-        this.bornMoons(count*2/3, center, size,0,0.9,2.3);
+        this.bornMoons(count, center, size,aplha1,aplha2,1.5);
+        this.bornMoons(count*1.2, center, size,beta1,beta2,1.65);
 
         this.createGUI(center, size, count);
     }
@@ -51,11 +58,11 @@ export class SolarSystem {
 
         const options = {
             sunLightStrength: 100,
-            sunLightDecay: 2,
-            alpha1: 1.6,
-            alpha2: 0.6,
-            beta1: 0,
-            beta2: 0.9
+            sunLightDecay: 4,
+            alpha1: aplha1,
+            alpha2: aplha2,
+            beta1: beta1,
+            beta2: beta2
         }
         var _this = this;
 
@@ -93,19 +100,18 @@ export class SolarSystem {
         this.orbiterPivots.forEach(orb=>this.solarSystem.add(orb));
         
 
-        this.bornMoons(count/3, center, size,alphaRot1,alphaRot2,2);
-        this.bornMoons(count*2/3, center, size,betaRot1,betaRot2,2.3);
+        this.bornMoons(count, center, size,alphaRot1,alphaRot2,1);
+        this.bornMoons(count, center, size,betaRot1,betaRot2,1.2);
     }
 
     public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number, distance: number ) {
 
         let geometry: ConvexGeometry;
         let material: Material;
-        let axis: number = 0;
 
         for (let i = 0; i < count / 10; i++) {
 
-            geometry = this.generateGeometry(size / 10);
+            geometry = this.generateGeometry(size / 15);
 
             const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
             stoneTexture.wrapS = THREE.MirroredRepeatWrapping;
@@ -142,8 +148,7 @@ export class SolarSystem {
             pivot.rotateX(betaRot)
             pivot.rotateY(Math.random() * Math.PI * 2);
             moon.position.x = size * distance;
-            moon.position.y = (Math.random() - 0.5) * size / 2;
-            moon.position.y = (Math.random() - 0.5) * size / 2;
+            moon.position.y = (Math.random() - 0.5) * size * 0.75;
 
             this.moonSpeeds.push(Math.random() - 0.5);
             this.moonPivots.push(pivot);
@@ -188,7 +193,7 @@ export class SolarSystem {
 
         const geometry = new SphereGeometry(0.2, 32, 16);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
-        const radius = size / 2;
+        const radius = size /2;
 
         for (let i = 0; i < count; i++) {
 
