@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Quaternion, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
-// @ts-ignore
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
-// @ts-ignore
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import * as UTILS from './utils/applyUV'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 
 enum MoonOrbits {
@@ -13,10 +15,21 @@ enum MoonOrbits {
     Second
 }
 
-const aplha1=1.7;
-const aplha2=0.5;
+const alpha1=0.3;
+const alpha2=0.4;
 const beta1=1.3;
 const beta2=-0.8;
+
+const alphaDist=1.2;
+const betaDist=1.4;
+
+const sunLightStrength=120;
+const sunLightDecay=6;
+
+const bloomThreshold=0.9;
+const bloomStrength=1;
+const bloomRadius=2;
+
 
 export class SolarSystem {
 
@@ -31,14 +44,18 @@ export class SolarSystem {
 
     //private sunMesh: Mesh;
     private sunLight: PointLight;
-    private sunLightStrength: number = 100;
-    private sunLightDecay: number = 4;
+    private sunLightStrength: number = sunLightStrength;
+    private sunLightDecay: number = sunLightDecay;
     visible: Boolean = false;
     private lensflare: Lensflare;
 
-    
+    //postprocessing
+    composer: EffectComposer;
+    renderer: THREE.WebGLRenderer;
+    bloomPass: UnrealBloomPass;
+    bloomPassToggle: boolean = true;
 
-    public constructor(center: Vector3, size: number, count: number) {
+    public constructor(center: Vector3, size: number, count: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass) {
 
         this.solarSystem = new Group();
 
@@ -49,8 +66,20 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size,aplha1,aplha2,1.5);
-        this.bornMoons(count*1.2, center, size,beta1,beta2,1.65);
+        this.bornMoons(count, center, size,alpha1,alpha2,alphaDist);
+        this.bornMoons(count*1.2, center, size,beta1,beta2,betaDist);        
+
+        this.renderer=renderer;
+
+        this.composer = new EffectComposer( renderer );
+        
+        this.composer.addPass( renderPass );
+
+        const antiAA = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
+        this.composer.addPass( antiAA );
+
+        this.bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), bloomStrength, bloomRadius, bloomThreshold );
+        this.composer.addPass( this.bloomPass );
 
         this.createGUI(center, size, count);
     }
@@ -58,12 +87,16 @@ export class SolarSystem {
     createGUI(center: Vector3, size: number, count: number) {
 
         const options = {
-            sunLightStrength: 100,
-            sunLightDecay: 4,
-            alpha1: aplha1,
-            alpha2: aplha2,
+            sunLightStrength: sunLightStrength,
+            sunLightDecay: sunLightDecay,
+            alpha1: alpha1,
+            alpha2: alpha2,
             beta1: beta1,
-            beta2: beta2
+            beta2: beta2,
+            threshold: bloomThreshold,
+            strength: bloomStrength,
+            radius:bloomRadius,
+            bloomToggle: true
         }
         var _this = this;
 
@@ -90,6 +123,27 @@ export class SolarSystem {
             _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
         } );
         moonFolder.open();
+        const bloomFolder = gui.addFolder('Bloom')
+        bloomFolder.add(options, 'threshold', 0,1).step(0.1).onChange( function ( value ) {
+
+            _this.bloomPass.threshold = Number( value );
+
+        } );
+        bloomFolder.add(options, 'strength', 0,10).step(0.1).onChange( function ( value ) {
+
+            _this.bloomPass.strength = Number( value );
+
+        } );
+        bloomFolder.add(options, 'radius', 0,10).step(0.1).onChange( function ( value ) {
+
+            _this.bloomPass.radius = Number( value );
+
+        } );
+        bloomFolder.add( options, 'bloomToggle', true ).onChange( function ( value ) {
+
+            _this.bloomPass.enabled=value;
+        } );
+        bloomFolder.open();
     }
 
     public reBornMoons(count: number, center: THREE.Vector3, size: number, alphaRot1:number , alphaRot2:number , betaRot1:number, betaRot2:number ) {
@@ -101,8 +155,8 @@ export class SolarSystem {
         this.orbiterPivots.forEach(orb=>this.solarSystem.add(orb));
         
 
-        this.bornMoons(count, center, size,alphaRot1,alphaRot2,1);
-        this.bornMoons(count, center, size,betaRot1,betaRot2,1.2);
+        this.bornMoons(count, center, size,alphaRot1,alphaRot2,alphaDist);
+        this.bornMoons(count, center, size,betaRot1,betaRot2,betaDist);
     }
 
     public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number, distance: number ) {
@@ -279,6 +333,7 @@ export class SolarSystem {
                 }
             }
         }
+        this.composer.render();
     }
 
     public toggleSolarSystem() {

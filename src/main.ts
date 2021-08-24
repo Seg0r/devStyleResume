@@ -13,26 +13,39 @@ import { SolarSystem } from './SolarSystem';
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { Universe } from './Universe';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+
+
+enum AllLayers{
+    solarSystem=1,
+    universe,
+    stars
+}
 
 //Scene
 const scene: Scene = new Scene();
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
 camera.layers.enable(0);
-camera.layers.enable(1);
+camera.layers.enable(AllLayers.solarSystem);
+camera.layers.enable(AllLayers.universe);
+camera.layers.enable(AllLayers.stars);
 const cameraPivot = new Object3D();
 
 
+//Renderer
 const renderer = new WebGLRenderer({
     canvas: document.querySelector('#bg') as HTMLCanvasElement
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+const renderPass = new RenderPass( scene, camera );
 //renderer.toneMapping = THREE.ReinhardToneMapping;
 //renderer.toneMapping = THREE.CineonToneMapping;
 
-/* const stats = new Stats();
-stats.showPanel( 0 );
-document.querySelector('#main')!.appendChild( stats.dom ); */
+//  const stats = new Stats();
+// stats.showPanel( 0 );
+// document.querySelector('#main')!.appendChild( stats.dom ); 
 
 //GreetingBox
 //const box = new GreetingBox();
@@ -42,9 +55,8 @@ document.querySelector('#main')!.appendChild( stats.dom ); */
 camera.position.z = 10;
 
 
-const starsLayer = 1
 //Universe
-const universe = new Universe(2000,1000,starsLayer,renderer,scene,camera);
+const universe = new Universe(2000,1000,AllLayers.stars,renderer,renderPass,camera);
 universe.addNebulaToScene(scene);
 universe.addStarsToScene(scene);
 
@@ -52,7 +64,7 @@ universe.addStarsToScene(scene);
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSize: number = 200;
-const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
+const solarSystem = new SolarSystem(solarCenter, solarSize, 800, renderer,renderPass);
 solarSystem.addToScene(scene);
 
 
@@ -217,11 +229,12 @@ function animate() {
     //render scene
     renderer.clear();
     universe.render();
-    renderer.render(scene,camera)
     solarSystem.renderSolarSystem();
+    //renderer.render(scene,camera)
+    
 
     var timer = new Date().getTime()*0.0001; 
-    camera.position.add(new Vector3(Math.cos( timer )*0.3,0,0));
+    camera.position.add(new Vector3(Math.cos( timer )*0.2,0,0));
     camera.position.add(new Vector3(0,Math.sin( timer )*0.1,0));
     camera.lookAt(solarCenter);
 }

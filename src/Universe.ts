@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Scene } from 'three';
+import { Camera, Scene } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
@@ -21,7 +21,7 @@ export class Universe {
     camera: THREE.Camera;
     
 
-    constructor(univerSize: number, starsCount: number, starsLayer: number, renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
+    constructor(univerSize: number, starsCount: number, starsLayer: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass, camera: Camera) {
 
         this.starsLayer=starsLayer;
         this.renderer=renderer
@@ -93,18 +93,17 @@ export class Universe {
         const material = new THREE.PointsMaterial({ color: 0xffffff, sizeAttenuation: false });
         buffGeometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 3));
         this.stars = new THREE.Points(buffGeometry, material);
-        this.stars.layers.set(starsLayer);
+        //this.stars.layers.set(starsLayer);
         
 
         this.composer = new EffectComposer( renderer );
-        const renderPass = new RenderPass( scene, camera );
         this.composer.addPass( renderPass );
 
-        //this.afterimagePass = new AfterimagePass();
-        //this.composer.addPass( this.afterimagePass );
+        this.afterimagePass = new AfterimagePass(1);
+        this.composer.addPass( this.afterimagePass );
 
-        const pass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
-        this.composer.addPass( pass );
+        //const pass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
+        //this.composer.addPass( pass );
 
 
         //this.createGUI();
@@ -130,13 +129,12 @@ export class Universe {
     }
 
     public render(){
-        this.renderer.clear();
   
-        this.camera.layers.set(this.starsLayer);
+        //this.camera.layers.set(this.starsLayer);
         this.composer.render();
         
         this.renderer.clearDepth();
-        this.camera.layers.set(0);
-    }
+        //this.camera.layers.set(0);
+    }   
 
 }
