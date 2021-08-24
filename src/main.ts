@@ -13,6 +13,7 @@ import { SolarSystem } from './SolarSystem';
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { Universe } from './Universe';
+import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 
 
@@ -56,9 +57,12 @@ camera.position.z = 10;
 
 
 //Universe
-const universe = new Universe(2000,1000,AllLayers.stars,renderer,renderPass,camera);
+const universe = new Universe(2000,renderer,renderPass);
 universe.addNebulaToScene(scene);
-universe.addStarsToScene(scene);
+
+
+const stars = new Stars(2000,1000,AllLayers.stars,renderer,renderPass,camera);
+stars.addStarsToScene(scene);
 
 
 //SolarSystem
@@ -230,6 +234,7 @@ function animate() {
     renderer.clear();
     universe.render();
     solarSystem.renderSolarSystem();
+    stars.render();
     //renderer.render(scene,camera)
     
 
