@@ -8,13 +8,9 @@ export class Universe {
     blueNebula: THREE.Mesh;
     pinkNebula: THREE.Mesh;
     yellowNebula: THREE.Mesh;
-    composer: EffectComposer;
-    renderer: THREE.WebGLRenderer;
     
 
     constructor(univerSize: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass) {
-
-        this.renderer=renderer
 
         const fileFormat = ".jpg";
         const loader = new THREE.TextureLoader();
@@ -53,10 +49,6 @@ export class Universe {
         this.yellowNebula = new THREE.Mesh(geometry, materialArray);
 
 
-        this.composer = new EffectComposer( renderer );
-        this.composer.addPass( renderPass );
-
-
         //this.createGUI();
 
     }
@@ -69,12 +61,7 @@ export class Universe {
     }
 
     public render(){
-  
-        //this.camera.layers.set(this.starsLayer);
-        this.composer.render();
-        
-        this.renderer.clearDepth();
-        //this.camera.layers.set(0);
+        //empty for now
     }   
 
 }

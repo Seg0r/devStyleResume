@@ -15,6 +15,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+
 
 
 enum AllLayers{
@@ -44,6 +46,13 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const renderPass = new RenderPass( scene, camera );
+const composer = new EffectComposer( renderer );
+        
+composer.addPass( renderPass );
+const antiAA = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
+composer.addPass( antiAA );
+
+
 //renderer.toneMapping = THREE.ReinhardToneMapping;
 //renderer.toneMapping = THREE.CineonToneMapping;
 
@@ -71,7 +80,7 @@ stars.addStarsToScene(scene);
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSize: number = 200;
-const solarSystem = new SolarSystem(solarCenter, solarSize, 800, renderer,renderPass);
+const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
 solarSystem.addToScene(scene);
 
 
@@ -239,11 +248,10 @@ function animate() {
     renderer.clear();
     
     universe.render();
-    solarSystem.renderSolarSystem();
-    //stars.render();
+    solarSystem.render();
+    stars.render();
     
-    
-    renderer.render(scene,camera)
+    composer.render();
     
 
     timer = new Date().getTime()*0.0005;

@@ -1,1 +1,0 @@
-export function animateBox (beginOffset: number,endOffset:number): void;

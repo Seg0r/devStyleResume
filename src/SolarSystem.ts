@@ -63,9 +63,6 @@ export class SolarSystem {
     vector3:Vector3;
 
     //postprocessing
-    composer: EffectComposer;
-    renderer: THREE.WebGLRenderer;
-    bloomPass: UnrealBloomPass;
     bloomPassToggle: boolean = true;
 
     options: Options  =  {
@@ -77,7 +74,7 @@ export class SolarSystem {
         roughness: roughness
     } 
 
-    public constructor(center: Vector3, size: number, count: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass) {
+    public constructor(center: Vector3, size: number, count: number) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
@@ -90,19 +87,7 @@ export class SolarSystem {
         this.lensflare = this.createLensflare(size);
 
         this.bornMoons(count, center, size,this.options,this.options.alpha1,this.options.alpha2,alphaDist);
-        this.bornMoons(count*1.2, center, size,this.options,this.options.beta1,this.options.beta2,betaDist);        
-
-        this.renderer=renderer;
-
-        this.composer = new EffectComposer( renderer );
-        
-        this.composer.addPass( renderPass );
-
-        const antiAA = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
-        this.composer.addPass( antiAA );
-
-        this.bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), bloomStrength, bloomRadius, bloomThreshold );
-        this.composer.addPass( this.bloomPass );
+        this.bornMoons(count*1.2, center, size,this.options,this.options.beta1,this.options.beta2,betaDist);
 
         this.createGUI(center, size, count);
     }
@@ -110,8 +95,8 @@ export class SolarSystem {
     createGUI(center: Vector3, size: number, count: number) {
 
 
-        var _this = this;
-        const options: Options =  {
+        const _this = this;
+        let options: Options =  {
             alpha1:alpha1,
             alpha2: alpha2,
             beta1: beta1,
@@ -144,16 +129,21 @@ export class SolarSystem {
         moonFolder.add(options, 'roughness', 0,1).step(0.1).onChange( function () {
             _this.reBornMoons(count,center, size, options);
         } );
-        moonFolder.add(options, 'metalness', 0,1).step(0.1).onChange( function () {
+        moonFolder.add(options, 'metalness', 0,1).step(0.1).listen().onChange( function () {
             _this.reBornMoons(count,center, size, options);
         } );
+        var obj = { button:function(){ 
+            options= _this.options;
+            _this.reBornMoons(count,center, size, options);
+         }};
+        moonFolder.add(obj,'button').name('Reset');
         moonFolder.open();
-        const bloomFolder = gui.addFolder('Bloom')
-        bloomFolder.add(_this.bloomPass, 'threshold', 0,1).step(0.1);
-        bloomFolder.add(_this.bloomPass, 'strength', 0,10).step(0.1);
-        bloomFolder.add(_this.bloomPass, 'radius', 0,10).step(0.1);
-        bloomFolder.add( _this.bloomPass, 'enabled', true );
-        bloomFolder.open();
+        // const bloomFolder = gui.addFolder('Bloom')
+        // bloomFolder.add(_this.bloomPass, 'threshold', 0,1).step(0.1);
+        // bloomFolder.add(_this.bloomPass, 'strength', 0,10).step(0.1);
+        // bloomFolder.add(_this.bloomPass, 'radius', 0,10).step(0.1);
+        // bloomFolder.add( _this.bloomPass, 'enabled', true );
+        // bloomFolder.open();
         gui.close();
     }
 
@@ -323,7 +313,7 @@ export class SolarSystem {
         this.sunLight.add(this.lensflare);
     }
 
-    public renderSolarSystem() {
+    public render() {
         if (this.solarSystem.visible) {
 
             let pivot: Object3D;
@@ -348,8 +338,6 @@ export class SolarSystem {
                 }
             }
         }
-        this.composer.render();
-        this.renderer.clearDepth();
     }
 
     public toggleSolarSystem() {
