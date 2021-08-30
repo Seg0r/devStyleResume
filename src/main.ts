@@ -2,7 +2,7 @@ import './style.css'
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import { GreetingBox } from './GreetingBox'
-//import Stats from 'stats.js'
+import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight } from 'three';
@@ -18,14 +18,14 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 
 
 enum AllLayers{
-    solarSystem=1,
+    stars=1,
     universe,
-    stars
+    solarSystem
 }
 
 //Scene
 const scene: Scene = new Scene();
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
 camera.layers.enable(0);
 camera.layers.enable(AllLayers.solarSystem);
 camera.layers.enable(AllLayers.universe);
@@ -35,7 +35,10 @@ const cameraPivot = new Object3D();
 
 //Renderer
 const renderer = new WebGLRenderer({
-    canvas: document.querySelector('#bg') as HTMLCanvasElement
+    canvas: document.querySelector('#bg') as HTMLCanvasElement,
+    alpha: false,
+    stencil: false,
+    powerPreference: "high-performance"
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -44,9 +47,9 @@ const renderPass = new RenderPass( scene, camera );
 //renderer.toneMapping = THREE.ReinhardToneMapping;
 //renderer.toneMapping = THREE.CineonToneMapping;
 
-//  const stats = new Stats();
-// stats.showPanel( 0 );
-// document.querySelector('#main')!.appendChild( stats.dom ); 
+const stats = new Stats();
+stats.showPanel( 0 );
+document.querySelector('#main')!.appendChild( stats.dom ); 
 
 //GreetingBox
 //const box = new GreetingBox();
@@ -208,6 +211,8 @@ window.addEventListener('resize', onWindowResize, false);
 
 
 renderer.autoClear = false;
+var timer ;
+const vector3 = new Vector3();
 
 //animate loop
 function animate() {
@@ -227,20 +232,23 @@ function animate() {
     //GreetingBox.updateTweens();
     TWEEN.update()
     controls.update(); 
-    //stats.update();
+    stats.update();
 
 
     //render scene
     renderer.clear();
+    
     universe.render();
     solarSystem.renderSolarSystem();
-    stars.render();
-    //renderer.render(scene,camera)
+    //stars.render();
+    
+    
+    renderer.render(scene,camera)
     
 
-    var timer = new Date().getTime()*0.0001; 
-    camera.position.add(new Vector3(Math.cos( timer )*0.2,0,0));
-    camera.position.add(new Vector3(0,Math.sin( timer )*0.1,0));
+    timer = new Date().getTime()*0.0005;
+    camera.position.add(new Vector3(Math.cos( timer )*0.1,0,0));
+    camera.position.add(new Vector3(0,Math.sin( timer )*0.2,0));
     camera.lookAt(solarCenter);
 }
 animate();

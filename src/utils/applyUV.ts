@@ -8,7 +8,7 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
 
     // geom.removeAttribute('uv');
     if (geom.attributes.uv === undefined) {
-        geom.addAttribute('uv', new THREE.Float32BufferAttribute(coords, 2));
+        geom.setAttribute('uv', new THREE.Float32BufferAttribute(coords, 2));
     }
 
     //maps 3 verts of 1 face on the better side of the cube

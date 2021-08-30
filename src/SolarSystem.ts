@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Quaternion, Scene, SphereGeometry, TextureLoader, Vector3 } from "three";
+import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Quaternion, Scene, SphereBufferGeometry, SphereGeometry, TextureLoader, Vector, Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
@@ -20,6 +20,9 @@ const alpha2=0.4;
 const beta1=1.3;
 const beta2=-0.8;
 
+const metalness=0;
+const roughness=1;
+
 const alphaDist=1.2;
 const betaDist=1.4;
 
@@ -30,6 +33,15 @@ const bloomThreshold=0.9;
 const bloomStrength=1;
 const bloomRadius=2;
 
+
+interface Options  {
+    alpha1: number,
+    alpha2: number,
+    beta1: number,
+    beta2: number,
+    metalness: number,
+    roughness: number
+}
 
 export class SolarSystem {
 
@@ -48,6 +60,7 @@ export class SolarSystem {
     private sunLightDecay: number = sunLightDecay;
     visible: Boolean = false;
     private lensflare: Lensflare;
+    vector3:Vector3;
 
     //postprocessing
     composer: EffectComposer;
@@ -55,9 +68,19 @@ export class SolarSystem {
     bloomPass: UnrealBloomPass;
     bloomPassToggle: boolean = true;
 
+    options: Options  =  {
+        alpha1:alpha1,
+        alpha2: alpha2,
+        beta1: beta1,
+        beta2: beta2,
+        metalness: metalness,
+        roughness: roughness
+    } 
+
     public constructor(center: Vector3, size: number, count: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass) {
 
         this.solarSystem = new Group();
+        this.vector3 = new Vector3();
 
         this.bornOrbiters(count, center, size);
 
@@ -66,8 +89,8 @@ export class SolarSystem {
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size,alpha1,alpha2,alphaDist);
-        this.bornMoons(count*1.2, center, size,beta1,beta2,betaDist);        
+        this.bornMoons(count, center, size,this.options,this.options.alpha1,this.options.alpha2,alphaDist);
+        this.bornMoons(count*1.2, center, size,this.options,this.options.beta1,this.options.beta2,betaDist);        
 
         this.renderer=renderer;
 
@@ -86,67 +109,55 @@ export class SolarSystem {
 
     createGUI(center: Vector3, size: number, count: number) {
 
-        const options = {
-            sunLightStrength: sunLightStrength,
-            sunLightDecay: sunLightDecay,
-            alpha1: alpha1,
+
+        var _this = this;
+        const options: Options =  {
+            alpha1:alpha1,
             alpha2: alpha2,
             beta1: beta1,
             beta2: beta2,
-            threshold: bloomThreshold,
-            strength: bloomStrength,
-            radius:bloomRadius,
-            bloomToggle: true
-        }
-        var _this = this;
+            metalness: metalness,
+            roughness: roughness
+        } 
 
         const gui = new GUI()
         const lightFolder = gui.addFolder('Lights')
-        lightFolder.add(options, 'sunLightStrength', 0,200).onChange( function () {
-            _this.sunLight.intensity = options.sunLightStrength;
-        } );
-        lightFolder.add(options, 'sunLightDecay', 0,10).onChange( function () {
-            _this.sunLight.decay = options.sunLightDecay;
-        } );
+        lightFolder.add(_this.sunLight, 'intensity', 0,200);
+        lightFolder.add(_this.sunLight, 'decay', 0,10);
         lightFolder.open()
         const moonFolder = gui.addFolder('Moons')
         moonFolder.add(options, 'alpha1', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+            _this.reBornMoons(count,center, size, options);
         } );
         moonFolder.add(options, 'alpha2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+            _this.reBornMoons(count,center, size, options);
         } );
         moonFolder.add(options, 'beta1', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+            _this.reBornMoons(count,center, size, options);
         } );
         moonFolder.add(options, 'beta2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options.alpha1,options.alpha2, options.beta1,options.beta2);
+            _this.reBornMoons(count,center, size, options);
+        } );
+        moonFolder.add(options, 'beta2', -3,3).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options);
+        } );
+        moonFolder.add(options, 'roughness', 0,1).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options);
+        } );
+        moonFolder.add(options, 'metalness', 0,1).step(0.1).onChange( function () {
+            _this.reBornMoons(count,center, size, options);
         } );
         moonFolder.open();
         const bloomFolder = gui.addFolder('Bloom')
-        bloomFolder.add(options, 'threshold', 0,1).step(0.1).onChange( function ( value ) {
-
-            _this.bloomPass.threshold = Number( value );
-
-        } );
-        bloomFolder.add(options, 'strength', 0,10).step(0.1).onChange( function ( value ) {
-
-            _this.bloomPass.strength = Number( value );
-
-        } );
-        bloomFolder.add(options, 'radius', 0,10).step(0.1).onChange( function ( value ) {
-
-            _this.bloomPass.radius = Number( value );
-
-        } );
-        bloomFolder.add( options, 'bloomToggle', true ).onChange( function ( value ) {
-
-            _this.bloomPass.enabled=value;
-        } );
+        bloomFolder.add(_this.bloomPass, 'threshold', 0,1).step(0.1);
+        bloomFolder.add(_this.bloomPass, 'strength', 0,10).step(0.1);
+        bloomFolder.add(_this.bloomPass, 'radius', 0,10).step(0.1);
+        bloomFolder.add( _this.bloomPass, 'enabled', true );
         bloomFolder.open();
+        gui.close();
     }
 
-    public reBornMoons(count: number, center: THREE.Vector3, size: number, alphaRot1:number , alphaRot2:number , betaRot1:number, betaRot2:number ) {
+    public reBornMoons(count: number, center: THREE.Vector3, size: number, options: Options   ) {
 
         this.moonSpeeds = [];
         this.moonPivots= [];
@@ -155,11 +166,11 @@ export class SolarSystem {
         this.orbiterPivots.forEach(orb=>this.solarSystem.add(orb));
         
 
-        this.bornMoons(count, center, size,alphaRot1,alphaRot2,alphaDist);
-        this.bornMoons(count, center, size,betaRot1,betaRot2,betaDist);
+        this.bornMoons(count, center, size,options,options.alpha1,options.alpha2,alphaDist);
+        this.bornMoons(count, center, size,options,options.beta1,options.beta2,betaDist);
     }
 
-    public bornMoons(count: number, center: THREE.Vector3, size: number, alphaRot:number , betaRot:number, distance: number ) {
+    public bornMoons(count: number, center: THREE.Vector3, size: number,options:Options, alphaRot:number , betaRot:number, distance: number ) {
 
         let geometry: ConvexGeometry;
         let material: Material;
@@ -169,12 +180,14 @@ export class SolarSystem {
             geometry = this.generateGeometry(size / 15);
 
             const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
-            stoneTexture.wrapS = THREE.MirroredRepeatWrapping;
-            stoneTexture.wrapT = THREE.MirroredRepeatWrapping;
+            stoneTexture.wrapS = THREE.RepeatWrapping;
+            stoneTexture.wrapT = THREE.RepeatWrapping;
             const stoneNormalMap = new THREE.TextureLoader().load('assets/moons/stoneNormalMap.jpg');
             material = new THREE.MeshStandardMaterial({
                 map: stoneTexture,
-                normalMap:stoneNormalMap
+                normalMap:stoneNormalMap,
+                roughness: options.roughness,
+                metalness: options.metalness
             });
             geometry.computeBoundingBox();
             if (geometry.boundingBox) {
@@ -246,7 +259,7 @@ export class SolarSystem {
 
     private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
 
-        const geometry = new SphereGeometry(0.2, 32, 16);
+        const geometry = new SphereBufferGeometry(0.2, 32, 16);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
         const radius = size /2;
 
@@ -313,20 +326,22 @@ export class SolarSystem {
     public renderSolarSystem() {
         if (this.solarSystem.visible) {
 
-            this.sunLight
+            let pivot: Object3D;
+            let moon: THREE.Mesh;
+            let vector3: Vector3 = new Vector3();
 
             //const timer = 0.0001 * Date.now();
             for (let i = 0, il = this.orbiterPivots.length; i < il; i++) {
-                const pivot = this.orbiterPivots[i];
+                pivot = this.orbiterPivots[i];
                 pivot.rotateY(this.orbiterSpeeds[i] * 0.015);
-                pivot.rotateOnWorldAxis(new Vector3(0, 0, 1), 0.01);
-                pivot.rotateOnWorldAxis(new Vector3(1, 0, 0), 0.005);
+                pivot.rotateOnWorldAxis(vector3.set(0, 0, 1), 0.01);
+                pivot.rotateOnWorldAxis(vector3.set(1, 0, 0), 0.005);
             }
 
             for (let i = 0, il = this.moonPivots.length; i < il; i++) {
                 this.moonPivots[i].rotateY(0.001);
                 if (i <= this.moons.length) {
-                    const moon = this.moons[i];
+                    moon = this.moons[i];
                     moon.rotateX(this.moonSpeeds[i]*0.01);
                     moon.rotateY(this.moonSpeeds[i]*0.01);
                     moon.rotateZ(this.moonSpeeds[i]*0.01);
@@ -334,6 +349,7 @@ export class SolarSystem {
             }
         }
         this.composer.render();
+        this.renderer.clearDepth();
     }
 
     public toggleSolarSystem() {

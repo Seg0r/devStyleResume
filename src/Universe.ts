@@ -27,7 +27,7 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.5, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('blue_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.5, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('blue_back6' + fileFormat) }),
         ];
-        let geometry = new THREE.BoxGeometry(univerSize, univerSize, univerSize);
+        let geometry = new THREE.BoxBufferGeometry(univerSize, univerSize, univerSize);
         this.blueNebula = new THREE.Mesh(geometry, materialArray);
 
         materialArray = [
@@ -38,7 +38,7 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('pink_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('pink_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxGeometry(univerSize*2, univerSize*2, univerSize*2);
+        geometry = new THREE.BoxBufferGeometry(univerSize*2, univerSize*2, univerSize*2);
         this.pinkNebula = new THREE.Mesh(geometry, materialArray);
 
         materialArray = [
@@ -49,7 +49,7 @@ export class Universe {
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('yellow_front5' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('yellow_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxGeometry(univerSize*3, univerSize*3, univerSize*3);
+        geometry = new THREE.BoxBufferGeometry(univerSize*3, univerSize*3, univerSize*3);
         this.yellowNebula = new THREE.Mesh(geometry, materialArray);
 
 
