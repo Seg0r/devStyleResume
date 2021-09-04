@@ -51,7 +51,7 @@ export class Stars {
         const material = new THREE.PointsMaterial({ color: 0xffffff, sizeAttenuation: false });
         buffGeometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 3));
         this.stars = new THREE.Points(buffGeometry, material);
-        //this.stars.layers.set(starsLayer);
+        this.stars.layers.enable(starsLayer);
         
 
         this.composer = new EffectComposer( renderer );
@@ -60,7 +60,9 @@ export class Stars {
         this.afterimagePass = new AfterimagePass(0.9);
         this.composer.addPass( this.afterimagePass );
 
-        //this.createGUI();
+        //this.composer.renderToScreen = false;
+
+        this.createGUI();
 
     }
 
@@ -77,11 +79,11 @@ export class Stars {
 
     public render(){
   
-        //this.camera.layers.set(this.starsLayer);
+        this.camera.layers.set(this.starsLayer);
         this.composer.render();
         
-        //this.renderer.clearDepth();
-        //this.camera.layers.set(0);
+        this.renderer.clearDepth();
+        this.camera.layers.set(0);
     }   
 
 }

@@ -11,7 +11,6 @@ import { SolarSystem } from './SolarSystem';
 // @ts-ignore
 //import * as POSTPROCESSING from "postprocessing";
 
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
@@ -40,17 +39,16 @@ const renderer = new WebGLRenderer({
     canvas: document.querySelector('#bg') as HTMLCanvasElement,
     alpha: false,
     stencil: false,
-    powerPreference: "high-performance"
+    powerPreference: "high-performance",
+    antialias: true
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const renderPass = new RenderPass( scene, camera );
-const composer = new EffectComposer( renderer );
-        
-composer.addPass( renderPass );
-const antiAA = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
-composer.addPass( antiAA );
+renderPass.renderToScreen = true;
+//renderPass.clear = false;
+renderPass.clearDepth = false;
 
 
 //renderer.toneMapping = THREE.ReinhardToneMapping;
@@ -214,7 +212,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-
 }
 window.addEventListener('resize', onWindowResize, false);
 
@@ -251,7 +248,7 @@ function animate() {
     solarSystem.render();
     stars.render();
     
-    composer.render();
+    renderer.render(scene,camera);
     
 
     timer = new Date().getTime()*0.0005;
