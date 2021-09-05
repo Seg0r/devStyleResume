@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { Camera, Scene } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 export class Universe {
 
@@ -10,7 +9,7 @@ export class Universe {
     yellowNebula: THREE.Mesh;
     
 
-    constructor(univerSize: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass) {
+    constructor(univerSize: number) {
 
         const fileFormat = ".jpg";
         const loader = new THREE.TextureLoader();

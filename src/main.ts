@@ -14,7 +14,6 @@ import { SolarSystem } from './SolarSystem';
 import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 
 
 
@@ -26,6 +25,7 @@ enum AllLayers{
 
 //Scene
 const scene: Scene = new Scene();
+//scene.background = new THREE.Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
 camera.layers.enable(0);
 camera.layers.enable(AllLayers.solarSystem);
@@ -40,15 +40,14 @@ const renderer = new WebGLRenderer({
     alpha: false,
     stencil: false,
     powerPreference: "high-performance",
-    antialias: true
+    antialias: false,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const renderPass = new RenderPass( scene, camera );
-renderPass.renderToScreen = true;
-//renderPass.clear = false;
-renderPass.clearDepth = false;
+
+
 
 
 //renderer.toneMapping = THREE.ReinhardToneMapping;
@@ -67,9 +66,8 @@ camera.position.z = 10;
 
 
 //Universe
-const universe = new Universe(2000,renderer,renderPass);
-universe.addNebulaToScene(scene);
-
+const universe = new Universe(2000);
+//universe.addNebulaToScene(scene);
 
 const stars = new Stars(2000,1000,AllLayers.stars,renderer,renderPass,camera);
 stars.addStarsToScene(scene);
@@ -79,7 +77,7 @@ stars.addStarsToScene(scene);
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSize: number = 200;
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
-solarSystem.addToScene(scene);
+//solarSystem.addToScene(scene);
 
 
 //Lights
@@ -89,6 +87,9 @@ pointLight.position.set(0, 0, 200);
 
 //Helpers
 const controls = new OrbitControls(camera, renderer.domElement);;
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
+controls.rotateSpeed = 0.5;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
@@ -96,8 +97,8 @@ const ambientLight = new THREE.AmbientLight(0xffffff,0.5);
 scene.add(ambientLight);
 //scene.add(pointLight);
 
-//const worldAxis = new AxesHelper(100);
-//scene.add(worldAxis);
+const worldAxis = new AxesHelper(100);
+scene.add(worldAxis);
 
 
 //Camera positions
@@ -188,9 +189,9 @@ scene.add(curveObject); */
 // }
 // document.body.onscroll = checkScroll;;
 
-solarSystem.toggleSolarSystem();
+//solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
-camera.position.copy(new Vector3(0,solarSize,solarSize * 4).add(solarCenter));
+camera.position.copy(new Vector3(solarSize * 4,solarSize,0));
 cameraPivot.add(camera);
 
 // camera.position.add(new Vector3(250, 250, 500));
@@ -219,6 +220,11 @@ window.addEventListener('resize', onWindowResize, false);
 renderer.autoClear = false;
 var timer ;
 const vector3 = new Vector3();
+let lastHorizontal = controls.getAzimuthalAngle();
+let lastVertical = controls.getPolarAngle();
+let horizontalFactor=0;
+let verticalFactor=0;
+stars.render(renderer,0.0001,0);
 
 //animate loop
 function animate() {
@@ -244,16 +250,29 @@ function animate() {
     //render scene
     renderer.clear();
     
-    universe.render();
-    solarSystem.render();
-    stars.render();
+    //universe.render();
+    //solarSystem.render();
+    horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
+    verticalFactor=(controls.getPolarAngle()-lastVertical);
+    
+    if(Math.abs(horizontalFactor)<0.0001 && Math.abs(verticalFactor)<0.0001)
+        stars.render(renderer,0.0001,0.0001);
+    else
+        stars.render(renderer,horizontalFactor,verticalFactor);
     
     renderer.render(scene,camera);
     
+    //tiltCamera();
 
+    lastHorizontal = controls.getAzimuthalAngle();
+    lastVertical = controls.getPolarAngle();
+}
+animate();
+
+
+function tiltCamera(){
     timer = new Date().getTime()*0.0005;
     camera.position.add(new Vector3(Math.cos( timer )*0.1,0,0));
     camera.position.add(new Vector3(0,Math.sin( timer )*0.2,0));
     camera.lookAt(solarCenter);
 }
-animate();

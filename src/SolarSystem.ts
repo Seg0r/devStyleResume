@@ -89,7 +89,7 @@ export class SolarSystem {
         this.bornMoons(count, center, size,this.options,this.options.alpha1,this.options.alpha2,alphaDist);
         this.bornMoons(count*1.2, center, size,this.options,this.options.beta1,this.options.beta2,betaDist);
 
-        this.createGUI(center, size, count);
+        //this.createGUI(center, size, count);
     }
 
     createGUI(center: Vector3, size: number, count: number) {
