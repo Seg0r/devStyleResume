@@ -5,7 +5,7 @@ import { GreetingBox } from './GreetingBox'
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera } from 'three';
 import { cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 // @ts-ignore
@@ -26,7 +26,9 @@ enum AllLayers{
 //Scene
 const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+//const camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 15000 );
+
 camera.layers.enable(0);
 camera.layers.enable(AllLayers.solarSystem);
 camera.layers.enable(AllLayers.universe);
@@ -40,10 +42,11 @@ const renderer = new WebGLRenderer({
     alpha: false,
     stencil: false,
     powerPreference: "high-performance",
-    antialias: false,
+    antialias: true
 });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.autoClear = false;
 
 const renderPass = new RenderPass( scene, camera );
 
@@ -66,10 +69,10 @@ camera.position.z = 10;
 
 
 //Universe
-const universe = new Universe(2000);
+const universe = new Universe(4000);
 //universe.addNebulaToScene(scene);
 
-const stars = new Stars(2000,1000,AllLayers.stars,renderer,renderPass,camera);
+const stars = new Stars(2000,200,AllLayers.stars,renderer,renderPass,camera,scene);
 stars.addStarsToScene(scene);
 
 
@@ -88,8 +91,8 @@ pointLight.position.set(0, 0, 200);
 //Helpers
 const controls = new OrbitControls(camera, renderer.domElement);;
 controls.enableDamping = true;
-controls.dampingFactor = 0.1;
-controls.rotateSpeed = 0.5;
+controls.dampingFactor = 0.05;
+controls.rotateSpeed = 0.2;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
@@ -98,7 +101,7 @@ scene.add(ambientLight);
 //scene.add(pointLight);
 
 const worldAxis = new AxesHelper(100);
-scene.add(worldAxis);
+//scene.add(worldAxis);
 
 
 //Camera positions
@@ -210,21 +213,21 @@ cameraPivot.add(camera);
 //resize callback
 function onWindowResize() {
 
-    camera.aspect = window.innerWidth / window.innerHeight;
+    //camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener('resize', onWindowResize, false);
 
 
-renderer.autoClear = false;
+
 var timer ;
 const vector3 = new Vector3();
 let lastHorizontal = controls.getAzimuthalAngle();
 let lastVertical = controls.getPolarAngle();
 let horizontalFactor=0;
 let verticalFactor=0;
-stars.render(renderer,0.0001,0);
+stars.render(renderer,0.0001,0,0.0001);
 
 //animate loop
 function animate() {
@@ -250,15 +253,13 @@ function animate() {
     //render scene
     renderer.clear();
     
-    //universe.render();
-    //solarSystem.render();
+    universe.render();
+    solarSystem.render();
     horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
     verticalFactor=(controls.getPolarAngle()-lastVertical);
-    
-    if(Math.abs(horizontalFactor)<0.0001 && Math.abs(verticalFactor)<0.0001)
-        stars.render(renderer,0.0001,0.0001);
-    else
-        stars.render(renderer,horizontalFactor,verticalFactor);
+    const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
+    if(scaleFactor>0.001)
+        stars.render(renderer,horizontalFactor,verticalFactor,scaleFactor);
     
     renderer.render(scene,camera);
     
