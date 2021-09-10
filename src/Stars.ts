@@ -25,8 +25,7 @@ const bloomRadius=0;
 interface MeshState{
     mesh:THREE.Mesh; 
     startRotation: number; 
-    distance: number; 
-    rotationTween:TWEEN.Tween<{ z: number }>|null;
+    distance: number;     
 }
 
 export class Stars {
@@ -42,6 +41,7 @@ export class Stars {
     composer: any;
     camera: THREE.Camera;
     projected: THREE.Mesh[] = [];
+    rotationTween:TWEEN.Tween<{ z: number }>|null;
 
     cameraRotation: Quaternion = new Quaternion();
     state:{
@@ -55,10 +55,11 @@ export class Stars {
     constructor(univerSize: number, starsCount: number, starsLayer: number, renderer: THREE.WebGLRenderer, renderPass: RenderPass, camera: Camera, scene: Scene) {
 
         this.starsLayer=starsLayer;
-        this.camera=camera
+        this.camera=camera;
         this.starsCount = starsCount;
-        this.cameraRotation.copy(this.camera.quaternion)
+        this.cameraRotation.copy(this.camera.quaternion);
         this.univerSize=univerSize*2;
+        this.rotationTween=null;
 
         const sizes = [];
         const material = new LineBasicMaterial({ color: 0xffffff,  linewidth: 1});
@@ -102,7 +103,7 @@ export class Stars {
             //mesh.layers.set(starsLayer);
 
             this.starsGroup.add(mesh);
-            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:mesh.position.distanceTo(center),rotationTween:null});
+            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:mesh.position.distanceTo(center)});
         }
 
         //this.composer = new EffectComposer( renderer );
@@ -165,7 +166,7 @@ export class Stars {
             this.timeout = true;
             const _this=this;
             this.calculateDrawRange(horizontalFactor,verticalFactor,scaleFactor);
-            setTimeout(function () { _this.timeout = false; }, 200);
+            setTimeout(function () { _this.timeout = false; }, 100);
          };
 
         //this.calculateDrawRange(horizontalFactor,verticalFactor,scaleFactor);
@@ -183,36 +184,54 @@ export class Stars {
         
         // @ts-ignore
         let rotationFactor = Math.tanh(verticalFactor/(horizontalFactor+0.000001));
+
+        console.log(verticalFactor,horizontalFactor,rotationFactor);
         if (scaleFactor<0.001)
              scaleFactor=0.001
-        for(let i=0; i < this.stars.length; i++){
-            //scaleFactor=scaleFactor*this.univerSize/Math.max(Math.abs(this.stars[i].mesh.position.y),100);
-            //let scaleFactor2=scaleFactor*(Math.abs(this.stars[i].mesh.position.x)+Math.abs(this.stars[i].mesh.position.z));
-            let scaleFactor2=scaleFactor*Math.pow(this.stars[i].distance,2)/500;
-            if(scaleFactor2>500)
-                scaleFactor2=500;
-            //this.stars[i].mesh.rotation.z = this.stars[i].startRotation + Math.PI/2 *(- rotationFactor);
-            this.setRotation(this.stars[i],this.stars[i].startRotation + Math.PI/2 *(- rotationFactor))
-            this.stars[i].mesh.scale.set(1+scaleFactor2,1,1);
-        }
+        this.tweenRotation(scaleFactor,rotationFactor);
+        //this.tweenScale(scaleFactor);
         this.cameraRotation.copy(this.camera.quaternion)
 
         
     }
 
+    lastCoords=0;
+    lastDest=0;
+    nextCoords=0;
 
-    setRotation(object: MeshState, destRotation:number){
-        if(object.rotationTween)
-            object.rotationTween.pause();
+    tweenRotation(scaleFactor:number,rotationFactor:number){
+        if(this.rotationTween)
+            this.rotationTween.pause();
 
-        let coords = {z: object.mesh.rotation.z};
+        let coords = {z: getTweenedValue(this.lastCoords,this.lastDest,50,200,TWEEN.Easing.Linear.None)};
+        this.lastCoords = coords.z;
+        //const destRotation = Math.PI/2 *(- rotationFactor);
+        const destRotation = Math.asin(rotationFactor);
+        this.lastDest=destRotation;
     
-        object.rotationTween = new TWEEN.Tween(coords)
+        this.rotationTween = new TWEEN.Tween(coords)
         .to({z: destRotation}, 200)
         .onUpdate((tween) => {
-            object.mesh.rotation.z=coords.z;
+            for(let i=0; i < this.stars.length; i++){
+                let scaleFactor2=scaleFactor*Math.pow(this.stars[i].distance,2)/500;
+                if(scaleFactor2>500)
+                    scaleFactor2=500;
+                this.stars[i].mesh.rotation.z = this.stars[i].startRotation + coords.z;
+                this.stars[i].mesh.scale.set(1+scaleFactor2,1,1);
+            }
         })
         .start();
+
+
     }
 
+    
+
+}
+
+function getTweenedValue(startVal:number , endVal:number, currentTime:number, totalTime:number, tweener:(amount: number) => number) {
+    var delta = endVal - startVal;
+    var percentComplete = currentTime/totalTime;
+
+    return tweener(percentComplete) * delta + startVal;
 }
