@@ -5,7 +5,7 @@ import { GreetingBox } from './GreetingBox'
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical } from 'three';
 import { cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
 import { SolarSystem } from './SolarSystem';
 // @ts-ignore
@@ -21,6 +21,10 @@ enum AllLayers{
     stars=1,
     universe,
     solarSystem
+}
+
+export interface Rot {
+    rot: number;
 }
 
 //Scene
@@ -225,9 +229,14 @@ var timer ;
 const vector3 = new Vector3();
 let lastHorizontal = controls.getAzimuthalAngle();
 let lastVertical = controls.getPolarAngle();
+let lastAngle = 0;
 let horizontalFactor=0;
 let verticalFactor=0;
-stars.render(renderer,0.0001,0,0.0001);
+//stars.render(renderer,0.0001,0,0.0001,new Spherical(1,0,0));
+let rotationVector = new Vector2();
+let rotationVectorSpherical = new Spherical();
+let sync=false;
+let rotationChange:Rot={rot:0};
 
 //animate loop
 function animate() {
@@ -257,9 +266,21 @@ function animate() {
     solarSystem.render();
     horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
     verticalFactor=(controls.getPolarAngle()-lastVertical);
+
+    rotationVector.set(horizontalFactor,verticalFactor).normalize();
+    rotationVectorSpherical.set(1,horizontalFactor,verticalFactor)
+    const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
+
+    rotationChange.rot = rotationAngle;
+    //rotationChange.rot = rotationAngle;
+
     const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
-    if(scaleFactor>0.001)
-        stars.render(renderer,horizontalFactor,verticalFactor,scaleFactor);
+    if(scaleFactor>0.001){
+        if(rotationChange.rot<0.1 && rotationChange.rot>-0.1)
+            sync=true;
+        console.log(rotationChange.rot * (180/Math.PI),rotationAngle* (180/Math.PI),lastAngle);
+        stars.render(renderer,horizontalFactor,verticalFactor,scaleFactor,rotationChange,sync);
+    }
     
     renderer.render(scene,camera);
     
@@ -267,6 +288,8 @@ function animate() {
 
     lastHorizontal = controls.getAzimuthalAngle();
     lastVertical = controls.getPolarAngle();
+    lastAngle = rotationAngle;
+    sync=false;
 }
 animate();
 
