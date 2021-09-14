@@ -23,21 +23,18 @@ enum AllLayers{
     solarSystem
 }
 
-export interface Rot {
-    rot: number;
-}
+const solarSize: number = 200;
+const universeSize = 4000;
 
 //Scene
 const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-//const camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 15000 );
 
 camera.layers.enable(0);
 camera.layers.enable(AllLayers.solarSystem);
 camera.layers.enable(AllLayers.universe);
 camera.layers.enable(AllLayers.stars);
-const cameraPivot = new Object3D();
 
 
 //Renderer
@@ -54,9 +51,6 @@ renderer.autoClear = false;
 
 const renderPass = new RenderPass( scene, camera );
 
-
-
-
 //renderer.toneMapping = THREE.ReinhardToneMapping;
 //renderer.toneMapping = THREE.CineonToneMapping;
 
@@ -72,19 +66,20 @@ document.querySelector('#main')!.appendChild( stats.dom );
 camera.position.z = 10;
 
 
-//Universe
-const universe = new Universe(4000);
-//universe.addNebulaToScene(scene);
 
-const stars = new Stars(2000,200,AllLayers.stars,renderer,renderPass,camera,scene);
+//Universe
+const universe = new Universe(universeSize);
+universe.addNebulaToScene(scene);
+
+const stars = new Stars(universeSize,universeSize/10,AllLayers.stars,renderer,renderPass,camera,scene);
 stars.addStarsToScene(scene);
 
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
-const solarSize: number = 200;
+
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
-//solarSystem.addToScene(scene);
+solarSystem.addToScene(scene);
 
 
 //Lights
@@ -196,10 +191,9 @@ scene.add(curveObject); */
 // }
 // document.body.onscroll = checkScroll;;
 
-//solarSystem.toggleSolarSystem();
+solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
 camera.position.copy(new Vector3(solarSize * 4,solarSize,0));
-cameraPivot.add(camera);
 
 // camera.position.add(new Vector3(250, 250, 500));
 
@@ -232,11 +226,7 @@ let lastVertical = controls.getPolarAngle();
 let lastAngle = 0;
 let horizontalFactor=0;
 let verticalFactor=0;
-//stars.render(renderer,0.0001,0,0.0001,new Spherical(1,0,0));
 let rotationVector = new Vector2();
-let rotationVectorSpherical = new Spherical();
-let sync=false;
-let rotationChange:Rot={rot:0};
 
 //animate loop
 function animate() {
@@ -267,19 +257,12 @@ function animate() {
     horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
     verticalFactor=(controls.getPolarAngle()-lastVertical);
 
-    rotationVector.set(horizontalFactor,verticalFactor).normalize();
-    rotationVectorSpherical.set(1,horizontalFactor,verticalFactor)
     const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
 
-    rotationChange.rot = rotationAngle;
-    //rotationChange.rot = rotationAngle;
-
     const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
-    if(scaleFactor>0.001){
-        if(rotationChange.rot<0.1 && rotationChange.rot>-0.1)
-            sync=true;
-        console.log(rotationChange.rot * (180/Math.PI),rotationAngle* (180/Math.PI),lastAngle);
-        stars.render(renderer,horizontalFactor,verticalFactor,scaleFactor,rotationChange,sync);
+    if(scaleFactor>0.001 && scaleFactor < 1){
+        console.log(rotationAngle* (180/Math.PI),scaleFactor);
+        stars.render(renderer,scaleFactor,rotationAngle);
     }
     
     renderer.render(scene,camera);
@@ -288,8 +271,6 @@ function animate() {
 
     lastHorizontal = controls.getAzimuthalAngle();
     lastVertical = controls.getPolarAngle();
-    lastAngle = rotationAngle;
-    sync=false;
 }
 animate();
 
