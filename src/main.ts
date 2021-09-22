@@ -7,13 +7,14 @@ import Stats from 'stats.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical } from 'three';
 import { cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
-import { SolarSystem } from './SolarSystem';
+import { DirectionAngles, SolarSystem } from './SolarSystem';
 // @ts-ignore
 //import * as POSTPROCESSING from "postprocessing";
 
 import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { MagneticField } from './MagneticField';
 
 
 
@@ -22,6 +23,21 @@ enum AllLayers{
     universe,
     solarSystem
 }
+
+
+
+
+const alpha1=0.3;
+const alpha2=0.4;
+const beta1=1.3;
+const beta2=-0.8;
+
+const initAngles: DirectionAngles  =  {
+    alpha1:alpha1,
+    alpha2: alpha2,
+    beta1: beta1,
+    beta2: beta2
+} 
 
 const solarSize: number = 200;
 const universeSize = 4000;
@@ -69,17 +85,22 @@ camera.position.z = 10;
 
 //Universe
 const universe = new Universe(universeSize);
-universe.addNebulaToScene(scene);
+//universe.addNebulaToScene(scene);
 
+
+//Stars
 const stars = new Stars(universeSize,universeSize/10,AllLayers.stars,renderer,renderPass,camera,scene);
 stars.addStarsToScene(scene);
 
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
-
-const solarSystem = new SolarSystem(solarCenter, solarSize, 800);
+const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
 solarSystem.addToScene(scene);
+
+//Magnetic field
+const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles);
+magneticField.addToScene(scene);
 
 
 //Lights

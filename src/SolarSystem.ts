@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Box3, BufferGeometry, DodecahedronGeometry, Group, Light, LineSegments, Material, Matrix4, Mesh, MeshToonMaterial, Object3D, PointLight, Quaternion, Scene, SphereBufferGeometry, SphereGeometry, TextureLoader, Vector, Vector3 } from "three";
+import {   Group,   Material,  Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
@@ -8,12 +8,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { gaussianRandom } from './utils/math';
 
-
-enum MoonOrbits {
-    First,
-    Second
-}
 
 const alpha1=0.3;
 const alpha2=0.4;
@@ -33,6 +29,12 @@ const bloomThreshold=0.9;
 const bloomStrength=1;
 const bloomRadius=2;
 
+export interface DirectionAngles  {
+    alpha1: number,
+    alpha2: number,
+    beta1: number,
+    beta2: number
+}
 
 interface Options  {
     alpha1: number,
@@ -74,20 +76,20 @@ export class SolarSystem {
         roughness: roughness
     } 
 
-    public constructor(center: Vector3, size: number, count: number) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
 
-        this.bornOrbiters(count, center, size);
+        //this.bornOrbiters(count, center, size);
 
         this.sunLight = new PointLight(0xfe9b14, this.sunLightStrength, size*3, this.sunLightDecay);
         this.sunLight.position.copy(center);
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size,this.options,this.options.alpha1,this.options.alpha2,alphaDist);
-        this.bornMoons(count*1.2, center, size,this.options,this.options.beta1,this.options.beta2,betaDist);
+        this.bornMoons(count, center, size,this.options,initAngles.alpha1,initAngles.alpha2,alphaDist);
+        this.bornMoons(count*1.2, center, size,this.options,initAngles.beta1,initAngles.beta2,betaDist);
 
         //this.createGUI(center, size, count);
     }
@@ -249,7 +251,7 @@ export class SolarSystem {
 
     private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
 
-        const geometry = new SphereBufferGeometry(0.2, 32, 16);
+        const geometry = new SphereBufferGeometry(0.2, 4, 3);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
         const radius = size /2;
 
@@ -269,14 +271,14 @@ export class SolarSystem {
 
             const orbitLevel = Math.random();
             if (orbitLevel > 0.5) {
-                mesh.position.x = this.gaussianRandom(0, radius * 0.2);
+                mesh.position.x = gaussianRandom(0, radius * 0.2);
 
             } else if (orbitLevel < 0.5 && orbitLevel > 0.1) {
 
-                mesh.position.x = this.gaussianRandom(radius * 0.2, radius * 0.7);
+                mesh.position.x = gaussianRandom(radius * 0.2, radius * 0.7);
             }
             else {
-                mesh.position.x = this.gaussianRandom(radius * 0.7, radius);
+                mesh.position.x = gaussianRandom(radius * 0.7, radius);
             }
 
             mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 5 + 1;
@@ -292,19 +294,6 @@ export class SolarSystem {
         }
     }
 
-    private gaussianRand(): number {
-        var rand = 0;
-        const factor = 4;
-        for (var i = 0; i < factor; i += 1) {
-            rand += Math.random();
-        }
-
-        return rand / factor;
-    }
-
-    private gaussianRandom(start: number, end: number): number {
-        return Math.floor(start + this.gaussianRand() * (end - start + 1));
-    }
 
     public addToScene(scene: Scene) {
         this.solarSystem.visible = false;
