@@ -285,6 +285,8 @@ function animate() {
         console.log(rotationAngle* (180/Math.PI),scaleFactor);
         stars.render(renderer,scaleFactor,rotationAngle);
     }
+
+    magneticField.render();
     
     renderer.render(scene,camera);
     
