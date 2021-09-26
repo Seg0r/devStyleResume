@@ -20,4 +20,33 @@
 
 
   </body>
+
+
+  <!-- ---------------- Custom Shader Code ------------------------ -->
+<script id="vertexShader" type="x-shader/x-vertex">
+  varying vec3 vNormal;
+  void main() 
+  {
+      vNormal = normalize( normalMatrix * normal );
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  }
+  </script>
+  
+  <!-- fragment shader a.k.a. pixel shader -->
+  <script id="fragmentShader" type="x-shader/x-vertex"> 
+  varying vec3 vNormal;
+  void main() 
+  {
+    float intensity = pow( 0.3 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 1.0 ); 
+      gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 ) * intensity;
+  }
+  </script>
+  
+  <!-- ----------------------------------------------------------- 
+  /*
+  Three.js "tutorials by example"
+  Author: Lee Stemkoski
+  Date: June 2013 (three.js v56)
+ */-->
+ 
 </html>

@@ -99,7 +99,7 @@ const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
 solarSystem.addToScene(scene);
 
 //Magnetic field
-const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles);
+const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, scene, camera);
 magneticField.addToScene(scene);
 
 
@@ -286,9 +286,11 @@ function animate() {
         stars.render(renderer,scaleFactor,rotationAngle);
     }
 
+    //renderer.render(scene,camera);
+    //renderer.clearDepth();
     magneticField.render();
     
-    renderer.render(scene,camera);
+    
     
     //tiltCamera();
 
