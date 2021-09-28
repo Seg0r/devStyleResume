@@ -1,6 +1,6 @@
 
 import * as THREE from 'three';
-import {Camera, CatmullRomCurve3, Line, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, Scene, Sprite, Vector3 } from 'three';
+import {AdditiveBlending, Camera, CatmullRomCurve3, Line, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshToonMaterial, MultiplyBlending, NoBlending, NormalBlending, Scene, Sprite, SubtractiveBlending, TubeBufferGeometry, Vector3 } from 'three';
 import { DirectionAngles } from './SolarSystem';
 import { gaussianRandom } from './utils/math';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -115,27 +115,7 @@ export class MagneticField {
 
         const MAX_POINTS = 200;
 
-        const lineMaterial = new THREE.LineBasicMaterial({
-            transparent: true,
-            opacity: 0.5,
-            color: 0x0099ff,
-            linewidth: 5
-       });
-
-        const matLine = new LineMaterial( {
-            color: 0x0099ff,
-            linewidth: 20, // in world units with size attenuation, pixels otherwise
-            //vertexColors: true,
-            transparent: true,
-
-            dashed: false,
-            //alphaToCoverage: true,
-        } );
-        matLine.resolution.set( window.innerWidth, window.innerHeight );
-        matLine.uniforms.opacity.value = 0.1;
-
-        const  material = new MeshBasicMaterial({ color: 0x0099ff , transparent: true,opacity: 0.5});
-
+        
 
         var particleTexture = new THREE.TextureLoader().load( 'assets/spark.png' );
         var spriteMaterial = new THREE.SpriteMaterial( { 
@@ -143,6 +123,8 @@ export class MagneticField {
             depthTest: false,
             color: 0xb5deff});
         
+        const  material = new MeshBasicMaterial({ color: 0x0099ff , transparent: true,opacity: 0.1, blending: NormalBlending});
+
         
         for ( let i = 0; i < count; i ++ ) {
 
@@ -174,15 +156,11 @@ export class MagneticField {
 
             const curve = new CatmullRomCurve3(points3,true);
             const points = curve.getPoints( 20 );
-            //const geometry = new THREE.BufferGeometry().setFromPoints( points );
-            //const fieldLines = new THREE.Line(geometry, lineMaterial);
-            const geometry = new LineGeometry()
-            //geometry.setFromPoints( points );
-            geometry.setPositions( positions );
-            const fieldLines = new Line2(geometry, matLine);
-            fieldLines.computeLineDistances();
-            // const geometry = new THREE.TubeBufferGeometry(curve,64,10,10,true)
-            // const fieldLines =  new THREE.Mesh( geometry, material );
+``
+            const geometry = new TubeBufferGeometry(curve,64,10,10,true);
+            const fieldLines =  new THREE.Mesh( geometry, material );
+
+            fieldLines.geometry.computeVertexNormals();
             fieldLines.add(mesh);
 
             const rot = Math.random()*Math.PI*2 - Math.PI;
