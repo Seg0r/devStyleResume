@@ -85,7 +85,7 @@ camera.position.z = 10;
 
 //Universe
 const universe = new Universe(universeSize);
-//universe.addNebulaToScene(scene);
+universe.addNebulaToScene(scene);
 
 
 //Stars
@@ -286,9 +286,9 @@ function animate() {
         stars.render(renderer,scaleFactor,rotationAngle);
     }
 
-    //renderer.render(scene,camera);
-    //renderer.clearDepth();
     magneticField.render();
+    //renderer.render(scene,camera);
+    
     
     
     

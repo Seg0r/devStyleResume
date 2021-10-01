@@ -81,7 +81,7 @@ export class SolarSystem {
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
 
-        //this.bornOrbiters(count, center, size);
+        this.bornOrbiters(count, center, size);
 
         this.sunLight = new PointLight(0xfe9b14, this.sunLightStrength, size*3, this.sunLightDecay);
         this.sunLight.position.copy(center);
