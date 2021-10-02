@@ -5,7 +5,7 @@ import { ShaderMaterial } from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
-import { vertexShader, fragmentShader } from "./shader";
+import { vertexShader, fragmentShader } from "./passShader";
 
 export const createFinalPass = (
   bloomComposer:EffectComposer

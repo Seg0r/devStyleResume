@@ -85,7 +85,7 @@ camera.position.z = 10;
 
 //Universe
 const universe = new Universe(universeSize);
-universe.addNebulaToScene(scene);
+// universe.addNebulaToScene(scene);
 
 
 //Stars
@@ -99,7 +99,7 @@ const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
 solarSystem.addToScene(scene);
 
 //Magnetic field
-const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, scene, camera);
+const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, camera);
 magneticField.addToScene(scene);
 
 
@@ -232,7 +232,7 @@ camera.position.copy(new Vector3(solarSize * 4,solarSize,0));
 //resize callback
 function onWindowResize() {
 
-    //camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
@@ -282,12 +282,13 @@ function animate() {
 
     const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
     if(scaleFactor>0.001 && scaleFactor < 1){
-        console.log(rotationAngle* (180/Math.PI),scaleFactor);
+        //console.log(rotationAngle* (180/Math.PI),scaleFactor);
         stars.render(renderer,scaleFactor,rotationAngle);
     }
 
     magneticField.render();
-    //renderer.render(scene,camera);
+    renderer.clearDepth();
+    renderer.render(scene,camera);
     
     
     

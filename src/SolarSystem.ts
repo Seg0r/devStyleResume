@@ -1,15 +1,11 @@
 import * as THREE from 'three';
-import {   Group,   Material,  Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
+import {   Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import * as UTILS from './utils/applyUV'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { gaussianRandom } from './utils/math';
-
+import { vertexShader, fragmentShader } from "./utils/lavaShader";
 
 const alpha1=0.3;
 const alpha2=0.4;
@@ -75,6 +71,13 @@ export class SolarSystem {
         metalness: metalness,
         roughness: roughness
     } 
+    customUniforms!: { 
+        baseTexture: { type: string; value: THREE.Texture; }; 
+        baseSpeed: { type: string; value: number; }; 
+        noiseTexture: { type: string; value: THREE.Texture; }; 
+        noiseScale: { type: string; value: number; }; 
+        alpha: { type: string; value: number; }; 
+        time: { type: string; value: number; }; };
 
     public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles) {
 
@@ -165,22 +168,48 @@ export class SolarSystem {
     public bornMoons(count: number, center: THREE.Vector3, size: number,options:Options, alphaRot:number , betaRot:number, distance: number ) {
 
         let geometry: ConvexGeometry;
-        let material: Material;
 
-        for (let i = 0; i < count / 10; i++) {
-
-            geometry = this.generateGeometry(size / 15);
-
-            const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
+        const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
             stoneTexture.wrapS = THREE.RepeatWrapping;
             stoneTexture.wrapT = THREE.RepeatWrapping;
             const stoneNormalMap = new THREE.TextureLoader().load('assets/moons/stoneNormalMap.jpg');
-            material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshStandardMaterial({
                 map: stoneTexture,
                 normalMap:stoneNormalMap,
                 roughness: options.roughness,
                 metalness: options.metalness
             });
+
+
+
+        // var noiseTexture = new THREE.TextureLoader().load('assets/moons/cloud.png' );
+        // noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
+            
+        // var lavaTexture = new THREE.TextureLoader().load('assets/moons/lava.jpg' );
+        // lavaTexture.wrapS = lavaTexture.wrapT = THREE.RepeatWrapping; 
+        
+        // // use "this." to create global object
+        // this.customUniforms = {
+        //     baseTexture: 	{ type: "t", value: lavaTexture },
+        //     baseSpeed: 		{ type: "f", value: 0.05 },
+        //     noiseTexture: 	{ type: "t", value: noiseTexture },
+        //     noiseScale:		{ type: "f", value: 0.5337 },
+        //     alpha: 			{ type: "f", value: 1.0 },
+        //     time: 			{ type: "f", value: 1.0 }
+        // };
+        
+        // // create custom material from the shader code above
+        // // that is within specially labeled script tags
+        // var customMaterial = new THREE.ShaderMaterial( 
+        // {
+        //     uniforms: this.customUniforms,
+        //     vertexShader,
+        //     fragmentShader,
+        // }   );
+
+        for (let i = 0; i < count / 10; i++) {
+
+            geometry = this.generateGeometry(size / 15);
             geometry.computeBoundingBox();
             if (geometry.boundingBox) {
                 let bboxSize = new Vector3();
@@ -303,6 +332,7 @@ export class SolarSystem {
     }
 
     public render() {
+        var clock = new THREE.Clock();
         if (this.solarSystem.visible) {
 
             let pivot: Object3D;
@@ -326,6 +356,9 @@ export class SolarSystem {
                     moon.rotateZ(this.moonSpeeds[i]*0.01);
                 }
             }
+
+            // var delta = clock.getDelta();
+            // this.customUniforms.time.value += delta;
         }
     }
 
