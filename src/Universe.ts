@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { Camera, Scene } from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { Scene } from 'three';
 
 export class Universe {
 

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import {   Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
+import {   BufferGeometryUtils, Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import * as UTILS from './utils/applyUV'
 import { gaussianRandom } from './utils/math';
-import { vertexShader, fragmentShader } from "./utils/lavaShader";
+//import { vertexShader, fragmentShader } from "./utils/lavaShader";
 
 const alpha1=0.3;
 const alpha2=0.4;
@@ -287,8 +287,6 @@ export class SolarSystem {
         for (let i = 0; i < count; i++) {
 
             const mesh = new Mesh(geometry, material);
-            //const meshLight = new PointLight( 0xfedd1f, 0.05 );
-            //mesh.add(meshLight);
             const pivot = new Object3D();
             pivot.position.copy(center);
 
@@ -312,13 +310,10 @@ export class SolarSystem {
 
             mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 5 + 1;
 
-            //mesh.visible = false;
-
             this.orbiterPivots.push(pivot);
 
             this.orbiterSpeeds.push(Math.random() * size / (Math.abs(mesh.position.x) + 0.0001) + 0.3);
             this.orbiters.push(mesh);
-
             this.solarSystem.add(pivot);
         }
     }

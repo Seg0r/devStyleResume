@@ -31,6 +31,7 @@ export class MagneticField {
     scene: Scene;
     camera: Camera;
     renderer: THREE.WebGLRenderer;
+    t:number =0;
 
     uBloomParam = {strength:2, radius: 2, threshold: 0.0};
     parameters= {horizBlur:10.0 , vertiBlur: 0.0};
@@ -111,8 +112,6 @@ export class MagneticField {
         );
         blurFolder.open()
 
-
-        //gui.close();
     }
 
     private bornField(count: number, center: THREE.Vector3, size: number,initAngles: DirectionAngles) {
@@ -178,48 +177,48 @@ export class MagneticField {
             this.lines.push(fieldLines)
         }
 
-        // for ( let i = 0; i < count; i ++ ) {
-        //     var sprite = new THREE.Sprite( spriteMaterial );
-        //     sprite.scale.set( spriteScale, spriteScale, 1.0 );
-        //     sprite.material.blending = THREE.AdditiveBlending; 
-        //     sprite.layers.enable(Layers.MARKERS);
-        //     this.markers.push(sprite);
-        //     var sprite2 = sprite.clone();
-        //     this.markers.push(sprite2);
+        for ( let i = 0; i < count; i ++ ) {
+            var sprite = new THREE.Sprite( spriteMaterial );
+            sprite.scale.set( spriteScale, spriteScale, 1.0 );
+            sprite.material.blending = THREE.AdditiveBlending; 
+            sprite.layers.enable(Layers.MARKERS);
+            this.markers.push(sprite);
+            var sprite2 = sprite.clone();
+            this.markers.push(sprite2);
 
-        //     const xRadius = gaussianRandom(size*250,size*300);
-        //     const ax = xRadius ;
-        //     const curve2 = new THREE.EllipseCurve(
-        //         center.x+ax,  center.y,            // ax, aY
-        //         xRadius, xRadius*0.25,           // xRadius, yRadius
-        //         Math.PI/1.08,   -Math.PI/1.08,  // aStartAngle, aEndAngle
-        //         false,            // aClockwise
-        //         0                 // aRotation
-        //      );
+            const xRadius = gaussianRandom(size*250,size*300);
+            const ax = xRadius ;
+            const curve2 = new THREE.EllipseCurve(
+                center.x+ax,  center.y,            // ax, aY
+                xRadius, xRadius*0.25,           // xRadius, yRadius
+                Math.PI/1.08,   -Math.PI/1.08,  // aStartAngle, aEndAngle
+                false,            // aClockwise
+                0                 // aRotation
+             );
 
-        //     const points3: Vector3[] = [];
+            const points3: Vector3[] = [];
 
-        //     curve2.getPoints( 200 ).forEach(element => {
-        //         points3.push(new Vector3(element.x,element.y,0))
-        //     });
+            curve2.getPoints( 200 ).forEach(element => {
+                points3.push(new Vector3(element.x,element.y,0))
+            });
 
-        //     const curve = new CatmullRomCurve3(points3,false);
-        //     const geometry = new TubeBufferGeometry(curve,64,10,10,false);
-        //     const fieldLines =  new THREE.Mesh( geometry, material );
-        //     fieldLines.layers.enable(Layers.FIELD);
-        //     fieldLines.add(sprite);
-        //     fieldLines.add(sprite2);
+            const curve = new CatmullRomCurve3(points3,false);
+            const geometry = new TubeBufferGeometry(curve,64,10,10,false);
+            const fieldLines =  new THREE.Mesh( geometry, material );
+            fieldLines.layers.enable(Layers.FIELD);
+            fieldLines.add(sprite);
+            fieldLines.add(sprite2);
 
-        //     const rot = Math.random()*Math.PI*4 - Math.PI*2
-        //     fieldLines.rotateZ(-initAngles.beta2);
-        //     fieldLines.rotateX(-initAngles.alpha1);
-        //     fieldLines.rotateY(rot);
+            const rot = Math.random()*Math.PI*4 - Math.PI*2
+            fieldLines.rotateZ(-initAngles.beta2);
+            fieldLines.rotateX(-initAngles.alpha1);
+            fieldLines.rotateY(rot);
 
-        //     const seed = Math.random();
+            const seed = Math.random();
 
-        //     this.curves.push({curve:curve,seed:seed});
-        //     this.lines.push(fieldLines)
-        // }
+            this.curves.push({curve:curve,seed:seed});
+            this.lines.push(fieldLines)
+        }
     }
     
 
@@ -229,7 +228,7 @@ export class MagneticField {
         });
     }
 
-    t =0;
+
 
     public render(){
         
@@ -250,7 +249,6 @@ export class MagneticField {
 
     composeRender() {
       
-
         this.camera.layers.set(Layers.FIELD);
         this.bloomComposer.swapBuffers();
         this.bloomComposer.render();

@@ -45,7 +45,7 @@ const universeSize = 4000;
 //Scene
 const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize*2);
 
 camera.layers.enable(0);
 camera.layers.enable(AllLayers.solarSystem);
@@ -89,7 +89,7 @@ const universe = new Universe(universeSize);
 
 
 //Stars
-const stars = new Stars(universeSize,universeSize/10,AllLayers.stars,renderer,renderPass,camera,scene);
+const stars = new Stars(universeSize,universeSize/10);
 stars.addStarsToScene(scene);
 
 
@@ -278,13 +278,7 @@ function animate() {
     horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
     verticalFactor=(controls.getPolarAngle()-lastVertical);
 
-    const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
-
-    const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
-    if(scaleFactor>0.001 && scaleFactor < 1){
-        //console.log(rotationAngle* (180/Math.PI),scaleFactor);
-        stars.render(renderer,scaleFactor,rotationAngle);
-    }
+    stars.render(verticalFactor,horizontalFactor);
 
     magneticField.render();
     renderer.clearDepth();
