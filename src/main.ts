@@ -39,18 +39,19 @@ const initAngles: DirectionAngles  =  {
     beta2: beta2
 } 
 
-const solarSize: number = 200;
+
 const universeSize = 4000;
+const solarSize = universeSize/20;
 
 //Scene
 const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize*2);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize*4);
 
-camera.layers.enable(0);
-camera.layers.enable(AllLayers.solarSystem);
-camera.layers.enable(AllLayers.universe);
-camera.layers.enable(AllLayers.stars);
+//camera.layers.enable(0);
+//camera.layers.enable(AllLayers.solarSystem);
+//camera.layers.enable(AllLayers.universe);
+//camera.layers.enable(AllLayers.stars);
 
 
 //Renderer
@@ -65,10 +66,6 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.autoClear = false;
 
-const renderPass = new RenderPass( scene, camera );
-
-//renderer.toneMapping = THREE.ReinhardToneMapping;
-//renderer.toneMapping = THREE.CineonToneMapping;
 
 const stats = new Stats();
 stats.showPanel( 0 );
@@ -82,24 +79,26 @@ document.querySelector('#main')!.appendChild( stats.dom );
 camera.position.z = 10;
 
 
-
 //Universe
 const universe = new Universe(universeSize);
-// universe.addNebulaToScene(scene);
 
 
 //Stars
-const stars = new Stars(universeSize,universeSize/10);
-stars.addStarsToScene(scene);
+const stars = new Stars(universeSize,universeSize/8, camera);
 
 
 //SolarSystem
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
-solarSystem.addToScene(scene);
 
 //Magnetic field
 const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, camera);
+
+
+//Add to scene
+universe.addNebulaToScene(scene);
+stars.addStarsToScene(scene);
+solarSystem.addToScene(scene);
 magneticField.addToScene(scene);
 
 
@@ -244,10 +243,8 @@ var timer ;
 const vector3 = new Vector3();
 let lastHorizontal = controls.getAzimuthalAngle();
 let lastVertical = controls.getPolarAngle();
-let lastAngle = 0;
 let horizontalFactor=0;
 let verticalFactor=0;
-let rotationVector = new Vector2();
 
 //animate loop
 function animate() {
@@ -269,23 +266,21 @@ function animate() {
     controls.update(); 
     stats.update();
 
-
-    //render scene
-    renderer.clear();
-    
-    universe.render();
-    solarSystem.render();
     horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
     verticalFactor=(controls.getPolarAngle()-lastVertical);
 
-    stars.render(verticalFactor,horizontalFactor);
 
+    //render scene
+    renderer.clear();
+
+    universe.render();
+    solarSystem.render();
+    stars.render(verticalFactor,horizontalFactor);
     magneticField.render();
+
+
     renderer.clearDepth();
     renderer.render(scene,camera);
-    
-    
-    
     
     //tiltCamera();
 

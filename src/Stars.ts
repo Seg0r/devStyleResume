@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { Group, Scene, Vector3 } from 'three';
+import { Camera, Group, Scene, Vector2, Vector3 } from 'three';
 
 interface MeshState{
-    mesh:THREE.Mesh; 
+    mesh:THREE.Mesh;
     startRotation: number; 
     distance: number;     
 }
@@ -12,32 +12,37 @@ export class Stars {
     univerSize: number;
     starsGroup: THREE.Group = new Group();
     stars: MeshState[] = [];
+    camera: THREE.Camera;
+    center: Vector3;
 
-    constructor(univerSize: number, starsCount: number) {
+    constructor(univerSize: number, starsCount: number, camera: Camera) {
 
         this.univerSize=univerSize*2;
+        this.camera=camera;
 
-        const geometry2 = new THREE.SphereBufferGeometry(2,3,2);
+        const geometry2 = new THREE.SphereBufferGeometry(univerSize/2000,8,5);
         const material2 = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-        const center = new Vector3(0,0,0);
+        this.center = new Vector3(0,0,0);
 
         for (let i = 0; i < starsCount; i++) {
+            let x,y,z;
 
-            const x = THREE.MathUtils.randFloatSpread(univerSize*3);
-            const y = THREE.MathUtils.randFloatSpread(univerSize*3);
-            const z = THREE.MathUtils.randFloatSpread(univerSize*3);
+            x = THREE.MathUtils.randFloatSpread(univerSize*2);
+            y = THREE.MathUtils.randFloatSpread(univerSize*2);
+            z = THREE.MathUtils.randFloatSpread(univerSize*2);
 
             const mesh = new THREE.Mesh( geometry2, material2 )
             mesh.position.set(x, y, z);
-            mesh.scale.set(4,1,1);
-            mesh.lookAt(center);
+            const distance = new Vector2(x,z).distanceTo(new Vector2(this.center.x,this.center.z));
+            mesh.scale.set(0.5+distance/univerSize,0.5,0.5)
+            mesh.lookAt(this.center);
             
-            
+            //needed to synchronize start angle of all stars
             mesh.rotateOnAxis(new Vector3(0,0,1),0);
             
             this.starsGroup.add(mesh);
             
-            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:mesh.position.distanceTo(center)});
+            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:distance});
         }
     }
 
@@ -58,15 +63,17 @@ export class Stars {
 
 
     private calculateDrawRange(scaleFactor : number,rotationValue: number){
-
+        const cameraDist = this.camera.position.distanceTo(this.center);
         for(let i=0; i < this.stars.length; i++){
+            let sign= cameraDist < this.stars[i].mesh.position.distanceTo(this.camera.position) ? 1 : -1;
             let scaleFactor2=scaleFactor*this.distanceFactor(this.stars[i].distance);
-            this.stars[i].mesh.scale.set(1+scaleFactor2,1,1);
-            this.stars[i].mesh.rotation.z = this.stars[i].startRotation + rotationValue;
+            this.stars[i].mesh.scale.setX(0.5+scaleFactor2);
+            this.stars[i].mesh.rotation.z = this.stars[i].startRotation + rotationValue*sign;
         }
     }
 
+
     private distanceFactor(distance: number): number{
-        return Math.pow(distance,1.8)/(this.univerSize/8);
+        return Math.pow(distance,1.85)/(this.univerSize/8);
     }
 }
