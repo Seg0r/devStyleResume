@@ -15,26 +15,26 @@ export class Stars {
     camera: THREE.Camera;
     center: Vector3;
 
-    constructor(univerSize: number, starsCount: number, camera: Camera) {
+    constructor(universSize: number, starsCount: number, camera: Camera) {
 
-        this.univerSize=univerSize*2;
+        this.univerSize=universSize*2;
         this.camera=camera;
 
-        const geometry2 = new THREE.SphereBufferGeometry(univerSize/2000,8,5);
+        const geometry2 = new THREE.SphereBufferGeometry(universSize/2000,8,5);
         const material2 = new THREE.MeshBasicMaterial( { color: 0xffffff } );
         this.center = new Vector3(0,0,0);
 
         for (let i = 0; i < starsCount; i++) {
             let x,y,z;
 
-            x = THREE.MathUtils.randFloatSpread(univerSize*2);
-            y = THREE.MathUtils.randFloatSpread(univerSize*2);
-            z = THREE.MathUtils.randFloatSpread(univerSize*2);
+            x = THREE.MathUtils.randFloatSpread(universSize*2);
+            y = THREE.MathUtils.randFloatSpread(universSize*2);
+            z = THREE.MathUtils.randFloatSpread(universSize*2);
 
             const mesh = new THREE.Mesh( geometry2, material2 )
             mesh.position.set(x, y, z);
             const distance = new Vector2(x,z).distanceTo(new Vector2(this.center.x,this.center.z));
-            mesh.scale.set(0.5+distance/univerSize,0.5,0.5)
+            mesh.scale.set(0.5+distance/universSize,0.5,0.5)
             mesh.lookAt(this.center);
             
             //needed to synchronize start angle of all stars
