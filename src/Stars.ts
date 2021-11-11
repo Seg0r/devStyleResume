@@ -20,9 +20,10 @@ export class Stars {
         this.univerSize=universSize*2;
         this.camera=camera;
 
-        const geometry2 = new THREE.SphereBufferGeometry(universSize/2000,8,5);
+        const geometry2 = new THREE.SphereBufferGeometry(universSize/4000,8,5);
         const material2 = new THREE.MeshBasicMaterial( { color: 0xffffff } );
         this.center = new Vector3(0,0,0);
+        const meshScaleFactor=universSize/2;
 
         for (let i = 0; i < starsCount; i++) {
             let x,y,z;
@@ -33,8 +34,9 @@ export class Stars {
 
             const mesh = new THREE.Mesh( geometry2, material2 )
             mesh.position.set(x, y, z);
-            const distance = new Vector2(x,z).distanceTo(new Vector2(this.center.x,this.center.z));
-            mesh.scale.set(0.5+distance/universSize,0.5,0.5)
+            const distanceX = new Vector2(x,z).distanceTo(new Vector2(this.center.x,this.center.z));
+            const distance = mesh.position.distanceTo(this.center);
+            mesh.scale.set(0.01+distance/meshScaleFactor,0.01+distance/meshScaleFactor,0.01+distance/meshScaleFactor);
             mesh.lookAt(this.center);
             
             //needed to synchronize start angle of all stars
@@ -42,7 +44,7 @@ export class Stars {
             
             this.starsGroup.add(mesh);
             
-            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:distance});
+            this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:distanceX});
         }
     }
 
