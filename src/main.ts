@@ -15,6 +15,7 @@ import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { MagneticField } from './MagneticField';
+import { Nebula } from './Nebula';
 
 
 
@@ -82,9 +83,11 @@ camera.position.z = 10;
 //Universe
 const universe = new Universe(universeSize);
 
+//Nebulas
+const nebula = new Nebula(universeSize,universeSize/4,scene);
 
 //Stars
-const stars = new Stars(universeSize,universeSize/8, camera);
+const stars = new Stars(universeSize,universeSize, camera);
 
 
 //SolarSystem
@@ -96,10 +99,11 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-universe.addNebulaToScene(scene);
-stars.addStarsToScene(scene);
-solarSystem.addToScene(scene);
-magneticField.addToScene(scene);
+//universe.addNebulaToScene(scene);
+//stars.addStarsToScene(scene);
+//solarSystem.addToScene(scene);
+//magneticField.addToScene(scene);
+nebula.addStarsToScene(scene);
 
 
 //Lights
