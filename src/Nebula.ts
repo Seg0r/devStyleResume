@@ -1,6 +1,6 @@
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import * as THREE from 'three';
-import { AdditiveBlending, Group, Mesh, MeshToonMaterial, Object3D, Scene, Sprite, Vector3 } from 'three';
+import { AdditiveBlending, DoubleSide, Group, Mesh, MeshToonMaterial, Object3D, Scene, Sprite, Vector3 } from 'three';
 import { saveAs } from 'file-saver';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import fs from 'fs';
@@ -72,76 +72,111 @@ export class Nebula {
     //metod that sets textures in strict positions
     private setPositions(range: number){
         const _this = this;
-        const pivot = new Object3D();
+        const materials: THREE.MeshBasicMaterial[] = [];
+        let startAngle = THREE.MathUtils.degToRad(40);
+        let endAngle = THREE.MathUtils.degToRad(160);
+        let arc = endAngle-startAngle;
+        let count = 5;
 
-        // const spriteMaterial = new THREE.SpriteMaterial({ 
-        //     map: this.textures[Files.DarkMatter],
-        //     depthTest: false,
-        //     transparent: false,
-        //     opacity: 1,
-        //     color: 0xffffff
-        // });
-        // spriteMaterial.blending = AdditiveBlending;
+        for (let file in Files) {
+            if (!isNaN(Number(file))){
+                materials.push (new THREE.MeshBasicMaterial( { 
+                    map: _this.textures[file],
+                    depthTest: false,
+                    depthWrite: false,
+                    blending : AdditiveBlending} ));      
+            }
+        }
 
-        const materialDarkMatter = new THREE.MeshBasicMaterial( { 
-            map: _this.textures[Files.DarkMatter],
-            depthTest: false,
-            depthWrite: false,
-            blending : AdditiveBlending} );
+        //Orange nebula
+        placeSprite(materials[Files.DarkMatter],-2400,0.7,-0.1,4500,4000, -0.2);
+        placeSprite(materials[Files.DarkMatter],-2200,-0.5,-0.2,3000,5000, -3.4);
+        // placeSprite(materials[Files.DarkMatter],-2000,-0.3,0.2,2500,4000, 0.3);
 
-        const materialDarkMatter2 = new THREE.MeshBasicMaterial( { 
-            map: _this.textures[Files.DarkMatter2],
-            depthTest: false,
-            depthWrite: false,
-            blending : AdditiveBlending} );
+        placeSprite(materials[Files.DarkMatter2],-3000,0.2,-0.1,7000,7000, 0.2);
+        // placeSprite(materials[Files.DarkMatter2],-4000,0.6,0,2000,2000, 0.8);
+        placeSprite(materials[Files.Miriade],    -5000,0.2,0,7000,7000, 0);
+        // placeSprite(materials[Files.Middle_Nebula],-3500,0.2,0,3000,3000, 0);
 
+        startAngle = THREE.MathUtils.degToRad(-30);
+        endAngle = THREE.MathUtils.degToRad(30);
+        arc = endAngle-startAngle;
+        count = 5;
+ 
+        for (let index = 0; index < count; index++) {
+            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,5000,5000, THREE.MathUtils.randFloatSpread(Math.PI));
+        }
+
+
+
+        //green + purple nebula
+        startAngle = THREE.MathUtils.degToRad(40);
+        endAngle = THREE.MathUtils.degToRad(160);
+        arc = endAngle-startAngle;
+        count = 5;
         
-        const materialMiriade = new THREE.MeshBasicMaterial( { 
-            map: _this.textures[Files.Miriade],
-            depthTest: false,
-            depthWrite: false,
-            blending : AdditiveBlending} );
-        
-        
-        const materialDustGoThru = new THREE.MeshBasicMaterial( { 
-            map: _this.textures[Files.DustGoThru],
-            depthTest: false,
-            depthWrite: false,
-            blending : AdditiveBlending} );
-            
+        count = 3;        
+        for (let index = 0; index < count; index++) {
+            placeSprite(materials[Files.Middle_Nebula],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        }
+        count = 4;
+        for (let index = 0; index < count; index++) {
+            placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        }
+        count = 5;
+        for (let index = 0; index < count; index++) {
+            placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        }
+        count = 6;
+        for (let index = 0; index < count; index++) {
+            placeSprite(materials[Files.Nebula007],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        }
 
-        placeSprite(materialDarkMatter,-2000,-1000,100,4500,4000, -0.2);
-        placeSprite(materialDarkMatter,-2000,800,-200,3000,4000, -3.8);
-        placeSprite(materialDarkMatter,-2000,1000,1000,3000,4000, 0.4);
+        const backAngle = THREE.MathUtils.degToRad(180);
 
-        placeSprite(materialDarkMatter2,-3000,1000,500,4000,4000, -0.8);
-        placeSprite(materialDarkMatter2,-3000,-2000,500,2000,2000, 0.8);
-
-        placeSprite(materialMiriade,-3000,-500,500,3000,3000, 0);
-
-        placeSprite(materialDustGoThru,-3000,-500,900,3000,3000, 0);
-        // placeSprite(materialDustGoThru,-3000,1400,200,3000,3000, 0);
-
+        // //blue nebula
+        placeSprite(materials[Files.Nebula006],-2000,0.3,backAngle-0.3,5000,3000, -3.8,0.5);
+        placeSprite(materials[Files.Nebula006],-2000,0.2,backAngle-0.2,4500,4000, -0.2,0.1);
+        placeSprite(materials[Files.Nebula006],-2000,0.1,backAngle-0.2,5000,3000, -3.8,-0.4);
+        placeSprite(materials[Files.Nebula006],-2000,-0.1,backAngle+0.3,4000,5000, 0.3,-0.5);
+        placeSprite(materials[Files.Nebula006],-1200,0.4,backAngle+0.3,2000,2000, 0.3,0.1);
+        placeSprite(materials[Files.Nebula006],-1000,0.5,backAngle+0.4,4000,4000, 0.3,-0.3);
+        placeSprite(materials[Files.Miriade], -4000,0.2,backAngle-0.1,3000,3000, 0,0.2);
 
 
-        function placeSprite(material: THREE.MeshBasicMaterial, x:number, y:number, z: number, scaleX:number, scaleY: number, matRot: number) {
+        placeSprite(materials[Files.Nebula006], -4000,-0.1, backAngle/2,10000,10000, 0.5);
+        placeSprite(materials[Files.Nebula006], -4000, 0.1,-backAngle/2,10000,10000, 0.5);
+ 
 
+        function placeSprite(material: THREE.MeshBasicMaterial, distance:number, angleZ:number, angleY: number, scaleX:number, scaleY: number, matRot: number,angleX?:number) {
+
+            const pivot = new Object3D();        
             const geometry = new THREE.PlaneBufferGeometry() ;
     
             const mesh = new THREE.Mesh( geometry, material );
 
-            mesh.scale.set(scaleX, scaleY, 1.0);
-            mesh.position.set(x,y,z);
+            pivot.position.copy(mesh.position);
+
+            pivot.add(mesh);
+            pivot.rotateY(angleY);
+            pivot.rotateZ(angleZ);
     
+            mesh.position.set(distance,0,0);
             mesh.lookAt(new Vector3(0,0,0));
+
+            mesh.scale.set(scaleX, scaleY, 1.0);
+            
+            if(angleX)
+                mesh.rotateY(angleX);
+
             mesh.rotateZ(matRot);
 
-           _this.scene.add(mesh);
+           _this.scene.add(pivot);
         }
     }
     
 
-    //method for generating random sprite texture mix with 
+    //method for generating random sprite texture mix 
     private generatePoints(range: number) {
         const _this = this;
 
