@@ -21,9 +21,6 @@ const betaDist=1.4;
 const sunLightStrength=120;
 const sunLightDecay=6;
 
-const bloomThreshold=0.9;
-const bloomStrength=1;
-const bloomRadius=2;
 
 export interface DirectionAngles  {
     alpha1: number,
@@ -280,9 +277,9 @@ export class SolarSystem {
 
     private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
 
-        const geometry = new SphereBufferGeometry(0.2, 4, 3);
+        const geometry = new SphereBufferGeometry(size/1000, 8, 5);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
-        const radius = size /2;
+        let radius = size /2;
 
         for (let i = 0; i < count; i++) {
 
@@ -308,7 +305,7 @@ export class SolarSystem {
                 mesh.position.x = gaussianRandom(radius * 0.7, radius);
             }
 
-            mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 5 + 1;
+            mesh.scale.x = mesh.scale.y = mesh.scale.z = Math.random() * 10 + 2;
 
             this.orbiterPivots.push(pivot);
 

@@ -89,63 +89,62 @@ export class Nebula {
         }
 
         //Orange nebula
-        placeSprite(materials[Files.DarkMatter],-2400,0.7,-0.1,4500,4000, -0.2);
-        placeSprite(materials[Files.DarkMatter],-2200,-0.5,-0.2,3000,5000, -3.4);
-        // placeSprite(materials[Files.DarkMatter],-2000,-0.3,0.2,2500,4000, 0.3);
+        const orangeAngle = THREE.MathUtils.degToRad(140);
+        placeSprite(materials[Files.DarkMatter],-2800,0.7,orangeAngle-0.1,4500,4000, -0.2);
+        placeSprite(materials[Files.DarkMatter],-2600,-0.5,orangeAngle-0.2,3000,5000, -3.4);
 
-        placeSprite(materials[Files.DarkMatter2],-3000,0.2,-0.1,7000,7000, 0.2);
-        // placeSprite(materials[Files.DarkMatter2],-4000,0.6,0,2000,2000, 0.8);
-        placeSprite(materials[Files.Miriade],    -5000,0.2,0,7000,7000, 0);
-        // placeSprite(materials[Files.Middle_Nebula],-3500,0.2,0,3000,3000, 0);
+        placeSprite(materials[Files.DarkMatter2],-3600,0.2,orangeAngle-0.1,6000,6000, 0.2);
+        placeSprite(materials[Files.Miriade],    -5000,0.2,orangeAngle+0,6000,6000, 0);
 
-        startAngle = THREE.MathUtils.degToRad(-30);
-        endAngle = THREE.MathUtils.degToRad(30);
+        startAngle = orangeAngle+THREE.MathUtils.degToRad(-30);
+        endAngle = orangeAngle+THREE.MathUtils.degToRad(+30);
         arc = endAngle-startAngle;
-        count = 5;
+        count = 6;
  
         for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,5000,5000, THREE.MathUtils.randFloatSpread(Math.PI));
+            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
         }
-
 
 
         //green + purple nebula
-        startAngle = THREE.MathUtils.degToRad(40);
-        endAngle = THREE.MathUtils.degToRad(160);
-        arc = endAngle-startAngle;
-        count = 5;
+        // startAngle = THREE.MathUtils.degToRad(40);
+        // endAngle = THREE.MathUtils.degToRad(160);
+        // arc = endAngle-startAngle;
+        // count = 5;
         
-        count = 3;        
-        for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Middle_Nebula],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        }
-        count = 4;
-        for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        }
-        count = 5;
-        for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        }
-        count = 6;
-        for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula007],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        }
+        // count = 3;        
+        // for (let index = 0; index < count; index++) {
+        //     placeSprite(materials[Files.Middle_Nebula],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        // }
+        // count = 4;
+        // for (let index = 0; index < count; index++) {
+        //     placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        // }
+        // count = 5;
+        // for (let index = 0; index < count; index++) {
+        //     placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        // }
+        // count = 6;
+        // for (let index = 0; index < count; index++) {
+        //     placeSprite(materials[Files.Nebula007],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
+        // }
 
-        const backAngle = THREE.MathUtils.degToRad(180);
+        const blueAngle = THREE.MathUtils.degToRad(-60);
 
         // //blue nebula
-        placeSprite(materials[Files.Nebula006],-2000,0.3,backAngle-0.3,5000,3000, -3.8,0.5);
-        placeSprite(materials[Files.Nebula006],-2000,0.2,backAngle-0.2,4500,4000, -0.2,0.1);
-        placeSprite(materials[Files.Nebula006],-2000,0.1,backAngle-0.2,5000,3000, -3.8,-0.4);
-        placeSprite(materials[Files.Nebula006],-2000,-0.1,backAngle+0.3,4000,5000, 0.3,-0.5);
-        placeSprite(materials[Files.Nebula006],-1200,0.4,backAngle+0.3,2000,2000, 0.3,0.1);
-        placeSprite(materials[Files.Nebula006],-1000,0.5,backAngle+0.4,4000,4000, 0.3,-0.3);
-        placeSprite(materials[Files.Miriade], -4000,0.2,backAngle-0.1,3000,3000, 0,0.2);
+        placeSprite(materials[Files.Nebula006],-2400,0.3,blueAngle-0.3,5000,3000, -3.8,0.5);
+        placeSprite(materials[Files.Nebula006],-2400,0.2,blueAngle-0.2,4500,4000, -0.2,0.1);
+        placeSprite(materials[Files.Nebula006],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
+        placeSprite(materials[Files.Nebula006],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
+        placeSprite(materials[Files.Nebula006],-1800,0.4,blueAngle+0.3,2000,2000, 0.3,0.1);
+        placeSprite(materials[Files.Nebula006],-1600,0.5,blueAngle+0.4,4000,4000, 0.3,-0.3);
+        placeSprite(materials[Files.Miriade], -4000,0.2,blueAngle-0.1,3000,3000, 0,0.2);
 
+        const middleAngle1 = blueAngle+(Math.PI/2)
+        const middleAngle2 = blueAngle-(Math.PI/2)
 
-        placeSprite(materials[Files.Nebula006], -4000,-0.1, backAngle/2,10000,10000, 0.5);
-        placeSprite(materials[Files.Nebula006], -4000, 0.1,-backAngle/2,10000,10000, 0.5);
+        placeSprite(materials[Files.Nebula006], -4000,-0.1, middleAngle1,10000,10000, 0.5);
+        placeSprite(materials[Files.Nebula006], -4000, 0.1, middleAngle2,10000,10000, 0.5);
  
 
         function placeSprite(material: THREE.MeshBasicMaterial, distance:number, angleZ:number, angleY: number, scaleX:number, scaleY: number, matRot: number,angleX?:number) {
@@ -285,7 +284,7 @@ export class Nebula {
         
     }
 
-    public addStarsToScene(scene: Scene) {
+    public addToScene(scene: Scene) {
         scene.add(this.points);
         // this.markers.forEach(element => {
         //     scene.add(element)

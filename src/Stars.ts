@@ -28,9 +28,9 @@ export class Stars {
         for (let i = 0; i < starsCount; i++) {
             let x,y,z;
 
-            x = THREE.MathUtils.randFloatSpread(universSize*2);
-            y = THREE.MathUtils.randFloatSpread(universSize*2);
-            z = THREE.MathUtils.randFloatSpread(universSize*2);
+            x = THREE.MathUtils.randFloatSpread(this.univerSize);
+            y = THREE.MathUtils.randFloatSpread(this.univerSize);
+            z = THREE.MathUtils.randFloatSpread(this.univerSize);
 
             const mesh = new THREE.Mesh( geometry2, material2 )
             mesh.position.set(x, y, z);
@@ -48,7 +48,7 @@ export class Stars {
         }
     }
 
-    public addStarsToScene(scene: Scene) {
+    public addToScene(scene: Scene) {
         scene.add(this.starsGroup);
     }
 
