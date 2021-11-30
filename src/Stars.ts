@@ -57,8 +57,10 @@ export class Stars {
     public render(verticalFactor : number, horizontalFactor: number){
 
         const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
-        const scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
-        if(scaleFactor>0.001 && scaleFactor < 1){
+        let scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
+        if(scaleFactor>0.00001 ){
+            if(scaleFactor > 1)
+                scaleFactor=1;
             this.calculateDrawRange(scaleFactor,rotationAngle);
         }
     }   
@@ -69,7 +71,7 @@ export class Stars {
         for(let i=0; i < this.stars.length; i++){
             let sign= cameraDist < this.stars[i].mesh.position.distanceTo(this.camera.position) ? 1 : -1;
             let scaleFactor2=scaleFactor*this.distanceFactor(this.stars[i].distance);
-            this.stars[i].mesh.scale.setX(0.5+scaleFactor2);
+            this.stars[i].mesh.scale.setX(this.stars[i].mesh.scale.y+scaleFactor2);
             this.stars[i].mesh.rotation.z = this.stars[i].startRotation + rotationValue*sign;
         }
     }
