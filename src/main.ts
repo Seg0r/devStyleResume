@@ -87,7 +87,7 @@ const universe = new Universe(universeSize);
 const nebula = new Nebula(universeSize,universeSize/4,scene);
 
 //Stars
-const stars = new Stars(universeSize,universeSize, camera);
+const stars = new Stars(universeSize,universeSize*0.7, camera);
 
 
 //SolarSystem
@@ -99,11 +99,11 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-//universe.addNebulaToScene(scene);
-//stars.addStarsToScene(scene);
-//solarSystem.addToScene(scene);
+universe.addToScene(scene);
+stars.addToScene(scene);
+solarSystem.addToScene(scene);
 //magneticField.addToScene(scene);
-nebula.addStarsToScene(scene);
+nebula.addToScene(scene);
 
 
 //Lights
@@ -286,7 +286,7 @@ function animate() {
     renderer.clearDepth();
     renderer.render(scene,camera);
     
-    //tiltCamera();
+    tiltCamera();
 
     lastHorizontal = controls.getAzimuthalAngle();
     lastVertical = controls.getPolarAngle();
@@ -295,8 +295,8 @@ animate();
 
 
 function tiltCamera(){
-    timer = new Date().getTime()*0.0005;
-    camera.position.add(new Vector3(Math.cos( timer )*0.1,0,0));
-    camera.position.add(new Vector3(0,Math.sin( timer )*0.2,0));
+    timer = new Date().getTime()*0.0001;
+    camera.position.add(new Vector3(Math.cos( timer )*0.6,0,0));
+    camera.position.add(new Vector3(0,Math.sin( timer )*0.3,0));
     camera.lookAt(solarCenter);
 }

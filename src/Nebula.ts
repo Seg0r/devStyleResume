@@ -90,10 +90,10 @@ export class Nebula {
 
         //Orange nebula
         const orangeAngle = THREE.MathUtils.degToRad(140);
-        placeSprite(materials[Files.DarkMatter],-2800,0.7,orangeAngle-0.1,4500,4000, -0.2);
-        placeSprite(materials[Files.DarkMatter],-2600,-0.5,orangeAngle-0.2,3000,5000, -3.4);
+        placeSprite(materials[Files.DarkMatter],-2800,0.4,orangeAngle-0.1,4500,4000, -0.2);
+        placeSprite(materials[Files.DarkMatter],-2600,-0.3,orangeAngle-0.2,3000,5000, -3.4);
 
-        placeSprite(materials[Files.DarkMatter2],-3600,0.2,orangeAngle-0.1,6000,6000, 0.2);
+        placeSprite(materials[Files.DarkMatter2],-3000,0.2,orangeAngle+0.1,6000,6000, 0.2);
         placeSprite(materials[Files.Miriade],    -5000,0.2,orangeAngle+0,6000,6000, 0);
 
         startAngle = orangeAngle+THREE.MathUtils.degToRad(-30);
@@ -137,7 +137,7 @@ export class Nebula {
         placeSprite(materials[Files.Nebula006],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
         placeSprite(materials[Files.Nebula006],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
         placeSprite(materials[Files.Nebula006],-1800,0.4,blueAngle+0.3,2000,2000, 0.3,0.1);
-        placeSprite(materials[Files.Nebula006],-1600,0.5,blueAngle+0.4,4000,4000, 0.3,-0.3);
+        placeSprite(materials[Files.Nebula006],-1600,0.5,blueAngle+0.4,2000,2000, 0.3,-0.3);
         placeSprite(materials[Files.Miriade], -4000,0.2,blueAngle-0.1,3000,3000, 0,0.2);
 
         const middleAngle1 = blueAngle+(Math.PI/2)

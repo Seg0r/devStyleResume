@@ -58,9 +58,7 @@ export class Stars {
 
         const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
         let scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
-        if(scaleFactor>0.00001 ){
-            if(scaleFactor > 1)
-                scaleFactor=1;
+        if(scaleFactor>0.0001 && scaleFactor < 1){
             this.calculateDrawRange(scaleFactor,rotationAngle);
         }
     }   
