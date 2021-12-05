@@ -19,8 +19,8 @@ import { Nebula } from './Nebula';
 
 
 
-enum AllLayers{
-    stars=1,
+enum AllLayers {
+    stars = 1,
     universe,
     solarSystem
 }
@@ -28,26 +28,33 @@ enum AllLayers{
 
 
 
-const alpha1=0.3;
-const alpha2=0.4;
-const beta1=1.3;
-const beta2=-0.8;
+const alpha1 = 0.3;
+const alpha2 = 0.4;
+const beta1 = 1.3;
+const beta2 = -0.8;
 
-const initAngles: DirectionAngles  =  {
-    alpha1:alpha1,
+const initAngles: DirectionAngles = {
+    alpha1: alpha1,
     alpha2: alpha2,
     beta1: beta1,
     beta2: beta2
-} 
+}
 
 
 const universeSize = 4000;
-const solarSize = universeSize/20;
+const solarSize = universeSize / 20;
+
+
+//Hide scrollbar:
+var main = document.getElementById('main')!;
+if (main)
+    main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
+
 
 //Scene
 const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize*4);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize * 4);
 
 //camera.layers.enable(0);
 //camera.layers.enable(AllLayers.solarSystem);
@@ -69,8 +76,8 @@ renderer.autoClear = false;
 
 
 const stats = new Stats();
-stats.showPanel( 0 );
-document.querySelector('#main')!.appendChild( stats.dom ); 
+stats.showPanel(0);
+document.querySelector('#main')!.appendChild(stats.dom);
 
 //GreetingBox
 //const box = new GreetingBox();
@@ -84,10 +91,10 @@ camera.position.z = 10;
 const universe = new Universe(universeSize);
 
 //Nebulas
-const nebula = new Nebula(universeSize,universeSize/4,scene);
+const nebula = new Nebula(universeSize, universeSize / 4, scene);
 
 //Stars
-const stars = new Stars(universeSize,universeSize*0.7, camera);
+const stars = new Stars(universeSize, universeSize * 0.7, camera);
 
 
 //SolarSystem
@@ -119,7 +126,7 @@ controls.rotateSpeed = 0.2;
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-const ambientLight = new THREE.AmbientLight(0xffffff,0.5);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 //scene.add(pointLight);
 
@@ -217,7 +224,7 @@ scene.add(curveObject); */
 
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
-camera.position.copy(new Vector3(solarSize * 4,solarSize,0));
+camera.position.copy(new Vector3(solarSize * 4, solarSize, 0));
 
 // camera.position.add(new Vector3(250, 250, 500));
 
@@ -243,12 +250,69 @@ window.addEventListener('resize', onWindowResize, false);
 
 
 
-var timer ;
+enum Sections {
+    s1,
+    s2,
+    s3,
+    s4,
+    s5,
+    s6,
+    s7,
+}
+
+let sections: HTMLElement[] = [];
+let currentSection = 0;
+
+for (let section in Sections) {
+    if (isNaN(Number(section))) {
+        sections.push(document.getElementById(section)!);
+    }
+}
+
+
+const scrollDirection = (e: { preventDefault?: () => void; wheelDelta?: any; deltaY?: any; }) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
+let scrollUp = 0;
+let scrollDown = 0;
+
+const checkScroll = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    // if (!scrolled) {
+    //     scrolled = true;
+    handleScrollbar(e);
+    //     setTimeout(function () { scrolled = false; }, 100);
+    // };
+}
+
+const handleScrollbar = (e: { preventDefault: () => void; }) => {
+
+    if (scrollDirection(e) > 0) {
+        if (++scrollUp % 2) {
+            if (currentSection > 0) {
+                sections[--currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            }
+        }
+    } else {
+        if (++scrollDown % 2) {
+            if (currentSection < sections.length) {
+                sections[++currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            }
+        }
+    }
+
+}
+
+main.addEventListener('wheel', checkScroll, { passive: false });
+
+
+
+
+
+var timer;
 const vector3 = new Vector3();
 let lastHorizontal = controls.getAzimuthalAngle();
 let lastVertical = controls.getPolarAngle();
-let horizontalFactor=0;
-let verticalFactor=0;
+let horizontalFactor = 0;
+let verticalFactor = 0;
 
 //animate loop
 function animate() {
@@ -267,11 +331,11 @@ function animate() {
     //}, 5 );
     //GreetingBox.updateTweens();
     TWEEN.update()
-    controls.update(); 
+    controls.update();
     stats.update();
 
-    horizontalFactor=(controls.getAzimuthalAngle()-lastHorizontal);
-    verticalFactor=(controls.getPolarAngle()-lastVertical);
+    horizontalFactor = (controls.getAzimuthalAngle() - lastHorizontal);
+    verticalFactor = (controls.getPolarAngle() - lastVertical);
 
 
     //render scene
@@ -279,13 +343,13 @@ function animate() {
 
     universe.render();
     solarSystem.render();
-    stars.render(verticalFactor,horizontalFactor);
+    stars.render(verticalFactor, horizontalFactor);
     magneticField.render();
 
 
     renderer.clearDepth();
-    renderer.render(scene,camera);
-    
+    renderer.render(scene, camera);
+
     tiltCamera();
 
     lastHorizontal = controls.getAzimuthalAngle();
@@ -294,9 +358,10 @@ function animate() {
 animate();
 
 
-function tiltCamera(){
-    timer = new Date().getTime()*0.0001;
-    camera.position.add(new Vector3(Math.cos( timer )*0.6,0,0));
-    camera.position.add(new Vector3(0,Math.sin( timer )*0.3,0));
+function tiltCamera() {
+    timer = new Date().getTime() * 0.0001;
+    camera.position.add(new Vector3(Math.cos(timer) * 0.6, 0, 0));
+    camera.position.add(new Vector3(0, Math.sin(timer) * 0.3, 0));
     camera.lookAt(solarCenter);
 }
+
