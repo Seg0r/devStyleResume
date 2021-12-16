@@ -6,7 +6,7 @@ import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical } from 'three';
-import { cameraTweenLook, cameraTweenToPosAtCurve } from './cameraUtils';
+import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
 // @ts-ignore
 //import * as POSTPROCESSING from "postprocessing";
@@ -26,7 +26,8 @@ enum AllLayers {
 }
 
 
-
+const TARGET_LEFT = 100;
+const TARGET_RIGHT = -TARGET_LEFT;
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -43,7 +44,7 @@ const initAngles: DirectionAngles = {
 
 const universeSize = 4000;
 const solarSize = universeSize / 20;
-
+const solarCenter: Vector3 = new Vector3(0, 0, 0);
 
 //Hide scrollbar:
 var main = document.getElementById('main')!;
@@ -84,8 +85,19 @@ document.querySelector('#main')!.appendChild(stats.dom);
 //box.addToScene(scene);
 
 //camera away from orbit control
-camera.position.z = 10;
+let cameraUtils = new CameraUtils(camera, solarCenter);
 
+const cameraSpline = new THREE.CatmullRomCurve3( [
+	new THREE.Vector3(-1000,250,900),
+	new THREE.Vector3(400,200,900  ),
+	new THREE.Vector3(750,400,300  ),
+	new THREE.Vector3(-400,-400,150 ),
+    new THREE.Vector3(-1000,100,0 ),
+    new THREE.Vector3(100,600,500  ),
+    new THREE.Vector3(1000,700,700 )
+] );
+
+camera.position.copy(cameraSpline.getPoint(0));
 
 //Universe
 const universe = new Universe(universeSize);
@@ -98,7 +110,6 @@ const stars = new Stars(universeSize, universeSize * 0.7, camera);
 
 
 //SolarSystem
-const solarCenter: Vector3 = new Vector3(0, 0, 0);
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
 
 //Magnetic field
@@ -224,7 +235,7 @@ scene.add(curveObject); */
 
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
-camera.position.copy(new Vector3(solarSize * 4, solarSize, 0));
+//camera.position.copy(new Vector3(solarSize * 4, solarSize, 0));
 
 // camera.position.add(new Vector3(250, 250, 500));
 
@@ -248,43 +259,26 @@ function onWindowResize() {
 }
 window.addEventListener('resize', onWindowResize, false);
 
-
-
-enum Sections {
-    s1,
-    s2,
-    s3,
-    s4,
-    s5,
-    s6,
-    s7,
-}
-
-let sections: HTMLElement[] = [];
+let sections = main.children;
 let currentSection = 0;
 
-for (let section in Sections) {
-    if (isNaN(Number(section))) {
-        sections.push(document.getElementById(section)!);
-    }
-}
 
 
-const scrollDirection = (e: { preventDefault?: () => void; wheelDelta?: any; deltaY?: any; }) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
+const scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
 let scrollUp = 0;
 let scrollDown = 0;
 
-const checkScroll = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
+const checkScroll = (e: WheelEvent) => {
+    //e.preventDefault();
     // if (!scrolled) {
     //     scrolled = true;
-    handleScrollbar(e);
+    //sectionScrolling(e);
+    cameraScrolling(e);
     //     setTimeout(function () { scrolled = false; }, 100);
     // };
 }
 
-const handleScrollbar = (e: { preventDefault: () => void; }) => {
-
+const sectionScrolling = (e: Event) => {
     if (scrollDirection(e) > 0) {
         if (++scrollUp % 2) {
             if (currentSection > 0) {
@@ -298,16 +292,57 @@ const handleScrollbar = (e: { preventDefault: () => void; }) => {
             }
         }
     }
-
 }
+
+let prevSplinePoint=0
+
+
+function cameraScrolling(e: any ) {
+    const currOffsetPerc: number = main.scrollTop / (main.scrollHeight - main.clientHeight);
+    
+    let cameraSection = Math.floor(currOffsetPerc * sections.length);
+    if(cameraSection>=sections.length){
+        cameraSection=sections.length-1;
+    }
+
+    let cameraSectionTarget = null;
+
+    if(sections[cameraSection].className == "left"){
+        cameraSectionTarget = TARGET_LEFT;
+    } else if (sections[cameraSection].className == "right"){
+        cameraSectionTarget = TARGET_RIGHT;
+    }
+    
+    
+    const splinePoint = cameraSection * (1/(sections.length-1))
+    
+    if(splinePoint!=prevSplinePoint){
+
+        //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
+        cameraUtils.moveCameraAlongSpline(cameraSpline,splinePoint,3000);
+        
+        prevSplinePoint=splinePoint;
+    }
+}
+
+
 
 main.addEventListener('wheel', checkScroll, { passive: false });
 
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === 'y') {
+        if(main.style.visibility == "hidden")
+            main.style.visibility = "visible";
+        else
+            main.style.visibility = "hidden";
+    }
+  });
 
 
 
 
-var timer;
+
+
 const vector3 = new Vector3();
 let lastHorizontal = controls.getAzimuthalAngle();
 let lastVertical = controls.getPolarAngle();
@@ -331,7 +366,7 @@ function animate() {
     //}, 5 );
     //GreetingBox.updateTweens();
     TWEEN.update()
-    controls.update();
+    //controls.update();
     stats.update();
 
     horizontalFactor = (controls.getAzimuthalAngle() - lastHorizontal);
@@ -350,18 +385,15 @@ function animate() {
     renderer.clearDepth();
     renderer.render(scene, camera);
 
-    tiltCamera();
+    //cameraUtils.tiltCamera(solarCenter);
 
     lastHorizontal = controls.getAzimuthalAngle();
     lastVertical = controls.getPolarAngle();
+    
+    //console.log(camera.position);
+
 }
 animate();
 
 
-function tiltCamera() {
-    timer = new Date().getTime() * 0.0001;
-    camera.position.add(new Vector3(Math.cos(timer) * 0.6, 0, 0));
-    camera.position.add(new Vector3(0, Math.sin(timer) * 0.3, 0));
-    camera.lookAt(solarCenter);
-}
 

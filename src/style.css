@@ -2,7 +2,7 @@
 
 :root {
   --dark-bg: rgba(15, 15, 15, 0.6);
-  --spacing: 350px;
+  --spacing: 500px;
   --empty: 50000px;
 
   font-family: brandon-grotesque, sans-serif;
@@ -39,22 +39,23 @@ canvas {
 }
 
 
-
   header {
     background: var(--dark-bg);
-    grid-column: 1 / span 12;
-    font-size: 3vw;
+    grid-column: 5 / span 12;
+    font-size: 2vw;
     padding: 1vw;
     margin-bottom: var(--spacing);
   }
 
-  section {
+
+  section{
     padding: 1rem;
-    background: var(--dark-bg);
+    background-color: var(--dark-bg);
     font-size: 1.25rem;
     line-height: 1.5;
     margin-bottom: var(--spacing);
   }
+
 
   space {
     margin: 0;
@@ -75,6 +76,10 @@ canvas {
     font-size: 4rem;
     display: inline;
     line-height: 1;
+  }
+
+  .center {
+    grid-column: 6 / span 10;
   }
 
   .left {
