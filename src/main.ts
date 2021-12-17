@@ -26,8 +26,8 @@ enum AllLayers {
 }
 
 
-const TARGET_LEFT = 100;
-const TARGET_RIGHT = -TARGET_LEFT;
+const LEAN_LEFT = 30;
+const LEAN_RIGHT = -LEAN_LEFT;
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -305,12 +305,12 @@ function cameraScrolling(e: any ) {
         cameraSection=sections.length-1;
     }
 
-    let cameraSectionTarget = null;
+    let leanAngle = 0;
 
     if(sections[cameraSection].className == "left"){
-        cameraSectionTarget = TARGET_LEFT;
+        leanAngle = LEAN_LEFT;
     } else if (sections[cameraSection].className == "right"){
-        cameraSectionTarget = TARGET_RIGHT;
+        leanAngle = LEAN_RIGHT;
     }
     
     
@@ -319,7 +319,7 @@ function cameraScrolling(e: any ) {
     if(splinePoint!=prevSplinePoint){
 
         //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
-        cameraUtils.moveCameraAlongSpline(cameraSpline,splinePoint,3000);
+        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline,splinePoint,3000,THREE.MathUtils.degToRad(leanAngle));
         
         prevSplinePoint=splinePoint;
     }
