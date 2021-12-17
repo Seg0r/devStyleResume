@@ -1,10 +1,21 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve } from 'three';
 
-interface TweenCamera {
+interface TweenCameraInterface {
     tween: TWEEN.Tween<UnknownProps>;
     onCompleteCallback:(object: UnknownProps)=>void;
 }
+
+// class TweenCamera implements TweenCameraInterface{
+//     tween: TWEEN.Tween<UnknownProps>;
+//     onCompleteCallback: (object: UnknownProps) => void;
+
+//     constructor(tweenDef: () => TweenCameraInterface){
+//         this.tween=tweenDef.tween;
+//         this.onCompleteCallback = tweenDef.onCompleteCallback;
+//     }
+    
+// }
 
 class TweenObject{
     value: number;
@@ -42,7 +53,6 @@ export class CameraUtils {
 
     currTween: TWEEN.Tween<UnknownProps> | undefined;
     tweenOnCurveVal = new TweenObject(0);
-    startPositionOnSpline = new TweenObject(0);
     origin: Vector3;
     yAxis= new Vector3(0,1,0);
 
@@ -75,19 +85,19 @@ export class CameraUtils {
         })
     }
 
-    private async chainTweens(tween: TWEEN.Tween<UnknownProps>, onComplete:(object: UnknownProps)=>void){
+    private async chainTweens(tweenDefPrepare: ()=>TweenCameraInterface){
         const _this = this;
+        const tweenDef: TweenCameraInterface =  tweenDefPrepare();
         return new Promise<void> (function(resolve) {
-
-            tween.onComplete((object)=>{
-                onComplete(object);
+            tweenDef.tween.onComplete((object)=>{
+                tweenDef.onCompleteCallback(object);
                 resolve();
             });
 
             if(_this.currTween && _this.currTween.isPlaying()){
-                _this.currTween.chain(tween);
+                _this.currTween.chain(tweenDef.tween);
             }else{
-                _this.currTween=tween;
+                _this.currTween=tweenDef.tween;
                 _this.currTween.start();
             }
         });
@@ -124,39 +134,19 @@ export class CameraUtils {
     private cameraTweenLook(viewFromPoint: Readonly<Vector3>,
         lookAtPoint: Readonly<Vector3>, time: number,
         easingFun: (amount: number) => number) {
-        // backup original rotation
-        const startQuaternion = new Quaternion().copy(this.camera.quaternion);
-        // final rotation (with lookAt)
-        const startPosition = new Vector3().copy(this.camera.position);
-        this.camera.position.copy(viewFromPoint);
-        this.camera.lookAt(lookAtPoint);
-        const endQuaternion = new Quaternion().copy(this.camera.quaternion);
-        // revert to original rotation
-        this.camera.quaternion.copy(startQuaternion);
-        this.camera.position.copy(startPosition);
-        // Tween
-        let part = { t: 0 };
 
-        new TWEEN.Tween(part)
-            .to({ t: 1 }, time)
-            .onUpdate((tween) => {
-                this.camera.quaternion.slerp(endQuaternion, tween.t);
-            })
-            .easing(easingFun)
-            .start();
+        const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, viewFromPoint,lookAtPoint)
+        this.tweenCameraQuaternion(time, endQuaternion, easingFun);
     }
 
     private tweenCameraRotation(angle: number,axis: Vector3, time: number, easingFun: (amount: number) => number){
 
-        const startQuaternion = new Quaternion().copy(this.camera.quaternion);
-        // final rotation (with lookAt)
-        const startPosition = new Vector3().copy(this.camera.position);
-        this.camera.rotateOnAxis(axis,angle);
-        const endQuaternion = new Quaternion().copy(this.camera.quaternion);
-        // revert to original rotation
-        this.camera.quaternion.copy(startQuaternion);
-        this.camera.position.copy(startPosition);
-        // Tween
+        const endQuaternion = CameraUtils.calcCameraQuaternionRotateOnAxis(this.camera, axis,angle)
+        this.tweenCameraQuaternion(time, endQuaternion, easingFun);
+    }
+
+    
+    private tweenCameraQuaternion(time: number, endQuaternion: Quaternion, easingFun: (amount: number) => number) {
         let part = { t: 0 };
 
         new TWEEN.Tween(part)
@@ -187,44 +177,64 @@ export class CameraUtils {
         })
     }
 
-    public moveCameraAlongSplineAndLean(curve: Readonly<Curve<Vector3>>, endPosition: number, time: number, leanAngle: number) {
+    public moveCameraAlongSplineAndLean(curve: Readonly<Curve<Vector3>>, startPosition: number, endPosition: number, time: number, leanAngle: number) {
 
         const tweenObj = new TweenAlongSpline(curve,endPosition,time,leanAngle);
         
-        const tweenHandle = () =>{
-            // backup original rotation and position
-            const startQuaternion = new Quaternion().copy(this.camera.quaternion);
-            const startPosition = new Vector3().copy(this.camera.position);
-            // move and rotate (with lookAt + lean)
-            this.camera.position.copy(curve.getPoint(endPosition));
-            this.camera.lookAt(this.origin);
-            this.camera.rotateY(leanAngle);
-            //save quaternion
-            const endQuaternion = new Quaternion().copy(this.camera.quaternion);
-            // revert to original rotation and position
-            this.camera.quaternion.copy(startQuaternion);
-            this.camera.position.copy(startPosition);
+        const tweenPrepare = ():TweenCameraInterface=>{
+
+            const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, curve.getPoint(endPosition),this.origin,leanAngle)
+
             // Tween
             let part = { t: 0 };
             endPosition = Math.round((endPosition+ Number.EPSILON) * 100) / 100;
-            let positionDelta = endPosition-this.startPositionOnSpline.value;
-
+            let positionDelta = endPosition-startPosition;
+            
             const tween = new TWEEN.Tween(part)
                 .to({ t: 1 }, time)
                 .onUpdate((tween) => {
                     this.camera.quaternion.slerp(endQuaternion, tween.t);
-                    const destPosition = this.startPositionOnSpline.value+(tween.t*positionDelta);
-                    this.camera.position.copy(curve.getPoint(destPosition));
+                    this.camera.position.copy(curve.getPoint(startPosition+(tween.t*positionDelta)));
                 })
                 .easing(TWEEN.Easing.Cubic.InOut);
 
             const onCompleteCallback = ()=>{
-                this.startPositionOnSpline.value = endPosition;
+                
             }
+        
+            return {tween,onCompleteCallback};
         }
 
-        this.chainTweens(tween,onCompleteCallback);
+        this.chainTweens(tweenPrepare);
             
+    }
+
+    
+
+
+    static calcCameraQuaternionLookAt(_camera: Readonly<Camera>, endPosition: Vector3, lookAtVector: Vector3, leanAngle?: number): Quaternion{
+        const camera: Camera = _camera.clone();
+        // backup original rotation and position
+        const startQuaternion = new Quaternion().copy(camera.quaternion);
+        const startPosition = new Vector3().copy(camera.position);
+        // move and rotate (with lookAt + lean)
+        camera.position.copy(endPosition);
+        camera.lookAt(lookAtVector);
+        if(leanAngle)
+            camera.rotateY(leanAngle);
+        //save quaternion
+        return new Quaternion().copy(camera.quaternion);        
+    }
+
+    static calcCameraQuaternionRotateOnAxis(_camera: Readonly<Camera>, axis: Vector3, angle: number): Quaternion{
+        const camera: Camera = _camera.clone();
+        // backup original rotation and position
+        const startQuaternion = new Quaternion().copy(camera.quaternion);
+        const startPosition = new Vector3().copy(camera.position);
+        // move and rotate 
+        camera.rotateOnAxis(axis,angle);
+        //save quaternion
+        return new Quaternion().copy(camera.quaternion);        
     }
 
 }

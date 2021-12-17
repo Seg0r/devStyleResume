@@ -319,7 +319,7 @@ function cameraScrolling(e: any ) {
     if(splinePoint!=prevSplinePoint){
 
         //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
-        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline,splinePoint,3000,THREE.MathUtils.degToRad(leanAngle));
+        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline,prevSplinePoint,splinePoint,3000,THREE.MathUtils.degToRad(leanAngle));
         
         prevSplinePoint=splinePoint;
     }
