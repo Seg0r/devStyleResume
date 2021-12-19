@@ -150,18 +150,23 @@ export class CameraUtils {
         const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, curve.getPoint(endPosition),this.origin,leanAngle)
 
         // Tween
-        let part: TweenObject = { t: 0 , pos:this.startPosition};
+        let part: TweenObject = { t: 0 , pos:0};
         let startQuat: Quaternion ;
         let calcQuat = new Quaternion();
+        let posDirection: number;
+        let startPos: number;
         
         const newTween = new TWEEN.Tween(part)
             .onStart((tween)=>{
                 startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
-                tween.pos=this.startPosition;
+                startPos=this.startPosition;
+                posDirection = endPosition - this.startPosition;
             })
             .to({ t: 1, pos: endPosition}, time)
             .onUpdate((tween) => {
-                this.camera.position.copy(curve.getPoint(tween.pos));
+                let destPos=startPos+tween.t*posDirection;
+                destPos=destPos<0?0:(destPos>1?1:destPos);
+                this.camera.position.copy(curve.getPoint(destPos));
                 calcQuat.slerpQuaternions(startQuat,endQuaternion,tween.t)
                 this.camera.quaternion.copy(calcQuat);
             })
@@ -173,7 +178,9 @@ export class CameraUtils {
     }
 
     
-
+    static rounded2(val:number):number{
+        return (Math.round((val)*100))/100;
+    }
 
     static calcCameraQuaternionLookAt(_camera: Readonly<Camera>, endPosition: Vector3, lookAtVector: Vector3, leanAngle?: number): Quaternion{
         const camera: Camera = _camera.clone();
