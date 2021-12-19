@@ -1,44 +1,12 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve } from 'three';
 
-interface TweenCameraInterface {
-    tween: TWEEN.Tween<UnknownProps>;
-    onCompleteCallback:(object: UnknownProps)=>void;
+
+interface TweenObject{
+    t: number;
+    pos: number
 }
 
-// class TweenCamera implements TweenCameraInterface{
-//     tween: TWEEN.Tween<UnknownProps>;
-//     onCompleteCallback: (object: UnknownProps) => void;
-
-//     constructor(tweenDef: () => TweenCameraInterface){
-//         this.tween=tweenDef.tween;
-//         this.onCompleteCallback = tweenDef.onCompleteCallback;
-//     }
-    
-// }
-
-class TweenObject{
-    value: number;
-
-    constructor(val: number){
-        this.value=val;
-    }
-}
-
-class TweenAlongSpline{
-    curve: Curve<Vector3>;
-    leanAngle: number = 0;
-    time: number;
-    endPosition: number;
-
-    constructor(curve: Curve<Vector3>, endPosition: number, time: number, leanAngle?: number){
-        this.curve=curve;
-        this.endPosition=endPosition;
-        this.time=time;
-        if(leanAngle)
-            this.leanAngle=leanAngle;
-    }
-}
 
 declare type UnknownProps = Record<string, any>;
 
@@ -52,9 +20,9 @@ export class CameraUtils {
     currTweenObject: TWEEN.Tween<TweenObject> | undefined;
 
     currTween: TWEEN.Tween<UnknownProps> | undefined;
-    tweenOnCurveVal = new TweenObject(0);
     origin: Vector3;
     yAxis= new Vector3(0,1,0);
+    startPosition: number = 0;
 
 
     constructor(camera: Camera, origin: Vector3) {
@@ -85,19 +53,26 @@ export class CameraUtils {
         })
     }
 
-    private async chainTweens(tweenDefPrepare: ()=>TweenCameraInterface){
+    private async chainTweens(tween: TWEEN.Tween<TweenObject>){
         const _this = this;
-        const tweenDef: TweenCameraInterface =  tweenDefPrepare();
+
         return new Promise<void> (function(resolve) {
-            tweenDef.tween.onComplete((object)=>{
-                tweenDef.onCompleteCallback(object);
+
+            const anyTween = tween as any;
+
+            const orgCallback = anyTween['_onCompleteCallback'];
+
+            anyTween.onComplete((obj:TweenObject)=>{
+                if(orgCallback)
+                    orgCallback();
+                _this.startPosition=obj.pos;
                 resolve();
             });
 
             if(_this.currTween && _this.currTween.isPlaying()){
-                _this.currTween.chain(tweenDef.tween);
+                _this.currTween.chain(tween);
             }else{
-                _this.currTween=tweenDef.tween;
+                _this.currTween=tween;
                 _this.currTween.start();
             }
         });
@@ -106,27 +81,20 @@ export class CameraUtils {
     private async cameraTweenAlongCurve(curve: Readonly<Curve<Vector3>>, position: number, time: number) {
 
         const _this = this;
-        return new Promise<void> (function(resolve) {
 
-        console.log(curve.getPoint(position));
-        const nextTween = new TWEEN.Tween(_this.tweenOnCurveVal)
-            .to({ value: position }, time)
+        const obj:TweenObject = {t:0,pos:_this.startPosition}
+
+        const tween = new TWEEN.Tween(obj)
+            .to({ t:0, pos: position }, time)
             .onUpdate((tween) => {
-                _this.camera.position.copy(curve.getPoint(tween.value));
+                _this.camera.position.copy(curve.getPoint(tween.pos));
                 _this.camera.lookAt(_this.origin);
             })
-            .easing(TWEEN.Easing.Cubic.InOut)
-            .onComplete(()=>{
-                resolve();
-            });
+            .easing(TWEEN.Easing.Cubic.InOut);
             
-            if(_this.currTweenObject && _this.currTweenObject.isPlaying()){
-                _this.currTweenObject.chain(nextTween);
-            }else{
-                _this.currTweenObject=nextTween;
-                _this.currTweenObject.start();
-            }
-        })
+        this.chainTweens(tween).then(()=>{
+            console.log("promise resolved")
+        });
     }
 
 
@@ -179,33 +147,28 @@ export class CameraUtils {
 
     public moveCameraAlongSplineAndLean(curve: Readonly<Curve<Vector3>>, startPosition: number, endPosition: number, time: number, leanAngle: number) {
 
-        const tweenObj = new TweenAlongSpline(curve,endPosition,time,leanAngle);
+        const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, curve.getPoint(endPosition),this.origin,leanAngle)
+
+        // Tween
+        let part: TweenObject = { t: 0 , pos:this.startPosition};
+        let startQuat: Quaternion ;
+        let calcQuat = new Quaternion();
         
-        const tweenPrepare = ():TweenCameraInterface=>{
-
-            const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, curve.getPoint(endPosition),this.origin,leanAngle)
-
-            // Tween
-            let part = { t: 0 };
-            endPosition = Math.round((endPosition+ Number.EPSILON) * 100) / 100;
-            let positionDelta = endPosition-startPosition;
-            
-            const tween = new TWEEN.Tween(part)
-                .to({ t: 1 }, time)
-                .onUpdate((tween) => {
-                    this.camera.quaternion.slerp(endQuaternion, tween.t);
-                    this.camera.position.copy(curve.getPoint(startPosition+(tween.t*positionDelta)));
-                })
-                .easing(TWEEN.Easing.Cubic.InOut);
-
-            const onCompleteCallback = ()=>{
-                
-            }
+        const newTween = new TWEEN.Tween(part)
+            .onStart((tween)=>{
+                startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
+                tween.pos=this.startPosition;
+            })
+            .to({ t: 1, pos: endPosition}, time)
+            .onUpdate((tween) => {
+                this.camera.position.copy(curve.getPoint(tween.pos));
+                calcQuat.slerpQuaternions(startQuat,endQuaternion,tween.t)
+                this.camera.quaternion.copy(calcQuat);
+            })
+            .easing(TWEEN.Easing.Cubic.InOut);
         
-            return {tween,onCompleteCallback};
-        }
-
-        this.chainTweens(tweenPrepare);
+        this.chainTweens(newTween).then(()=>{
+        });
             
     }
 
@@ -234,7 +197,7 @@ export class CameraUtils {
         // move and rotate 
         camera.rotateOnAxis(axis,angle);
         //save quaternion
-        return new Quaternion().copy(camera.quaternion);        
+        return new Quaternion().copy(camera.quaternion);
     }
 
 }
