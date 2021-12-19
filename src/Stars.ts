@@ -54,10 +54,10 @@ export class Stars {
 
     timeout = false;
 
-    public render(verticalFactor : number, horizontalFactor: number){
+    public render(f:{horizontalFactor:number,verticalFactor:number}){
 
-        const rotationAngle = -Math.atan2(verticalFactor,horizontalFactor);
-        let scaleFactor = Math.max(Math.abs(horizontalFactor),Math.abs(verticalFactor))
+        const rotationAngle = -Math.atan2(f.verticalFactor,f.horizontalFactor);
+        let scaleFactor = Math.max(Math.abs(f.horizontalFactor),Math.abs(f.verticalFactor))
         if(scaleFactor>0.0001 && scaleFactor < 1){
             this.calculateDrawRange(scaleFactor,rotationAngle);
         }

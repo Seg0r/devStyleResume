@@ -91,7 +91,7 @@ const cameraSpline = new THREE.CatmullRomCurve3( [
 	new THREE.Vector3(-1000,250,900),
 	new THREE.Vector3(400,200,900  ),
 	new THREE.Vector3(750,400,300  ),
-	new THREE.Vector3(-400,-400,150 ),
+	new THREE.Vector3(-400,-400,500 ),
     new THREE.Vector3(-1000,100,0 ),
     new THREE.Vector3(100,600,500  ),
     new THREE.Vector3(1000,700,700 )
@@ -134,6 +134,9 @@ const controls = new OrbitControls(camera, renderer.domElement);;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.rotateSpeed = 0.2;
+controls.enabled=false;
+
+
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
@@ -318,6 +321,8 @@ function cameraScrolling(e: any ) {
     
     if(splinePoint!=prevSplinePoint){
 
+        console.log(splinePoint);
+
         //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
         cameraUtils.moveCameraAlongSplineAndLean(cameraSpline,prevSplinePoint,splinePoint,3000,THREE.MathUtils.degToRad(leanAngle));
         
@@ -331,25 +336,38 @@ main.addEventListener('wheel', checkScroll, { passive: false });
 
 document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'y') {
-        if(main.style.visibility == "hidden")
+        if(main.style.visibility == "hidden"){
             main.style.visibility = "visible";
-        else
+            controls.enabled=false;
+        }
+        else{
             main.style.visibility = "hidden";
+            controls.enabled=true;
+        }
     }
   });
 
 
 
-
-
-
 const vector3 = new Vector3();
-let lastHorizontal = controls.getAzimuthalAngle();
-let lastVertical = controls.getPolarAngle();
+
+let lastHorizontal:number = controls.getAzimuthalAngle();;
+let lastVertical:number = controls.getPolarAngle();;
+let currHorizontal:number;
+let currVertical:number;
+ 
+
 let horizontalFactor = 0;
 let verticalFactor = 0;
 
+
 //animate loop
+animate();
+
+
+
+
+
 function animate() {
     // cloudParticles.forEach(p => {
     //     p.rotation.z -=0.001;
@@ -362,15 +380,11 @@ function animate() {
     //  });
     //requestAnimationFrame(animate);
     //setTimeout( function() {
-    requestAnimationFrame(animate);
+    
     //}, 5 );
     //GreetingBox.updateTweens();
-    TWEEN.update()
-    //controls.update();
+    TWEEN.update();
     stats.update();
-
-    horizontalFactor = (controls.getAzimuthalAngle() - lastHorizontal);
-    verticalFactor = (controls.getPolarAngle() - lastVertical);
 
 
     //render scene
@@ -378,7 +392,7 @@ function animate() {
 
     universe.render();
     solarSystem.render();
-    stars.render(verticalFactor, horizontalFactor);
+    stars.render(calcCameraRotationSpeed());
     magneticField.render();
 
 
@@ -387,13 +401,27 @@ function animate() {
 
     //cameraUtils.tiltCamera(solarCenter);
 
-    lastHorizontal = controls.getAzimuthalAngle();
-    lastVertical = controls.getPolarAngle();
-    
-    //console.log(camera.position);
+    requestAnimationFrame(animate);
+}
+
+function calcCameraRotationSpeed(): {horizontalFactor:number,verticalFactor:number} {
+
+    if (controls.enabled) {
+        controls.update();
+        currHorizontal = controls.getAzimuthalAngle();
+        currVertical = controls.getPolarAngle();
+    } else {
+        currHorizontal = camera.rotation.y;
+        currVertical = camera.rotation.x;
+    }
+    horizontalFactor = (currHorizontal - lastHorizontal);
+    verticalFactor = (currVertical - lastVertical);
+    lastHorizontal = currHorizontal;
+    lastVertical = currVertical;
+
+    return {horizontalFactor:horizontalFactor,verticalFactor:verticalFactor}
+}
+
+function calcCameraRotation(){
 
 }
-animate();
-
-
-
