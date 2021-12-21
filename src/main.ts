@@ -87,15 +87,15 @@ document.querySelector('#main')!.appendChild(stats.dom);
 //camera away from orbit control
 let cameraUtils = new CameraUtils(camera, solarCenter);
 
-const cameraSpline = new THREE.CatmullRomCurve3( [
-	new THREE.Vector3(-1000,250,900),
-	new THREE.Vector3(400,200,900  ),
-	new THREE.Vector3(750,400,300  ),
-	new THREE.Vector3(-400,-400,500 ),
-    new THREE.Vector3(-1000,100,0 ),
-    new THREE.Vector3(100,600,500  ),
-    new THREE.Vector3(1000,700,700 )
-] );
+const cameraSpline = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-1000, 250, 900),
+    new THREE.Vector3(400, 200, 900),
+    new THREE.Vector3(750, 400, 300),
+    new THREE.Vector3(-400, -400, 500),
+    new THREE.Vector3(-1000, 100, 0),
+    new THREE.Vector3(100, 600, 500),
+    new THREE.Vector3(1000, 700, 700)
+]);
 
 camera.position.copy(cameraSpline.getPoint(0));
 
@@ -134,7 +134,7 @@ const controls = new OrbitControls(camera, renderer.domElement);;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.rotateSpeed = 0.2;
-controls.enabled=false;
+controls.enabled = false;
 
 
 //const gridHelper = new GridHelper(200,200)
@@ -297,68 +297,58 @@ const sectionScrolling = (e: Event) => {
     }
 }
 
-let prevSplinePoint=0
+let prevSplinePoint = 0
 
 
-function cameraScrolling(e: any ) {
+function cameraScrolling(e: any) {
+    const deltaScroll = Math.sign(e.deltaY);
     const currOffsetPerc: number = main.scrollTop / (main.scrollHeight - main.clientHeight);
-    
+
     let cameraSection = Math.floor(currOffsetPerc * sections.length);
-    if(cameraSection>=sections.length){
-        cameraSection=sections.length-1;
+    if (cameraSection >= sections.length) {
+        cameraSection = sections.length - 1;
     }
 
     let leanAngle = 0;
 
-    if(sections[cameraSection].className == "left"){
+    if (sections[cameraSection].className == "left") {
         leanAngle = LEAN_LEFT;
-    } else if (sections[cameraSection].className == "right"){
+    } else if (sections[cameraSection].className == "right") {
         leanAngle = LEAN_RIGHT;
     }
-    
-    
-    const splinePoint = cameraSection * (1/(sections.length-1))
-    
-    if(splinePoint!=prevSplinePoint){
 
-        console.log(splinePoint);
+
+    const splinePoint = cameraSection * (1 / (sections.length - 1))
+    console.log(splinePoint)
+
+    const deltaSpline = Math.sign(splinePoint - prevSplinePoint);
+
+    if (splinePoint != prevSplinePoint && deltaSpline == deltaScroll) {
+
+        console.log("move camera");
 
         //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
-        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline,prevSplinePoint,splinePoint,3000,THREE.MathUtils.degToRad(leanAngle));
-        
-        prevSplinePoint=splinePoint;
+        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline, prevSplinePoint, splinePoint, 3000, THREE.MathUtils.degToRad(leanAngle));
+
+        prevSplinePoint = splinePoint;
     }
 }
+main.addEventListener('wheel', checkScroll, { passive: true });
 
 
-
-main.addEventListener('wheel', checkScroll, { passive: false });
-
-document.addEventListener('keydown', function(event) {
+//enable OrbitControls on ctrl+y
+document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.key === 'y') {
-        if(main.style.visibility == "hidden"){
+        if (main.style.visibility == "hidden") {
             main.style.visibility = "visible";
-            controls.enabled=false;
+            controls.enabled = false;
         }
-        else{
+        else {
             main.style.visibility = "hidden";
-            controls.enabled=true;
+            controls.enabled = true;
         }
     }
-  });
-
-
-
-const vector3 = new Vector3();
-
-let lastHorizontal:number = controls.getAzimuthalAngle();;
-let lastVertical:number = controls.getPolarAngle();;
-let currHorizontal:number;
-let currVertical:number;
- 
-
-let horizontalFactor = 0;
-let verticalFactor = 0;
+});
 
 
 //animate loop
@@ -380,11 +370,14 @@ function animate() {
     //  });
     //requestAnimationFrame(animate);
     //setTimeout( function() {
-    
+
     //}, 5 );
     //GreetingBox.updateTweens();
     TWEEN.update();
     stats.update();
+    if (controls.enabled) {
+        controls.update();
+    }
 
 
     //render scene
@@ -392,8 +385,9 @@ function animate() {
 
     universe.render();
     solarSystem.render();
-    stars.render(calcCameraRotationSpeed());
+    stars.render();
     magneticField.render();
+
 
 
     renderer.clearDepth();
@@ -404,24 +398,5 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-function calcCameraRotationSpeed(): {horizontalFactor:number,verticalFactor:number} {
 
-    if (controls.enabled) {
-        controls.update();
-        currHorizontal = controls.getAzimuthalAngle();
-        currVertical = controls.getPolarAngle();
-    } else {
-        currHorizontal = camera.rotation.y;
-        currVertical = camera.rotation.x;
-    }
-    horizontalFactor = (currHorizontal - lastHorizontal);
-    verticalFactor = (currVertical - lastVertical);
-    lastHorizontal = currHorizontal;
-    lastVertical = currVertical;
 
-    return {horizontalFactor:horizontalFactor,verticalFactor:verticalFactor}
-}
-
-function calcCameraRotation(){
-
-}

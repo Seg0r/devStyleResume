@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { Camera, Group, Scene, Vector2, Vector3 } from 'three';
+import { Camera, Group, Scene, Spherical, Vector2, Vector3 } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface MeshState{
     mesh:THREE.Mesh;
@@ -14,6 +15,16 @@ export class Stars {
     stars: MeshState[] = [];
     camera: THREE.Camera;
     center: Vector3;
+
+    lastSpherical = new Spherical();
+    currSphelical = new Spherical();
+
+    horizontalFactor = 0;
+    verticalFactor = 0;
+
+    offset = new THREE.Vector3(); // so camera.up is the orbit axis
+    quat:THREE.Quaternion;
+    spherical = new THREE.Spherical();
 
     constructor(universSize: number, starsCount: number, camera: Camera) {
 
@@ -46,6 +57,8 @@ export class Stars {
             
             this.stars.push({mesh:mesh,startRotation:mesh.rotation.z, distance:distanceX});
         }
+
+        this.quat = new THREE.Quaternion().setFromUnitVectors(camera.up, new THREE.Vector3(0, 1, 0));
     }
 
     public addToScene(scene: Scene) {
@@ -54,17 +67,19 @@ export class Stars {
 
     timeout = false;
 
-    public render(f:{horizontalFactor:number,verticalFactor:number}){
+    public render(){
+
+        const f = this.calcCameraRotationSpeed();
 
         const rotationAngle = -Math.atan2(f.verticalFactor,f.horizontalFactor);
         let scaleFactor = Math.max(Math.abs(f.horizontalFactor),Math.abs(f.verticalFactor))
         if(scaleFactor>0.0001 && scaleFactor < 1){
-            this.calculateDrawRange(scaleFactor,rotationAngle);
+            this.scaleAndRotateStars(scaleFactor,rotationAngle);
         }
     }   
 
 
-    private calculateDrawRange(scaleFactor : number,rotationValue: number){
+    private scaleAndRotateStars(scaleFactor : number,rotationValue: number){
         const cameraDist = this.camera.position.distanceTo(this.center);
         for(let i=0; i < this.stars.length; i++){
             let sign= cameraDist < this.stars[i].mesh.position.distanceTo(this.camera.position) ? 1 : -1;
@@ -77,5 +92,19 @@ export class Stars {
 
     private distanceFactor(distance: number): number{
         return Math.pow(distance,1.85)/(this.univerSize/8);
+    }
+
+    private calcCameraRotationSpeed(): { horizontalFactor: number, verticalFactor: number } {
+    
+        this.offset.copy(this.camera.position).sub(this.center); // rotate offset to "y-axis-is-up" space
+        this.offset.applyQuaternion(this.quat); // angle from z-axis around y-axis
+        this.spherical.setFromVector3(this.offset);
+    
+        this.horizontalFactor = this.lastSpherical.theta - this.spherical.theta;
+        this.verticalFactor = this.lastSpherical.phi - this.spherical.phi;
+    
+        this.lastSpherical.copy(this.spherical);
+    
+        return { horizontalFactor: this.horizontalFactor, verticalFactor: this.verticalFactor }
     }
 }
