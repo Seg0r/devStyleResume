@@ -87,15 +87,23 @@ document.querySelector('#main')!.appendChild(stats.dom);
 //camera away from orbit control
 let cameraUtils = new CameraUtils(camera, solarCenter);
 
-const cameraSpline = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-1000, 250, 900),
-    new THREE.Vector3(400, 200, 900),
-    new THREE.Vector3(750, 400, 300),
-    new THREE.Vector3(-400, -400, 500),
-    new THREE.Vector3(-1000, 100, 0),
-    new THREE.Vector3(100, 600, 500),
-    new THREE.Vector3(1000, 700, 700)
-]);
+const cameraSplineDefinition:{vector:Vector3, mark:boolean}[] = [
+    {vector:new THREE.Vector3(-1000, 250, 900),mark:true},
+    {vector:new THREE.Vector3(400, 200, 900),mark:true},
+    {vector:new THREE.Vector3(800, 200, -500),mark:false},
+    {vector:new THREE.Vector3(0, 200, -800),mark:true},
+    //{vector:new THREE.Vector3(750, 400, 300),mark:true},   
+    {vector:new THREE.Vector3(-400, 600,600),mark:true},
+    {vector:new THREE.Vector3(-1000, 100, 0),mark:true},
+    {vector:new THREE.Vector3(100, 600, 500),mark:true},
+    {vector:new THREE.Vector3(1000, 700, 700),mark:true}
+];
+
+const cameraSpline = new THREE.CatmullRomCurve3(cameraSplineDefinition.map(a => a.vector));
+
+const cameraSplineMarks = cameraSplineDefinition.map(a => a.mark)
+
+const cameraSplineVectors = CameraUtils.calcSplinePoints(cameraSpline,cameraSplineMarks);
 
 camera.position.copy(cameraSpline.getPoint(0));
 
@@ -318,14 +326,14 @@ function cameraScrolling(e: any) {
     }
 
 
-    const splinePoint = cameraSection * (1 / (sections.length - 1))
+    let splinePoint = cameraSection * (1 / (sections.length - 1))
+    splinePoint = cameraSplineVectors[cameraSection]
     console.log(splinePoint)
 
+    //calculate direction to avoid "overdue" wheel spin
     const deltaSpline = Math.sign(splinePoint - prevSplinePoint);
 
     if (splinePoint != prevSplinePoint && deltaSpline == deltaScroll) {
-
-        console.log("move camera");
 
         //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
         cameraUtils.moveCameraAlongSplineAndLean(cameraSpline, prevSplinePoint, splinePoint, 3000, THREE.MathUtils.degToRad(leanAngle));
@@ -350,48 +358,33 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
+let i=0;
+
 
 //animate loop
 animate();
-
-
-
-
-
 function animate() {
-    // cloudParticles.forEach(p => {
-    //     p.rotation.z -=0.001;
-    //   });
-    //camera.position.add(new Vector3(0, 0.1, 0))
-    //camera.lookAt(new Vector3(0, 0, 0))
-    //middle.rotateOnWorldAxis(new Vector3(1,0,0),0.1)
-    // starParticles.forEach(p => {
-    //     p.rotation.z -=0.001;
-    //  });
-    //requestAnimationFrame(animate);
-    //setTimeout( function() {
 
-    //}, 5 );
-    //GreetingBox.updateTweens();
     TWEEN.update();
     stats.update();
     if (controls.enabled) {
         controls.update();
     }
 
-
     //render scene
     renderer.clear();
-
     universe.render();
     solarSystem.render();
     stars.render();
-    magneticField.render();
+    //magneticField.render();
 
 
 
     renderer.clearDepth();
     renderer.render(scene, camera);
+
+    if(i++%20==0)
+        console.log(camera.position)
 
     //cameraUtils.tiltCamera(solarCenter);
 
