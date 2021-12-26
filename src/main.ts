@@ -359,31 +359,25 @@ document.addEventListener('keydown', function (event) {
 });
 
 let i=0;
-var cameraHorzLimit = 200;
-var cameraVertLimit = 50;
+var cameraPanLimit = 50;
 var cameraCenter = new THREE.Vector3();
 
 cameraCenter.x = camera.position.x;
 cameraCenter.y = camera.position.y;
 
 var mouse = new THREE.Vector2(0,0);
-const deltaPosX = 10;
+const deltaPos = 10;
 
-console.log(cameraCenter.x,cameraHorzLimit)
+function panCamera() {
+    camera.position.x += calcCameraPan(mouse.x,camera.position.x,cameraCenter.x);
+    camera.position.y += calcCameraPan(mouse.y,camera.position.y,cameraCenter.y);
+}
 
-function updateCamera() {
-    const sign = Math.sign(mouse.x);
-
-    let inertia = Math.abs(camera.position.x - cameraCenter.x)/(cameraHorzLimit);
-    // console.log(camera.position.x, sign, inertia)
-
-    inertia = inertia < 0 ? 0 : inertia > 1?  1 : inertia;
-
-    camera.position.x += sign * deltaPosX * Math.abs(1-inertia);
-   
-    //offset the camera x/y based on the mouse's position in the window
-    // camera.position.x = cameraCenter.x + (cameraHorzLimit * mouse.x);
-    // camera.position.y = cameraCenter.y + (cameraVertLimit * mouse.y);
+function calcCameraPan(mouse: number,pos:number,center:number): number {
+    const sign = Math.sign(mouse);
+    let inertia = (pos - center) / (cameraPanLimit*2);
+    inertia = inertia < -1 ? -1 : inertia > 1 ? 1 : inertia;
+    return mouse * deltaPos * Math.abs(sign - inertia);
 }
 
 function onDocumentMouseMove(event:any) {
@@ -412,7 +406,7 @@ function animate() {
     stars.render();
     //magneticField.render();
 
-    updateCamera();
+    panCamera();
 
     renderer.clearDepth();
     renderer.render(scene, camera);
