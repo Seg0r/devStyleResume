@@ -92,7 +92,7 @@ const cameraSplineDefinition:{vector:Vector3, mark:boolean}[] = [
     {vector:new THREE.Vector3(400, 200, 900),mark:true},
     {vector:new THREE.Vector3(800, 200, -500),mark:false},
     {vector:new THREE.Vector3(0, 200, -800),mark:true},
-    //{vector:new THREE.Vector3(750, 400, 300),mark:true},   
+    {vector:new THREE.Vector3(-800, 400, 10),mark:false},   
     {vector:new THREE.Vector3(-400, 600,600),mark:true},
     {vector:new THREE.Vector3(-1000, 100, 0),mark:true},
     {vector:new THREE.Vector3(100, 600, 500),mark:true},
@@ -328,7 +328,7 @@ function cameraScrolling(e: any) {
 
     let splinePoint = cameraSection * (1 / (sections.length - 1))
     splinePoint = cameraSplineVectors[cameraSection]
-    console.log(splinePoint)
+    // console.log(splinePoint)
 
     //calculate direction to avoid "overdue" wheel spin
     const deltaSpline = Math.sign(splinePoint - prevSplinePoint);
@@ -359,7 +359,41 @@ document.addEventListener('keydown', function (event) {
 });
 
 let i=0;
+var cameraHorzLimit = 200;
+var cameraVertLimit = 50;
+var cameraCenter = new THREE.Vector3();
 
+cameraCenter.x = camera.position.x;
+cameraCenter.y = camera.position.y;
+
+var mouse = new THREE.Vector2(0,0);
+const deltaPosX = 10;
+
+console.log(cameraCenter.x,cameraHorzLimit)
+
+function updateCamera() {
+    const sign = Math.sign(mouse.x);
+
+    let inertia = Math.abs(camera.position.x - cameraCenter.x)/(cameraHorzLimit);
+    // console.log(camera.position.x, sign, inertia)
+
+    inertia = inertia < 0 ? 0 : inertia > 1?  1 : inertia;
+
+    camera.position.x += sign * deltaPosX * Math.abs(1-inertia);
+   
+    //offset the camera x/y based on the mouse's position in the window
+    // camera.position.x = cameraCenter.x + (cameraHorzLimit * mouse.x);
+    // camera.position.y = cameraCenter.y + (cameraVertLimit * mouse.y);
+}
+
+function onDocumentMouseMove(event:any) {
+    // event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    // console.log(mouse)
+}
+
+document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 //animate loop
 animate();
@@ -378,13 +412,13 @@ function animate() {
     stars.render();
     //magneticField.render();
 
-
+    updateCamera();
 
     renderer.clearDepth();
     renderer.render(scene, camera);
 
-    if(i++%20==0)
-        console.log(camera.position)
+    // if(i++%20==0)
+    //     console.log(camera.position)
 
     //cameraUtils.tiltCamera(solarCenter);
 
