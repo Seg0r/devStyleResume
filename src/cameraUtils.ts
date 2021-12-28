@@ -1,5 +1,5 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3 } from 'three';
+import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2 } from 'three';
 
 
 interface TweenObject {
@@ -7,8 +7,10 @@ interface TweenObject {
     pos: number
 }
 
-
 declare type UnknownProps = Record<string, any>;
+
+const cameraPanLimit = 25;
+const deltaPos = 5;
 
 export class CameraUtils {
 
@@ -24,10 +26,17 @@ export class CameraUtils {
     yAxis = new Vector3(0, 1, 0);
     startPosition: number = 0;
 
+    //camera pan variables
+    cameraCenter = new Vector3();
+    mouse = new Vector2(0,0);
+    sideVector = new Vector3();
+
 
     constructor(camera: Camera, origin: Vector3) {
         this.camera = camera;
         this.origin = origin;
+        this.camera.lookAt(origin);
+        this.setPanCameraConstants();
     }
 
 
@@ -173,6 +182,7 @@ export class CameraUtils {
             .easing(TWEEN.Easing.Cubic.InOut);
 
         this.chainTweens(newTween).then(() => {
+            this.setPanCameraConstants();
         });
 
     }
@@ -236,5 +246,43 @@ export class CameraUtils {
             return marks[idx];
         });
     }
+
+
+    private setPanCameraConstants(){
+        this.cameraCenter.x = this.camera.position.x;
+        this.cameraCenter.y = this.camera.position.y;
+        this.camera.getWorldDirection(this.sideVector);        
+        let up = new Vector3(0, 1, 0)
+        // this.camera.localToWorld(up).normalize();
+        this.sideVector.cross(this.camera.up).normalize();
+    }
+
+
+    private panCamera(mouse:Vector2) {
+        
+        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x,this.camera.position.x,this.cameraCenter.x));
+        this.camera.position.addScaledVector(this.camera.up, CameraUtils.calcCameraPan(mouse.y,this.camera.position.y,this.cameraCenter.y));
+    }
+
+    static calcCameraPan(mouse: number,pos:number,center:number): number {
+        const sign = Math.sign(mouse);
+        let inertia = (pos - center) / (cameraPanLimit*2);
+        inertia = inertia < -1 ? -1 : inertia > 1 ? 1 : inertia;
+        return mouse * deltaPos * Math.abs(sign - inertia);
+    }
+
+    render(mouse:Vector2) {
+        if(!this.currTween?.isPlaying())
+            this.panCamera(mouse);
+    }
+
+    public setPositionAndTarget(position:Vector3, target?:Vector3){
+        this.camera.position.copy(position);        
+        if(target){
+            this.camera.lookAt(target);
+        }
+        this.setPanCameraConstants();
+    }
+
 
 }

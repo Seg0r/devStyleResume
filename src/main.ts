@@ -57,11 +57,6 @@ const scene: Scene = new Scene();
 //scene.background = new THREE.Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize * 4);
 
-//camera.layers.enable(0);
-//camera.layers.enable(AllLayers.solarSystem);
-//camera.layers.enable(AllLayers.universe);
-//camera.layers.enable(AllLayers.stars);
-
 
 //Renderer
 const renderer = new WebGLRenderer({
@@ -105,7 +100,7 @@ const cameraSplineMarks = cameraSplineDefinition.map(a => a.mark)
 
 const cameraSplineVectors = CameraUtils.calcSplinePoints(cameraSpline,cameraSplineMarks);
 
-camera.position.copy(cameraSpline.getPoint(0));
+
 
 //Universe
 const universe = new Universe(universeSize);
@@ -246,19 +241,7 @@ scene.add(curveObject); */
 
 solarSystem.toggleSolarSystem();
 controls.target.copy(solarCenter);
-//camera.position.copy(new Vector3(solarSize * 4, solarSize, 0));
 
-// camera.position.add(new Vector3(250, 250, 500));
-
-
-// controls.target.copy(solarCenter.add(new Vector3(800,0,0)));
-// camera.position.copy(new Vector3(50,50,50).add(solarCenter));
-// const geo = solarSystem.generateGeometry(10);
-// const edges = new THREE.EdgesGeometry( geo );
-// const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff0000 } ) );
-// line.position.copy(solarCenter);
-// scene.add( line );
-//const material = 
 
 
 //resize callback
@@ -284,12 +267,12 @@ const checkScroll = (e: WheelEvent) => {
     // if (!scrolled) {
     //     scrolled = true;
     //sectionScrolling(e);
-    cameraScrolling(e);
+    sectionScrolling(e);
     //     setTimeout(function () { scrolled = false; }, 100);
     // };
 }
 
-const sectionScrolling = (e: Event) => {
+const sectionScrolling2 = (e: Event) => {
     if (scrollDirection(e) > 0) {
         if (++scrollUp % 2) {
             if (currentSection > 0) {
@@ -308,7 +291,7 @@ const sectionScrolling = (e: Event) => {
 let prevSplinePoint = 0
 
 
-function cameraScrolling(e: any) {
+function sectionScrolling(e: any) {
     const deltaScroll = Math.sign(e.deltaY);
     const currOffsetPerc: number = main.scrollTop / (main.scrollHeight - main.clientHeight);
 
@@ -358,36 +341,17 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-let i=0;
-var cameraPanLimit = 50;
-var cameraCenter = new THREE.Vector3();
 
-cameraCenter.x = camera.position.x;
-cameraCenter.y = camera.position.y;
-
-var mouse = new THREE.Vector2(0,0);
-const deltaPos = 10;
-
-function panCamera() {
-    camera.position.x += calcCameraPan(mouse.x,camera.position.x,cameraCenter.x);
-    camera.position.y += calcCameraPan(mouse.y,camera.position.y,cameraCenter.y);
-}
-
-function calcCameraPan(mouse: number,pos:number,center:number): number {
-    const sign = Math.sign(mouse);
-    let inertia = (pos - center) / (cameraPanLimit*2);
-    inertia = inertia < -1 ? -1 : inertia > 1 ? 1 : inertia;
-    return mouse * deltaPos * Math.abs(sign - inertia);
-}
+let mouse = new Vector2(0,0);
 
 function onDocumentMouseMove(event:any) {
     // event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    // console.log(mouse)
 }
 
 document.addEventListener('mousemove', onDocumentMouseMove, false);
+cameraUtils.setPositionAndTarget(cameraSpline.getPoint(0),solarCenter);
 
 //animate loop
 animate();
@@ -405,16 +369,10 @@ function animate() {
     solarSystem.render();
     stars.render();
     //magneticField.render();
-
-    panCamera();
+    cameraUtils.render(mouse);
 
     renderer.clearDepth();
     renderer.render(scene, camera);
-
-    // if(i++%20==0)
-    //     console.log(camera.position)
-
-    //cameraUtils.tiltCamera(solarCenter);
 
     requestAnimationFrame(animate);
 }
