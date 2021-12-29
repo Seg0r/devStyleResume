@@ -29,17 +29,27 @@ export class CameraUtils {
 
     //camera pan variables
     cameraCenter = new Vector3();
-    mouse = new Vector2(0,0);
+    mouse = new Vector2(0, 0);
     sideVector = new Vector3();
     upVector = new Vector3();
+    private _panEnabled: boolean = true;
+
+    public get panEnabled(): boolean {
+        return this._panEnabled;
+    }
+
+    public set panEnabled(value: boolean) {
+        this._panEnabled = value;
+    }
 
 
     constructor(camera: Camera, origin: Vector3) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
-        this.setPanCameraConstants();        
+        this.setPanCameraConstants();
     }
+
 
 
     //camera tweens
@@ -244,54 +254,56 @@ export class CameraUtils {
             }
         }
 
-        return points.filter((val,idx)=>{
+        return points.filter((val, idx) => {
             return marks[idx];
         });
     }
 
 
-    private setPanCameraConstants(){
+    private setPanCameraConstants() {
+        this.camera.updateWorldMatrix(false, false);
+        this.cameraCenter.copy(this.camera.position);
+
         // previous way of getting side vector
-        // this.cameraCenter.copy(this.camera.position);
-        // this.camera.getWorldDirection(this.sideVector);        
-        // this.sideVector.cross(this.camera.up).normalize();   
+        // this.camera.getWorldDirection(this.sideVector);
+        // this.sideVector.cross(this.camera.up).normalize();
+        // this.sideVector=new Vector3();
 
         let right = new Vector3(1, 0, 0);
         this.camera.localToWorld(right)
         right.sub(this.cameraCenter);
-        right.normalize()
-        this.sideVector.copy(right)
+        right.normalize();
+        this.sideVector.copy(right);
 
-        let up = new Vector3(0,1,0);
+        let up = new Vector3(0, 1, 0);
         this.camera.localToWorld(up)
         up.sub(this.cameraCenter);
-        up.normalize()
-        this.upVector.copy(up)
+        up.normalize();
+        this.upVector.copy(up);
     }
 
 
-    private panCamera(mouse:Vector2) {
-        const distVector = new Vector3().subVectors(this.camera.position,this.cameraCenter);
-        const xSign=Math.sign(this.sideVector.dot(distVector));
-        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x,this.sideVector.dot(distVector)));
-        this.camera.position.addScaledVector(this.upVector, CameraUtils.calcCameraPan(mouse.y,this.upVector.dot(distVector)));
+    private panCamera(mouse: Vector2) {
+        const distVector = new Vector3().subVectors(this.camera.position, this.cameraCenter);
+        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x, this.sideVector.dot(distVector)));
+        this.camera.position.addScaledVector(this.upVector, CameraUtils.calcCameraPan(mouse.y, this.upVector.dot(distVector)));
     }
 
-    static calcCameraPan(mouse: number,distance:number): number {
+    static calcCameraPan(mouse: number, distance: number): number {
         const sign = Math.sign(mouse);
-        let inertia = distance / (cameraPanLimit*2);
+        let inertia = distance / (cameraPanLimit * 2);
         inertia = inertia < -1 ? -1 : inertia > 1 ? 1 : inertia;
         return mouse * deltaPos * Math.abs(sign - inertia);
     }
 
-    render(mouse:Vector2) {
-        if(!this.currTween?.isPlaying())
+    render(mouse: Vector2) {
+        if (this.panEnabled && !this.currTween?.isPlaying())
             this.panCamera(mouse);
     }
 
-    public setPositionAndTarget(position:Vector3, target?:Vector3){
-        this.camera.position.copy(position);        
-        if(target){
+    public setPositionAndTarget(position: Vector3, target?: Vector3) {
+        this.camera.position.copy(position);
+        if (target) {
             this.camera.lookAt(target);
         }
         this.setPanCameraConstants();

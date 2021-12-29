@@ -82,23 +82,23 @@ document.querySelector('#main')!.appendChild(stats.dom);
 //camera away from orbit control
 let cameraUtils = new CameraUtils(camera, solarCenter);
 
-const cameraSplineDefinition:{vector:Vector3, mark:boolean}[] = [
-    {vector:new THREE.Vector3(-1000, 250, 900),mark:true},
-    {vector:new THREE.Vector3(400, 200, 900),mark:true},
-    {vector:new THREE.Vector3(800, 200, -500),mark:false},
-    {vector:new THREE.Vector3(0, 200, -800),mark:true},
-    {vector:new THREE.Vector3(-800, 400, 10),mark:false},   
-    {vector:new THREE.Vector3(-400, 600,600),mark:true},
-    {vector:new THREE.Vector3(-1000, 100, 0),mark:true},
-    {vector:new THREE.Vector3(100, 600, 500),mark:true},
-    {vector:new THREE.Vector3(1000, 700, 700),mark:true}
+const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
+    { vector: new THREE.Vector3(-1000, 250, 900), mark: true },
+    { vector: new THREE.Vector3(400, 200, 900), mark: true },
+    { vector: new THREE.Vector3(800, 200, -500), mark: false },
+    { vector: new THREE.Vector3(0, 200, -800), mark: true },
+    { vector: new THREE.Vector3(-800, 400, 10), mark: false },
+    { vector: new THREE.Vector3(-400, 600, 600), mark: true },
+    { vector: new THREE.Vector3(-1000, 100, 0), mark: true },
+    { vector: new THREE.Vector3(100, 600, 500), mark: true },
+    { vector: new THREE.Vector3(1000, 700, 700), mark: true }
 ];
 
 const cameraSpline = new THREE.CatmullRomCurve3(cameraSplineDefinition.map(a => a.vector));
 
 const cameraSplineMarks = cameraSplineDefinition.map(a => a.mark)
 
-const cameraSplineVectors = CameraUtils.calcSplinePoints(cameraSpline,cameraSplineMarks);
+const cameraSplineVectors = CameraUtils.calcSplinePoints(cameraSpline, cameraSplineMarks);
 
 
 
@@ -333,25 +333,27 @@ document.addEventListener('keydown', function (event) {
         if (main.style.visibility == "hidden") {
             main.style.visibility = "visible";
             controls.enabled = false;
+            cameraUtils.panEnabled = true;
         }
         else {
             main.style.visibility = "hidden";
             controls.enabled = true;
+            cameraUtils.panEnabled = false;
         }
     }
 });
 
 
-let mouse = new Vector2(0,0);
+let mouse = new Vector2(0, 0);
 
-function onDocumentMouseMove(event:any) {
+function onDocumentMouseMove(event: any) {
     // event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 document.addEventListener('mousemove', onDocumentMouseMove, false);
-cameraUtils.setPositionAndTarget(cameraSpline.getPoint(0),solarCenter);
+cameraUtils.setPositionAndTarget(cameraSpline.getPoint(0), solarCenter);
 
 //animate loop
 animate();
