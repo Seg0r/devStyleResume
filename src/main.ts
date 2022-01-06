@@ -75,12 +75,20 @@ const stats = new Stats();
 stats.showPanel(0);
 document.querySelector('#main')!.appendChild(stats.dom);
 
+//Orbit Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.rotateSpeed = 0.2;
+controls.enabled = false;
+// controls.autoRotate=true;
+
 //GreetingBox
 //const box = new GreetingBox();
 //box.addToScene(scene);
 
 //camera away from orbit control
-let cameraUtils = new CameraUtils(camera, solarCenter);
+let cameraUtils = new CameraUtils(camera, solarCenter,controls);
 
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(-1000, 250, 900), mark: true },
@@ -109,8 +117,7 @@ const universe = new Universe(universeSize);
 const nebula = new Nebula(universeSize, universeSize / 4, scene);
 
 //Stars
-const stars = new Stars(universeSize, universeSize * 0.7, camera);
-
+const stars = new Stars(universeSize, universeSize * 0.7, cameraUtils);
 
 //SolarSystem
 const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
@@ -120,11 +127,12 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-universe.addToScene(scene);
+// universe.addToScene(scene);
 stars.addToScene(scene);
-solarSystem.addToScene(scene);
-//magneticField.addToScene(scene);
-nebula.addToScene(scene);
+// solarSystem.addToScene(scene);
+// solarSystem.toggleSolarSystem();
+// magneticField.addToScene(scene);
+// nebula.addToScene(scene);
 
 
 //Lights
@@ -133,12 +141,6 @@ const pointLight = new PointLight(0xFFFFFF);
 pointLight.position.set(0, 0, 200);
 
 //Helpers
-const controls = new OrbitControls(camera, renderer.domElement);;
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.rotateSpeed = 0.2;
-controls.enabled = false;
-
 
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
@@ -239,7 +241,7 @@ scene.add(curveObject); */
 // }
 // document.body.onscroll = checkScroll;;
 
-solarSystem.toggleSolarSystem();
+
 controls.target.copy(solarCenter);
 
 

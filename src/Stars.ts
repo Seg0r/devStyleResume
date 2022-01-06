@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Camera, Group, Scene, Spherical, Vector2, Vector3 } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Camera, Euler, Group, Quaternion, Scene, Spherical, Vector2, Vector3 } from 'three';
+import { CameraUtils } from './CameraUtils';
 
 interface MeshState {
     mesh: THREE.Mesh;
@@ -15,30 +15,21 @@ export class Stars {
     univerSize: number;
     starsGroup: THREE.Group = new Group();
     stars: MeshState[] = [];
-    camera: THREE.Camera;
+    camera: CameraUtils;
     center: Vector3;
     currScaleFactor: number = 0;
     currDeltaFactorMultiplayer = 1;
 
-    lastSpherical = new Spherical();
-    currSphelical = new Spherical();
 
-    horizontalFactor = 0;
-    verticalFactor = 0;
-
-    offset = new THREE.Vector3(); // so camera.up is the orbit axis
-    quat: THREE.Quaternion;
-    spherical = new THREE.Spherical();
-
-    constructor(universSize: number, starsCount: number, camera: Camera) {
+    constructor(universSize: number, starsCount: number, camera: CameraUtils) {
 
         this.univerSize = universSize * 2;
         this.camera = camera;
 
         const geometry2 = new THREE.SphereBufferGeometry(universSize / 4000, 8, 5);
         const material2 = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        this.center = new Vector3(0, 0, 0);
-        const meshScaleFactor = universSize / 2;
+        this.center = this.camera.cameraLookAt;
+        const meshScaleFactor = universSize /1.5;
 
         for (let i = 0; i < starsCount; i++) {
             let x, y, z;
@@ -51,6 +42,7 @@ export class Stars {
             mesh.position.set(x, y, z);
             const distanceX = new Vector2(x, z).distanceTo(new Vector2(this.center.x, this.center.z));
             const distance = mesh.position.distanceTo(this.center);
+            // mesh.scale.set(0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor);
             mesh.scale.set(0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor);
             mesh.lookAt(this.center);
 
@@ -62,7 +54,6 @@ export class Stars {
             this.stars.push({ mesh: mesh, startRotation: mesh.rotation.z, distance: distanceX });
         }
 
-        this.quat = new THREE.Quaternion().setFromUnitVectors(camera.up, new THREE.Vector3(0, 1, 0));
     }
 
     public addToScene(scene: Scene) {
@@ -73,11 +64,11 @@ export class Stars {
 
     public render() {
 
-        const f = this.calcCameraRotationSpeed();
+        const f = this.camera.calcCameraRotationSpeed();
 
         const rotationAngle = -Math.atan2(f.verticalFactor, f.horizontalFactor);
         let scaleFactor = Math.max(Math.abs(f.horizontalFactor), Math.abs(f.verticalFactor))
-        if (scaleFactor > 0.0001 && scaleFactor < 1) {
+        if (scaleFactor > 0.0001 && scaleFactor < 100) {
             this.scaleAndRotateStars(scaleFactor, rotationAngle);
         }
     }
@@ -85,17 +76,18 @@ export class Stars {
 
     private scaleAndRotateStars(scaleFactor: number, rotationValue: number) {
         let factorToSet = 0;
-        const factorDiff = scaleFactor - this.currScaleFactor;
+        scaleFactor/=500;
+        let factorDiff = scaleFactor - this.currScaleFactor
         const cameraDist = this.camera.position.distanceTo(this.center);
 
         if (factorDiff > 0) {
             factorToSet = this.currScaleFactor + factorDelta*this.currDeltaFactorMultiplayer;
-            this.currDeltaFactorMultiplayer+=10;
+            this.currDeltaFactorMultiplayer+=10
         } else {
             factorToSet = scaleFactor;
             this.currDeltaFactorMultiplayer=1;
         }
-        console.log(this.currDeltaFactorMultiplayer)
+
         this.currScaleFactor = factorToSet;
         for (let i = 0; i < this.stars.length; i++) {
             let sign = cameraDist < this.stars[i].mesh.position.distanceTo(this.camera.position) ? 1 : -1;
@@ -108,19 +100,5 @@ export class Stars {
 
     private distanceFactor(distance: number): number {
         return Math.pow(distance, 1.85) / (this.univerSize / 8);
-    }
-
-    private calcCameraRotationSpeed(): { horizontalFactor: number, verticalFactor: number } {
-
-        this.offset.copy(this.camera.position).sub(this.center); // rotate offset to "y-axis-is-up" space
-        this.offset.applyQuaternion(this.quat); // angle from z-axis around y-axis
-        this.spherical.setFromVector3(this.offset);
-
-        this.horizontalFactor = this.lastSpherical.theta - this.spherical.theta;
-        this.verticalFactor = this.lastSpherical.phi - this.spherical.phi;
-
-        this.lastSpherical.copy(this.spherical);
-
-        return { horizontalFactor: this.horizontalFactor, verticalFactor: this.verticalFactor }
     }
 }

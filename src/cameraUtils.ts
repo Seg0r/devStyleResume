@@ -1,6 +1,7 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { throws } from 'assert';
-import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D } from 'three';
+import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
 interface TweenObject {
@@ -20,9 +21,9 @@ export class CameraUtils {
     vector = new Vector3;
     moving: boolean = false;
     currTweenV3: TWEEN.Tween<Vector3> | undefined;
-    currTweenObject: TWEEN.Tween<TweenObject> | undefined;
 
     currTween: TWEEN.Tween<UnknownProps> | undefined;
+    nextTween: TWEEN.Tween<UnknownProps> | undefined;
     origin: Vector3;
     yAxis = new Vector3(0, 1, 0);
     startPosition: number = 0;
@@ -30,24 +31,53 @@ export class CameraUtils {
     //camera pan variables
     cameraCenter = new Vector3();
     mouse = new Vector2(0, 0);
+    private _panEnabled: boolean = true;
+    cameraDir: Vector3 = new Vector3();
+    private _cameraLookAt = new Vector3();
+
+    //camera rotation factors
+    lastPos = new Vector3();
+    currentCameraPos: Vector3 = new Vector3();
+
+    //pan and rotation variables
     sideVector = new Vector3();
     upVector = new Vector3();
-    private _panEnabled: boolean = true;
+    dirVector = new Vector3();
+    orbitControls: OrbitControls;
+
+    public get cameraLookAt() {
+        return this._cameraLookAt;
+    }
+    public set cameraLookAt(value) {
+        this._cameraLookAt = value;
+    }
 
     public get panEnabled(): boolean {
         return this._panEnabled;
     }
 
     public set panEnabled(value: boolean) {
+        if (value) {
+            this.setPanCameraConstants();
+        }
         this._panEnabled = value;
     }
 
+    public get position(): Vector3 {
+        return this.camera.position;
+    }
 
-    constructor(camera: Camera, origin: Vector3) {
+    public get up(): Vector3 {
+        return this.camera.up;
+    }
+
+
+    constructor(camera: Camera, origin: Vector3, controls: OrbitControls) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
         this.setPanCameraConstants();
+        this.orbitControls=controls;
     }
 
 
@@ -57,7 +87,7 @@ export class CameraUtils {
 
         const _this = this;
         return new Promise<void>(function (resolve) {
-            console.log(cameraPos);
+            // console.log(cameraPos);
             const nextTween = new TWEEN.Tween(_this.camera.position)
                 .to(cameraPos, time)
                 .easing(TWEEN.Easing.Cubic.InOut)
@@ -87,11 +117,13 @@ export class CameraUtils {
                 if (orgCallback)
                     orgCallback();
                 _this.startPosition = obj.pos;
+                _this.currTween=_this.nextTween;
                 resolve();
             });
 
             if (_this.currTween && _this.currTween.isPlaying()) {
                 _this.currTween.chain(tween);
+                _this.nextTween=tween;
             } else {
                 _this.currTween = tween;
                 _this.currTween.start();
@@ -114,7 +146,7 @@ export class CameraUtils {
             .easing(TWEEN.Easing.Cubic.InOut);
 
         this.chainTweens(tween).then(() => {
-            console.log("promise resolved")
+            // console.log("promise resolved")
         });
     }
 
@@ -162,7 +194,7 @@ export class CameraUtils {
         var splinePoint = spline.getPoint(point);
         const promise = this.cameraTweenToPos(splinePoint, time);
         promise.then(() => {
-            console.log("promise received")
+            // console.log("promise received")
         })
     }
 
@@ -264,11 +296,6 @@ export class CameraUtils {
         this.camera.updateWorldMatrix(false, false);
         this.cameraCenter.copy(this.camera.position);
 
-        // previous way of getting side vector
-        // this.camera.getWorldDirection(this.sideVector);
-        // this.sideVector.cross(this.camera.up).normalize();
-        // this.sideVector=new Vector3();
-
         let right = new Vector3(1, 0, 0);
         this.camera.localToWorld(right)
         right.sub(this.cameraCenter);
@@ -280,13 +307,18 @@ export class CameraUtils {
         up.sub(this.cameraCenter);
         up.normalize();
         this.upVector.copy(up);
+
+        this.camera.getWorldDirection(this.cameraDir);
+        this.cameraDir.normalize();
+        const dist = this.camera.position.distanceTo(this.origin);
+        this.cameraLookAt.copy(this.camera.position).addScaledVector(this.cameraDir, dist);
     }
 
 
     private panCamera(mouse: Vector2) {
-        const distVector = new Vector3().subVectors(this.camera.position, this.cameraCenter);
-        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x, this.sideVector.dot(distVector)));
-        this.camera.position.addScaledVector(this.upVector, CameraUtils.calcCameraPan(mouse.y, this.upVector.dot(distVector)));
+        this.dirVector.subVectors(this.camera.position, this.cameraCenter);
+        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x, this.sideVector.dot(this.dirVector)));
+        this.camera.position.addScaledVector(this.upVector, CameraUtils.calcCameraPan(mouse.y, this.upVector.dot(this.dirVector)));
     }
 
     static calcCameraPan(mouse: number, distance: number): number {
@@ -309,5 +341,36 @@ export class CameraUtils {
         this.setPanCameraConstants();
     }
 
+    arrowHelper: ArrowHelper | undefined;
+
+
+    public calcCameraRotationSpeed(): { horizontalFactor: number, verticalFactor: number } {
+        let horizontalFactor = 0;
+        let verticalFactor = 0;
+
+        if (this.currTween?.isPlaying() || this.orbitControls.enabled) {
+            this.camera.updateWorldMatrix(false, false);
+            this.currentCameraPos.copy(this.camera.position);
+
+            this.upVector.set(0, 1, 0);
+            this.camera.localToWorld(this.upVector)
+            this.upVector.sub(this.currentCameraPos);
+            this.upVector.normalize();
+
+            this.sideVector.set(1, 0, 0);
+            this.camera.localToWorld(this.sideVector)
+            this.sideVector.sub(this.currentCameraPos);
+            this.sideVector.normalize();
+
+            this.dirVector.subVectors(this.currentCameraPos, this.lastPos);
+            horizontalFactor = -this.sideVector.dot(this.dirVector);
+            verticalFactor = this.upVector.dot(this.dirVector);
+            this.lastPos.copy(this.currentCameraPos);
+
+            console.log(horizontalFactor, verticalFactor)
+        }
+        
+        return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
+    }
 
 }
