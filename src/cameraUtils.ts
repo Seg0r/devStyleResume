@@ -63,6 +63,9 @@ export class CameraUtils {
     scrollBarMark: Object3D | undefined;
     lastCameraSection: number = 0;
     scrollbar: Group | undefined;
+    lastScrollTween: TWEEN.Tween<UnknownProps> | undefined;
+    newCameraSection: number = 0;
+    ;
 
 
     public get cameraLookAt() {
@@ -465,30 +468,36 @@ export class CameraUtils {
     }
 
     updateScrollBar(cameraSection: number) {
-        let part = { t: 0 };
-        let dest = 1;
-        const sectionDiff = cameraSection - this.lastCameraSection;
 
-        new TWEEN.Tween(part)
-            .to({ t: dest }, 1000)
-            .onUpdate((tween) => {
-                const pos = (this.lastCameraSection + tween.t * sectionDiff) * -10;
-                this.scrollBarMark?.position.set(0, pos, 0)
-                console.log(pos,tween.t);
-            })
-            .easing(TWEEN.Easing.Cubic.InOut)
-            .onComplete(() => {
-                this.lastCameraSection = cameraSection;
-                console.log("end:" + cameraSection + " last:" + this.lastCameraSection + " diff:"+sectionDiff)
-            }
-            )
-            .start();
-        console.log("start:" + cameraSection + " last:" + this.lastCameraSection + " diff:"+sectionDiff)
-
+        this.newCameraSection = cameraSection;
+        if (!this.lastScrollTween || !this.lastScrollTween.isPlaying()) {
+            this.lastScrollTween = this.startNewScrollBarTween(cameraSection);
+            // this.lastScrollTween!.start();
+        }
     }
 
-    public addScrollbar(scene:Scene) {
-    
+    private startNewScrollBarTween(cameraSection: number) {
+        let part = { t: this.lastCameraSection };
+
+        return new TWEEN.Tween(part)
+            .to({ t: cameraSection }, 1000)
+            .onUpdate((tween: any) => {
+                const pos = tween.t * -10;
+                this.scrollBarMark?.position.set(0, pos, 0)
+                // console.log(pos, tween.t);
+            })
+            .easing(TWEEN.Easing.Cubic.InOut)
+            .onComplete((tween) => {
+                console.log("end:" + tween.t + " this.newCameraSection:" + this.newCameraSection)
+                this.lastCameraSection = tween.t;
+                if (this.lastCameraSection != this.newCameraSection) {
+                    this.lastScrollTween = this.startNewScrollBarTween(this.newCameraSection);
+                }
+            }).start()
+    }
+
+    public addScrollbar(scene: Scene) {
+
         if (!this.scrollBarMark) {
             scene.add(this.camera)
             this.createScrollbar();
@@ -529,9 +538,9 @@ export class CameraUtils {
         const circleMesh = new Mesh(geometry, material);
         this.scrollbar.add(circleMesh);
 
-        this.setScrollbarPosition(this.camera.aspect*112, -200);
+        this.setScrollbarPosition(this.camera.aspect * 112, -200);
 
-        for (let index = 0; index < this.sections.length-1; index++) {
+        for (let index = 0; index < this.sections.length - 1; index++) {
             const line = new Line2(lineGeo, lineMat);
             line.position.set(0, index * -10, 0)
             this.scrollbar.add(line);
@@ -545,10 +554,10 @@ export class CameraUtils {
         const markMat = new MeshBasicMaterial({
             color: 0xffffff,
             transparent: true,
-            opacity: 0.5            
+            opacity: 0.5
         });
         this.scrollBarMark = new Mesh(markGeo, markMat)
-        this.scrollBarMark.renderOrder=1;
+        this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
     }
 
