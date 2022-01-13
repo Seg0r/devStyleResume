@@ -5,7 +5,7 @@ import { GreetingBox } from './GreetingBox'
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical, Camera } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
 // @ts-ignore
@@ -25,9 +25,6 @@ enum AllLayers {
     solarSystem
 }
 
-
-const LEAN_LEFT = 30;
-const LEAN_RIGHT = -LEAN_LEFT;
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -54,7 +51,7 @@ if (main)
 
 //Scene
 const scene: Scene = new Scene();
-//scene.background = new THREE.Color( 0x666666 );
+// scene.background = new THREE.Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize * 4);
 
 
@@ -88,7 +85,7 @@ controls.enabled = false;
 //box.addToScene(scene);
 
 //camera away from orbit control
-let cameraUtils = new CameraUtils(camera, solarCenter,controls);
+let cameraUtils = new CameraUtils(camera, solarCenter,controls,main);
 
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(-1000, 250, 900), mark: true },
@@ -102,12 +99,8 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(1000, 700, 700), mark: true }
 ];
 
-const cameraSpline = new THREE.CatmullRomCurve3(cameraSplineDefinition.map(a => a.vector));
-
-const cameraSplineMarks = cameraSplineDefinition.map(a => a.mark)
-
-const cameraSplineVectors = CameraUtils.calcSplinePoints(cameraSpline, cameraSplineMarks);
-
+cameraUtils.calcSplinePoints(cameraSplineDefinition);
+main.addEventListener('wheel', cameraUtils.checkScroll, { passive: true });
 
 
 //Universe
@@ -127,12 +120,12 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-// universe.addToScene(scene);
-stars.addToScene(scene);
-// solarSystem.addToScene(scene);
-// solarSystem.toggleSolarSystem();
-// magneticField.addToScene(scene);
-// nebula.addToScene(scene);
+//universe.addToScene(scene);
+//stars.addToScene(scene);
+//solarSystem.addToScene(scene);
+//solarSystem.toggleSolarSystem();
+//magneticField.addToScene(scene);
+nebula.addToScene(scene);
 
 
 //Lights
@@ -148,6 +141,8 @@ pointLight.position.set(0, 0, 200);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 //scene.add(pointLight);
+// const scrollbarScene:{scene:Scene,camera:Camera} = cameraUtils.createSceneForScrollbar(camera);
+cameraUtils.addScrollbar(scene);
 
 const worldAxis = new AxesHelper(100);
 //scene.add(worldAxis);
@@ -248,85 +243,13 @@ controls.target.copy(solarCenter);
 
 //resize callback
 function onWindowResize() {
-
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    cameraUtils.setScrollbarPosition(camera.aspect*112,-200);
 }
 window.addEventListener('resize', onWindowResize, false);
 
-let sections = main.children;
-let currentSection = 0;
-
-
-
-const scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
-let scrollUp = 0;
-let scrollDown = 0;
-
-const checkScroll = (e: WheelEvent) => {
-    //e.preventDefault();
-    // if (!scrolled) {
-    //     scrolled = true;
-    //sectionScrolling(e);
-    sectionScrolling(e);
-    //     setTimeout(function () { scrolled = false; }, 100);
-    // };
-}
-
-const sectionScrolling2 = (e: Event) => {
-    if (scrollDirection(e) > 0) {
-        if (++scrollUp % 2) {
-            if (currentSection > 0) {
-                sections[--currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-            }
-        }
-    } else {
-        if (++scrollDown % 2) {
-            if (currentSection < sections.length) {
-                sections[++currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-            }
-        }
-    }
-}
-
-let prevSplinePoint = 0
-
-
-function sectionScrolling(e: any) {
-    const deltaScroll = Math.sign(e.deltaY);
-    const currOffsetPerc: number = main.scrollTop / (main.scrollHeight - main.clientHeight);
-
-    let cameraSection = Math.floor(currOffsetPerc * sections.length);
-    if (cameraSection >= sections.length) {
-        cameraSection = sections.length - 1;
-    }
-
-    let leanAngle = 0;
-
-    if (sections[cameraSection].className == "left") {
-        leanAngle = LEAN_LEFT;
-    } else if (sections[cameraSection].className == "right") {
-        leanAngle = LEAN_RIGHT;
-    }
-
-
-    let splinePoint = cameraSection * (1 / (sections.length - 1))
-    splinePoint = cameraSplineVectors[cameraSection]
-    // console.log(splinePoint)
-
-    //calculate direction to avoid "overdue" wheel spin
-    const deltaSpline = Math.sign(splinePoint - prevSplinePoint);
-
-    if (splinePoint != prevSplinePoint && deltaSpline == deltaScroll) {
-
-        //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
-        cameraUtils.moveCameraAlongSplineAndLean(cameraSpline, prevSplinePoint, splinePoint, 3000, THREE.MathUtils.degToRad(leanAngle));
-
-        prevSplinePoint = splinePoint;
-    }
-}
-main.addEventListener('wheel', checkScroll, { passive: true });
 
 
 //enable OrbitControls on ctrl+y
@@ -355,7 +278,7 @@ function onDocumentMouseMove(event: any) {
 }
 
 document.addEventListener('mousemove', onDocumentMouseMove, false);
-cameraUtils.setPositionAndTarget(cameraSpline.getPoint(0), solarCenter);
+cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
 
 //animate loop
 animate();
@@ -376,6 +299,11 @@ function animate() {
     cameraUtils.render(mouse);
 
     renderer.clearDepth();
+
+    //render scrollbar
+    // renderer.render(scrollbarScene.scene,scrollbarScene.camera);
+
+    //render rest
     renderer.render(scene, camera);
 
     requestAnimationFrame(animate);

@@ -1,7 +1,10 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { throws } from 'assert';
-import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper } from 'three';
+import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper, MathUtils, Scene, TextureLoader, Group, PlaneBufferGeometry, Mesh, MeshBasicMaterial, AdditiveBlending, BufferGeometry, CircleGeometry, RingGeometry, LineBasicMaterial, Line, MultiplyBlending, OrthographicCamera } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 
 
 interface TweenObject {
@@ -14,9 +17,12 @@ declare type UnknownProps = Record<string, any>;
 const cameraPanLimit = 25;
 const deltaPos = 5;
 
+const LEAN_LEFT = 30;
+const LEAN_RIGHT = -LEAN_LEFT;
+
 export class CameraUtils {
 
-    camera: Camera;
+    camera: PerspectiveCamera;
     timer: number = 0;
     vector = new Vector3;
     moving: boolean = false;
@@ -45,6 +51,20 @@ export class CameraUtils {
     dirVector = new Vector3();
     orbitControls: OrbitControls;
 
+    //section scrolling
+    sections: HTMLCollection;
+    main: HTMLElement;
+    currentSection = 0;
+    scrollUp = 0;
+    scrollDown = 0;
+    prevSplinePoint = 0
+    cameraSplineVectors: number[] = [];
+    cameraSpline: CatmullRomCurve3 | undefined;
+    scrollBarMark: Object3D | undefined;
+    lastCameraSection: number = 0;
+    scrollbar: Group | undefined;
+
+
     public get cameraLookAt() {
         return this._cameraLookAt;
     }
@@ -72,14 +92,15 @@ export class CameraUtils {
     }
 
 
-    constructor(camera: Camera, origin: Vector3, controls: OrbitControls) {
+    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, main: HTMLElement) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
         this.setPanCameraConstants();
-        this.orbitControls=controls;
+        this.orbitControls = controls;
+        this.sections = main.children;
+        this.main = main;
     }
-
 
 
     //camera tweens
@@ -117,13 +138,13 @@ export class CameraUtils {
                 if (orgCallback)
                     orgCallback();
                 _this.startPosition = obj.pos;
-                _this.currTween=_this.nextTween;
+                _this.currTween = _this.nextTween;
                 resolve();
             });
 
             if (_this.currTween && _this.currTween.isPlaying()) {
                 _this.currTween.chain(tween);
-                _this.nextTween=tween;
+                _this.nextTween = tween;
             } else {
                 _this.currTween = tween;
                 _this.currTween.start();
@@ -262,7 +283,11 @@ export class CameraUtils {
     }
 
 
-    static calcSplinePoints(spline: CatmullRomCurve3, marks: boolean[]): number[] {
+    public calcSplinePoints(splineDef: { vector: Vector3, mark: boolean }[]) {
+
+        this.cameraSpline = new CatmullRomCurve3(splineDef.map(a => a.vector));
+        const marks = splineDef.map(a => a.mark)
+
         const points: number[] = [];
         const distance: number[] = [];
         const grain = 1000;
@@ -275,10 +300,10 @@ export class CameraUtils {
 
 
         for (let index = 0; index <= grain; index++) {
-            const curvePoint = spline.getPointAt(index * 1 / grain);
+            const curvePoint = this.cameraSpline.getPointAt(index * 1 / grain);
 
-            for (let index2 = 0; index2 < spline.points.length; index2++) {
-                const currDistance = spline.points[index2].distanceTo(curvePoint);
+            for (let index2 = 0; index2 < this.cameraSpline.points.length; index2++) {
+                const currDistance = this.cameraSpline.points[index2].distanceTo(curvePoint);
                 if (currDistance < distance[index2]) {
                     distance[index2] = currDistance;
                     points[index2] = index / grain;
@@ -286,7 +311,7 @@ export class CameraUtils {
             }
         }
 
-        return points.filter((val, idx) => {
+        this.cameraSplineVectors = points.filter((val, idx) => {
             return marks[idx];
         });
     }
@@ -367,10 +392,183 @@ export class CameraUtils {
             verticalFactor = this.upVector.dot(this.dirVector);
             this.lastPos.copy(this.currentCameraPos);
 
-            console.log(horizontalFactor, verticalFactor)
+            //console.log(horizontalFactor, verticalFactor)
         }
-        
+
         return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
+    }
+
+
+    private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
+
+
+    public checkScroll = (e: WheelEvent) => {
+        //e.preventDefault();
+        // if (!scrolled) {
+        //     scrolled = true;
+        //sectionScrolling(e);
+        this.sectionScrolling(e);
+        //     setTimeout(function () { scrolled = false; }, 100);
+        // };
+    }
+
+    public sectionScrolling2 = (e: Event) => {
+        if (this.scrollDirection(e) > 0) {
+            if (++this.scrollUp % 2) {
+                if (this.currentSection > 0) {
+                    this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+                }
+            }
+        } else {
+            if (++this.scrollDown % 2) {
+                if (this.currentSection < this.sections.length) {
+                    this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+                }
+            }
+        }
+    }
+
+
+    public sectionScrolling(e: any) {
+        const deltaScroll = Math.sign(e.deltaY);
+        const currOffsetPerc: number = this.main.scrollTop / (this.main.scrollHeight - this.main.clientHeight);
+
+        let cameraSection = Math.floor(currOffsetPerc * this.sections.length);
+        if (cameraSection >= this.sections.length) {
+            cameraSection = this.sections.length - 1;
+        }
+
+        let leanAngle = 0;
+
+        if (this.sections[cameraSection].className == "left") {
+            leanAngle = LEAN_LEFT;
+        } else if (this.sections[cameraSection].className == "right") {
+            leanAngle = LEAN_RIGHT;
+        }
+
+
+        let splinePoint = cameraSection * (1 / (this.sections.length - 1))
+        splinePoint = this.cameraSplineVectors[cameraSection]
+        // console.log(splinePoint)
+
+        //calculate direction to avoid "overdue" wheel spin
+        const deltaSpline = Math.sign(splinePoint - this.prevSplinePoint);
+
+        if (this.cameraSpline && splinePoint != this.prevSplinePoint && deltaSpline == deltaScroll) {
+
+            //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
+            this.moveCameraAlongSplineAndLean(this.cameraSpline!, this.prevSplinePoint, splinePoint, 3000, MathUtils.degToRad(leanAngle));
+
+            this.prevSplinePoint = splinePoint;
+            this.updateScrollBar(cameraSection);
+            this.lastCameraSection = cameraSection
+        }
+    }
+
+    updateScrollBar(cameraSection: number) {
+        let part = { t: 0 };
+        let dest = 1;
+        const sectionDiff = cameraSection - this.lastCameraSection;
+        if (sectionDiff < 0) {
+            part = { t: 1 };
+            dest = 0;
+        }
+        new TWEEN.Tween(part)
+            .to({ t: dest }, 1000)
+            .onUpdate((tween) => {
+                this.scrollBarMark?.position.set(0, (this.lastCameraSection + tween.t * sectionDiff) * -10, 0)
+            })
+            .easing(TWEEN.Easing.Cubic.InOut)
+            .onComplete(() => {
+                this.lastCameraSection = cameraSection;
+                console.log("end:" + cameraSection + " last:" + this.lastCameraSection + " diff:"+sectionDiff)
+            }
+            )
+            .start();
+        console.log("start:" + cameraSection + " last:" + this.lastCameraSection + " diff:"+sectionDiff)
+
+    }
+
+    // public createSceneForScrollbar(camera:Camera):{scene:Scene,camera:Camera} {
+    //     const scrollbarCamera = camera.clone();
+    //     const scrollbarScene = new Scene();
+
+    //     if (!this.scrollBarMark) {
+    //         scrollbarScene.add(scrollbarCamera)
+    //         this.createScrollbar(scrollbarCamera);
+    //     }
+
+    //     return {scene:scrollbarScene,camera:scrollbarCamera};
+    // }
+
+    public addScrollbar(scene:Scene) {
+    
+        if (!this.scrollBarMark) {
+            scene.add(this.camera)
+            this.createScrollbar();
+        }
+    }
+
+    createScrollbar() {
+        // const geometry = new RingGeometry(1.7,2.3,20);
+        const geometry = new CircleGeometry(2, 20);
+        const material = new MeshBasicMaterial({
+            // color: 0x8a8a8a, 
+            color: 0x282b37,
+            transparent: true,
+            opacity: 0.7
+        });
+        this.scrollbar = new Group();
+        //add scrollbar to camera to fix position
+        this.camera.add(this.scrollbar);
+
+        const lineMat = new LineMaterial({
+            color: 0x282b37,
+            linewidth: 0.0015,
+            transparent: true,
+            opacity: 0.7,
+
+            // alphaToCoverage: true,
+        });
+
+        const points = [];
+        points.push(0, 7, 0);
+        points.push(0, 0, 0);
+        points.push(0, -7, 0);
+
+        const lineGeo = new LineGeometry();
+        lineGeo.setPositions(points);
+        const line = new Line2(lineGeo, lineMat);
+        this.scrollbar.add(line);
+        const circleMesh = new Mesh(geometry, material);
+        this.scrollbar.add(circleMesh);
+
+        this.setScrollbarPosition(this.camera.aspect*112, -200);
+
+        for (let index = 0; index < this.sections.length; index++) {
+            const line = new Line2(lineGeo, lineMat);
+            line.position.set(0, index * -10, 0)
+            this.scrollbar.add(line);
+            const circleMesh = new Mesh(geometry, material);
+            circleMesh.position.set(0, index * -10, 0)
+            this.scrollbar.add(circleMesh);
+            this.scrollbar.position.setY(index * 5)
+        }
+
+        const markGeo = new CircleGeometry(2, 20);
+        const markMat = new MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.5
+        });
+        this.scrollBarMark = new Mesh(markGeo, markMat)
+        this.scrollbar.add(this.scrollBarMark);
+        // this.scrollBarMark.position.set(-1,1);
+    }
+
+    public setScrollbarPosition(x: number, z: number) {
+        this.scrollbar?.position.setX(x);
+        this.scrollbar?.position.setZ(z);
     }
 
 }
