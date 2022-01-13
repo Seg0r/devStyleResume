@@ -141,7 +141,6 @@ pointLight.position.set(0, 0, 200);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 //scene.add(pointLight);
-// const scrollbarScene:{scene:Scene,camera:Camera} = cameraUtils.createSceneForScrollbar(camera);
 cameraUtils.addScrollbar(scene);
 
 const worldAxis = new AxesHelper(100);

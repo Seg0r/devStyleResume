@@ -461,7 +461,6 @@ export class CameraUtils {
 
             this.prevSplinePoint = splinePoint;
             this.updateScrollBar(cameraSection);
-            this.lastCameraSection = cameraSection
         }
     }
 
@@ -469,14 +468,13 @@ export class CameraUtils {
         let part = { t: 0 };
         let dest = 1;
         const sectionDiff = cameraSection - this.lastCameraSection;
-        if (sectionDiff < 0) {
-            part = { t: 1 };
-            dest = 0;
-        }
+
         new TWEEN.Tween(part)
             .to({ t: dest }, 1000)
             .onUpdate((tween) => {
-                this.scrollBarMark?.position.set(0, (this.lastCameraSection + tween.t * sectionDiff) * -10, 0)
+                const pos = (this.lastCameraSection + tween.t * sectionDiff) * -10;
+                this.scrollBarMark?.position.set(0, pos, 0)
+                console.log(pos,tween.t);
             })
             .easing(TWEEN.Easing.Cubic.InOut)
             .onComplete(() => {
@@ -488,18 +486,6 @@ export class CameraUtils {
         console.log("start:" + cameraSection + " last:" + this.lastCameraSection + " diff:"+sectionDiff)
 
     }
-
-    // public createSceneForScrollbar(camera:Camera):{scene:Scene,camera:Camera} {
-    //     const scrollbarCamera = camera.clone();
-    //     const scrollbarScene = new Scene();
-
-    //     if (!this.scrollBarMark) {
-    //         scrollbarScene.add(scrollbarCamera)
-    //         this.createScrollbar(scrollbarCamera);
-    //     }
-
-    //     return {scene:scrollbarScene,camera:scrollbarCamera};
-    // }
 
     public addScrollbar(scene:Scene) {
     
@@ -545,7 +531,7 @@ export class CameraUtils {
 
         this.setScrollbarPosition(this.camera.aspect*112, -200);
 
-        for (let index = 0; index < this.sections.length; index++) {
+        for (let index = 0; index < this.sections.length-1; index++) {
             const line = new Line2(lineGeo, lineMat);
             line.position.set(0, index * -10, 0)
             this.scrollbar.add(line);
@@ -559,11 +545,11 @@ export class CameraUtils {
         const markMat = new MeshBasicMaterial({
             color: 0xffffff,
             transparent: true,
-            opacity: 0.5
+            opacity: 0.5            
         });
         this.scrollBarMark = new Mesh(markGeo, markMat)
+        this.scrollBarMark.renderOrder=1;
         this.scrollbar.add(this.scrollBarMark);
-        // this.scrollBarMark.position.set(-1,1);
     }
 
     public setScrollbarPosition(x: number, z: number) {
