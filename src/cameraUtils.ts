@@ -1,6 +1,6 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import { throws } from 'assert';
-import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper, MathUtils, Scene, TextureLoader, Group, PlaneBufferGeometry, Mesh, MeshBasicMaterial, AdditiveBlending, BufferGeometry, CircleGeometry, RingGeometry, LineBasicMaterial, Line, MultiplyBlending, OrthographicCamera, SphereBufferGeometry, MeshPhongMaterial, PointLight, MeshPhysicalMaterial, DirectionalLight } from 'three';
+import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper, MathUtils, Scene, TextureLoader, Group, PlaneBufferGeometry, Mesh, MeshBasicMaterial, AdditiveBlending, BufferGeometry, CircleGeometry, RingGeometry, LineBasicMaterial, Line, MultiplyBlending, OrthographicCamera, SphereBufferGeometry, MeshPhongMaterial, PointLight, MeshPhysicalMaterial, DirectionalLight, MeshToonMaterial } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
@@ -19,6 +19,8 @@ const deltaPos = 5;
 
 const LEAN_LEFT = 30;
 const LEAN_RIGHT = -LEAN_LEFT;
+
+const SCROLL_BAR_DISTANCE = -10
 
 export class CameraUtils {
 
@@ -482,9 +484,8 @@ export class CameraUtils {
         return new TWEEN.Tween(part)
             .to({ t: cameraSection }, 1000)
             .onUpdate((tween: any) => {
-                const pos = tween.t * -10;
-                this.scrollBarMark?.position.set(0, pos, 0)
-                // console.log(pos, tween.t);
+                const pos = tween.t * SCROLL_BAR_DISTANCE;
+                this.scrollBarMark?.position.set(0, pos, 0)   
             })
             .easing(TWEEN.Easing.Cubic.InOut)
             .onComplete((tween) => {
@@ -505,73 +506,37 @@ export class CameraUtils {
     }
 
     createScrollbar() {
-        // const geometry = new RingGeometry(1.7,2.3,20);
-        // const geometry = new CircleGeometry(2, 20);
+
         const geometry = new SphereBufferGeometry(2, 20, 20);
         const material = new MeshPhysicalMaterial({
             roughness: 0.2,
             transmission: 1
         });
-        material.thickness=1;
+        material.thickness=7;
         this.scrollbar = new Group();
         //add scrollbar to camera to fix position
         this.camera.add(this.scrollbar);
 
-        const lineMat = new LineMaterial({
-            color: 0x282b37,
-            linewidth: 0.0015,
-            transparent: true,
-            opacity: 0.7,
-
-            // alphaToCoverage: true,
-        });
-
-        const points = [];
-        points.push(0, 7, 0);
-        points.push(0, 0, 0);
-        points.push(0, -7, 0);
-
-        const lineGeo = new LineGeometry();
-        lineGeo.setPositions(points);
-
-
         this.setScrollbarPosition(this.camera.aspect * 112, -200);
 
         for (let index = 0; index < this.sections.length - 1; index++) {
-            const line = new Line2(lineGeo, lineMat);
-            line.position.set(0, index * -10, 0)
-            // this.scrollbar.add(line);
             const circleMesh = new Mesh(geometry, material);
-            circleMesh.position.set(0, index * -10, 0)
+            circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
             this.scrollbar.add(circleMesh);
             this.scrollbar.position.setY(index * 5)
         }
 
-        const markGeo = new SphereBufferGeometry(1, 20, 20);
-        const markMat = new MeshPhongMaterial({
-            color: 0xffffff,
-            shininess:100,
-            specular:0x75341e,
-            reflectivity:1
-        });
-
-        // const markMat = new MeshPhysicalMaterial({
-        //     roughness: 0.1,
-        //     transmission: 1
-        // });
-        // markMat.thickness = 2;
-
-        // const light2 = new PointLight(0xfff0dd, 1);
-        // this.scrollBarMark = light2;
-
+        const markGeo = new SphereBufferGeometry(0.7, 20, 20);
+        const markMat = new MeshBasicMaterial({ color: 0xfedd1f });
         this.scrollBarMark = new Mesh(markGeo, markMat);
         
         this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
 
-        const light = new DirectionalLight(0xfff0dd, 1);
-        this.scrollBarMark.add(light);
-        light.position.set(0, 0, 10);
+        const scrollBarLight = new DirectionalLight(0xfffffff, 0.1);
+        this.scrollBarMark.add(scrollBarLight);
+        scrollBarLight.position.set(-200, 400, 0);
+ 
 
     }
 

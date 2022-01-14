@@ -120,10 +120,10 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-//universe.addToScene(scene);
-//stars.addToScene(scene);
-//solarSystem.addToScene(scene);
-//solarSystem.toggleSolarSystem();
+universe.addToScene(scene);
+stars.addToScene(scene);
+solarSystem.addToScene(scene);
+solarSystem.toggleSolarSystem();
 //magneticField.addToScene(scene);
 nebula.addToScene(scene);
 
@@ -138,7 +138,7 @@ pointLight.position.set(0, 0, 200);
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 //scene.add(pointLight);
 cameraUtils.addScrollbar(scene);
@@ -298,9 +298,6 @@ function animate() {
     cameraUtils.render(mouse);
 
     renderer.clearDepth();
-
-    //render scrollbar
-    // renderer.render(scrollbarScene.scene,scrollbarScene.camera);
 
     //render rest
     renderer.render(scene, camera);
