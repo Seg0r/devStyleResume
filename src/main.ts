@@ -138,7 +138,7 @@ pointLight.position.set(0, 0, 200);
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
 //scene.add(pointLightHelper);
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
 //scene.add(pointLight);
 cameraUtils.addScrollbar(scene);

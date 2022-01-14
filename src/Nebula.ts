@@ -1,8 +1,8 @@
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
+import { GUI } from 'lil-gui';
 import * as THREE from 'three';
 import { AdditiveBlending, DoubleSide, Group, Mesh, MeshToonMaterial, Object3D, Scene, Sprite, Vector3 } from 'three';
 import { saveAs } from 'file-saver';
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import fs from 'fs';
 // import STARS from '../assets/dataStars.json'
 import CLOUDS from '../assets/dataCloud.json'
@@ -29,10 +29,10 @@ export class Nebula {
     range: number;
     scene: THREE.Scene;
     resetFactor: number;
-    markers: Sprite[] = [];
     spriteScale: number;
     distanceFactor: number = 0.2;
     textures:THREE.Texture[] = [];
+    pivots: THREE.Group = new THREE.Group();
     borders = {
         b0:0,
         b1:0.05,
@@ -170,7 +170,8 @@ export class Nebula {
 
             mesh.rotateZ(matRot);
 
-           _this.scene.add(pivot);
+           _this.pivots.add(pivot);
+            // _this.scene.add(pivot)
         }
     }
     
@@ -285,11 +286,9 @@ export class Nebula {
     }
 
     public addToScene(scene: Scene) {
-        scene.add(this.points);
-        // this.markers.forEach(element => {
-        //     scene.add(element)
-        // });
-        scene.add(this.cloudGroup);
+        // scene.add(this.points);
+        // scene.add(this.cloudGroup);
+        scene.add(this.pivots)
     }
 
     createGUI(): GUI {
@@ -299,7 +298,7 @@ export class Nebula {
         const gui = new GUI();
         
         gui.add(_this, 'range', 0,100).step(1).onChange(
-            function(value)
+            function(value:any)
             {  _this.cloudGroup.clear();
                _this.generatePoints(value); }
         );
@@ -309,42 +308,42 @@ export class Nebula {
         
 
         gui.add(_this.borders, 'b0', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value, this.bordersOld.b0);
             }
         );
         gui.add(_this.borders, 'b1', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value, this.bordersOld.b1);
             }
         );
         gui.add(_this.borders, 'b2', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b2);
             }
         );
         gui.add(_this.borders, 'b3', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b3);
             }
         );
         gui.add(_this.borders, 'b4', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b4);
             }
         );
         gui.add(_this.borders, 'b5', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b5);
             }
         );
         gui.add(_this.borders, 'b6', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b6);
             }
         );
         gui.add(_this.borders, 'b7', 0.0,1).step(0.01).listen().onFinishChange(
-            (value) => {
+            (value:any) => {
                 this.moveBorder(value,this.bordersOld.b7);
             }
         );
@@ -355,7 +354,7 @@ export class Nebula {
         var genNew = { button:function(){ 
             const oldPoints = new THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>().copy(_this.points);
             _this.generatePoints(_this.range);
-            var merged = BufferGeometryUtils.mergeBufferGeometries([oldPoints.geometry, _this.points.geometry]);
+            var merged = mergeBufferGeometries([oldPoints.geometry, _this.points.geometry]);
             _this.points.geometry=merged;
             }
         };

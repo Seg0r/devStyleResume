@@ -9,7 +9,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { HorizontalBlurShader } from 'three/examples/jsm/shaders/HorizontalBlurShader.js';
 import { VerticalBlurShader } from 'three/examples/jsm/shaders/VerticalBlurShader.js';
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
+import { GUI } from 'lil-gui';
 import { createFinalPass } from "./utils/pass";
 
 
@@ -93,22 +93,22 @@ export class MagneticField {
 
         const bloom2Folder = gui.addFolder('Bloom')
         bloom2Folder.add(this.uBloomParam, 'strength', 0,10).step(0.1).onChange(
-            function(value)
+            function()
             {   _this.setupComposers();   }
         );
         bloom2Folder.add(_this.uBloomParam, 'radius', 0,5).step(0.1).onChange(
-            function(value)
+            function()
             {   _this.setupComposers();   }
         );
         bloom2Folder.add(_this.uBloomParam, 'threshold', 0,1).step(0.1).onChange(
-            function(value)
+            function()
             {   _this.setupComposers();   }
         );
         bloom2Folder.open();
 
         const blurFolder = gui.addFolder('Blur')
         blurFolder.add(this.parameters, 'horizBlur', 0,10).step(0.1).onChange(
-            function(value)
+            function()
             {   _this.setupComposers();   }
         );
         blurFolder.open()

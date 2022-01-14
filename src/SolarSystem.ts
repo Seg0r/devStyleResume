@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import {   BufferGeometryUtils, Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
+import { Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
+import { GUI } from 'lil-gui';
 import * as UTILS from './utils/applyUV'
 import { gaussianRandom } from './utils/math';
 //import { vertexShader, fragmentShader } from "./utils/lavaShader";
