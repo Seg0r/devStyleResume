@@ -234,18 +234,21 @@ export class CameraUtils {
         let calcQuat = new Quaternion();
         let posDirection: number;
         let startPos: number;
+        let destVector = new Vector3();
 
         const newTween = new TWEEN.Tween(part)
             .onStart((tween) => {
                 startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
                 startPos = this.startPosition;
                 posDirection = endPosition - this.startPosition;
+                destVector.copy(this.camera.position);
             })
             .to({ t: 1, pos: endPosition }, time)
             .onUpdate((tween) => {
                 let destPos = startPos + tween.t * posDirection;
                 destPos = destPos < 0 ? 0 : (destPos > 1 ? 1 : destPos);
-                this.camera.position.copy(curve.getPoint(destPos));
+                destVector.lerp(curve.getPoint(destPos),tween.t);
+                this.camera.position.copy(destVector);
                 calcQuat.slerpQuaternions(startQuat, endQuaternion, tween.t)
                 this.camera.quaternion.copy(calcQuat);
             })
