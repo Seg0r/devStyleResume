@@ -13,17 +13,9 @@ import { DirectionAngles, SolarSystem } from './SolarSystem';
 
 import { Universe } from './Universe';
 import { Stars } from './Stars';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
-
-
-
-enum AllLayers {
-    stars = 1,
-    universe,
-    solarSystem
-}
 
 
 const alpha1 = 0.3;

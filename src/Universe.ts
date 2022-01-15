@@ -1,3 +1,4 @@
+import './loader.css'
 import * as THREE from 'three';
 import { Scene } from 'three';
 
@@ -11,7 +12,19 @@ export class Universe {
     constructor(univerSize: number) {
 
         const fileFormat = ".jpg";
-        const loader = new THREE.TextureLoader();
+        const loadingManager = new THREE.LoadingManager( () => {
+	
+            const loadingScreen = document.getElementById( 'loading-screen' )!;
+            loadingScreen.classList.add( 'fade-out' );
+
+            const mainScene = document.getElementById( 'main-div' )!;
+            mainScene.style.visibility = 'visible';
+
+            loadingScreen.addEventListener( 'transitionend', this.onTransitionEnd );
+            
+        } );
+
+        const loader = new THREE.TextureLoader(loadingManager);
         loader.setPath('/assets/scene/');
         let materialArray = [
             new THREE.MeshBasicMaterial({ depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: true, map: loader.load('blue_right1' + fileFormat) }),
@@ -61,5 +74,12 @@ export class Universe {
     public render(){
         //empty for now
     }   
+
+    private onTransitionEnd( event:any ) {
+
+        const element = event.target;
+        element.remove();
+        
+    }
 
 }
