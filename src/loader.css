@@ -1,5 +1,5 @@
 :root {
-    --size: 300px;
+    --size: 20vmin;
     --margin: calc(-1*var(--size)/2);
 }
 
@@ -10,11 +10,11 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: #07001a;
-    /* background-color: #000000;
+	/* background-color: #07001a; */
+    background-color: #000000;
     background-image: url("../assets/hud/intro/big.png");
     background-position: center; 
-    background-size: contain; */
+    background-size: contain;
     /* background-size: 300px;  */
     background-repeat: no-repeat;
 	opacity: 1;
@@ -28,14 +28,14 @@
 #loader {
     display: block;
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: 49.7%;
+    top: 49.7%;
     width: var(--size);
     height: var(--size);
     margin: var(--margin) 0 0 var(--margin);
     border-radius: 50%;
     border: 3px solid transparent;
-    border-top-color: #195ebf;
+    border-top-color: #b7e3ed;
     -webkit-animation: spin 2.6s linear infinite;
     animation: spin 2.6s linear infinite;
 }
@@ -48,7 +48,7 @@
     bottom: 5px;
     border-radius: 50%;
     border: 3px solid transparent;
-    border-top-color: #750f50;
+    border-top-color: #005596;
     -webkit-animation: spin 4s linear infinite;
     animation: spin 4s linear infinite;
 }
@@ -61,7 +61,7 @@
     bottom: 15px;
     border-radius: 50%;
     border: 3px solid transparent;
-    border-top-color: #8F4a29;
+    border-top-color: #0e84df;
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
 }
@@ -94,13 +94,14 @@
     height: 100%;
     width: 100%;
     display: grid;
-    place-items: center;
+    /* place-items: center; */
+    /* grid-template-columns: repeat(auto-fit,minmax(240px,1fr)) */
 }
 
 #loader-text > *{
     /* display: grid; */
-    grid-column: 1;
-    grid-row: 1;
+    grid-column: 6;
+    grid-row: 4;
     /* grid-template-columns: repeat(auto-fit,minmax(240px,1fr)) */
 }
 
