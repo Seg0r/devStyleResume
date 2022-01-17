@@ -1,4 +1,5 @@
 import './style.css'
+import './loader.css'
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import { GreetingBox } from './GreetingBox'

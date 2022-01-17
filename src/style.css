@@ -1,11 +1,18 @@
-@import url("https://use.typekit.net/jmk3xov.css");
+/* @import url("https://use.typekit.net/jmk3xov.css"); */
+@font-face { font-family: "Orbitron"; src: url("../fonts/Orbitron/static/Orbitron-Regular.ttf"); }
+/* @font-face { font-family: "Orbitron-Black"; src: url("../fonts/Orbitron/static/Orbitron-Black.ttf"); } */
+@font-face { font-family: "Ailerons"; src: url("../fonts/Ailerons/Ailerons-Regular.otf"); }
+/* @font-face { font-family: "Exan"; src: url("../fonts/Exan/Exan-Regular.ttf"); } */
+@font-face { font-family: "Hyperion"; src: url("../fonts/Hyperion/Hyperion\ Regular.otf"); }
+/* @font-face { font-family: "Primal"; src: url("../fonts/Primal/Primal\ Webfont.woff"); } */
+/* @font-face { font-family: "Sarpanch"; src: url("../fonts/Sarpanch/Sarpanch-Regular.ttf"); } */
 
 :root {
   --dark-bg: rgba(15, 15, 15, 0.6);
-  --spacing: 500px;
+  --spacing: 700px;
   --empty: 50000px;
 
-  font-family: brandon-grotesque, sans-serif;
+  font-family: Hyperion, sans-serif;
   font-weight: 400;
   font-style: normal;
   overflow: hidden;
@@ -28,8 +35,8 @@ main {
 }
 
 
-h1, h2, h3, blockquote {
-  font-family: elevon, sans-serif;
+h1, h2, h3 {
+  font-family: Ailerons, Hyperion;
   font-weight: 700;
   font-style: normal;
 }
@@ -43,8 +50,9 @@ canvas {
 
   header {
     /* background: var(--dark-bg); */
+    font-family: Hyperion;
     grid-column: 5 / span 12;
-    font-size: 2vw;
+    font-size: 3vw;
     padding: 1vw;
     margin-bottom: var(--spacing);
   }
@@ -67,17 +75,27 @@ canvas {
   }
 
   blockquote {
+    font-family: Ailerons;
     margin: 0;
     padding: 0;
     margin-bottom: var(--spacing);
+    display:grid;
   }
 
   blockquote p {
-    color: black;
-    background-color: white;
-    font-size: 4rem;
-    display: inline;
+    color: rgb(255, 255, 255);    
+    font-size: 1.5rem;
     line-height: 1;
+    margin: 0;
+    text-align: left;
+  }
+
+  blockquote p span{
+    background-color: var(--dark-bg);
+  }
+
+  blockquote p.author {
+    text-align: right;
   }
 
   .center {

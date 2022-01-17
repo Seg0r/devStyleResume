@@ -65,7 +65,7 @@ export class Nebula {
         //this.generatePoints(this.range);
         this.setPositions(this.range);
  
-        this.createGUI().close();
+        // this.createGUI().close();
     }
 
 

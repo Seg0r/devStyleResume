@@ -4,33 +4,39 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="loader" href="src/loader.css">
+  <!-- <link rel="loader" href="src/loader.css"> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DevStyleResume</title>
 </head>
 
 <body>
 
-  <canvas id="bg"></canvas>
-
   <div id="loading-screen">
-
+    <div id="loader-text" class="fade-animate">
+      <p id="f1" class="center-text">CALCULATING<br>TRAJECTORY...</p>
+      <p id="f2" class="center-text">ACHIEVING<br>ORBIT...</p>
+      <p id="f3" class="center-text">SCANNING<br>PERIMETER...</p>
+    </div>
     <div id="loader"></div>
-  
   </div>
+
+  <canvas id="bg"></canvas>
 
   <div id="main-div" style="visibility: hidden;">
     <main id="main">
 
       <header class="center">
-        <h1>DevStyleResume</h1>
+        D E V&ensp;S T Y L E&ensp;R E S U M E
       </header>
 
       <blockquote class="left">
-        <p>🚀 I like making stuff and putting it on the internet</p>
+        <p><span>Nature never appeals to intelligence until habit and instinct are useless. There is no intelligence
+            where there is no need of change.</span></p>
+        <p class="author"><span>-H.G Wells</span></p>
       </blockquote>
 
-      <section  class="left">
+
+      <section class="left">
         <h2>📜 Manifesto</h2>
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
@@ -82,7 +88,10 @@
       </section>
 
       <blockquote class="right">
-        <p>The best way out is always through <br>-Robert Frost</p>
+        <p><span>A common mistake that people make when trying to design something completely foolproof is to
+            underestimate
+            the ingenuity of complete fools.</span></p>
+        <p class="author"><span>-Douglas Adams</span></p>
       </blockquote>
 
       <section class="right">
