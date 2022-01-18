@@ -15,7 +15,7 @@ export class Universe {
         const loadingManager = new THREE.LoadingManager( () => {
 	
             const loadingScreen = document.getElementById( 'loading-screen' )!;
-            loadingScreen.classList.add( 'fade-out' );
+            // loadingScreen.classList.add( 'fade-out' );
 
             const mainScene = document.getElementById( 'main-div' )!;
             mainScene.style.visibility = 'visible';

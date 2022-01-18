@@ -1,5 +1,5 @@
 :root {
-    --size: 20vmin;
+    --size: 40vmin;
     --margin: calc(-1*var(--size)/2);
 }
 
@@ -33,21 +33,21 @@
     height: var(--size);
     margin: var(--margin) 0 0 var(--margin);
     border-radius: 50%;
-    border: 3px solid transparent;
+    border: 4px solid transparent;
     border-top-color: #b7e3ed;
-    -webkit-animation: spin 2.6s linear infinite;
-    animation: spin 2.6s linear infinite;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
 }
 #loader:before {
     content: "";
     position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 5px;
-    bottom: 5px;
+    top: 72px;
+    left: 72px;
+    right: 72px;
+    bottom: 72px;
     border-radius: 50%;
-    border: 3px solid transparent;
-    border-top-color: #005596;
+    border: 4px solid transparent;
+    border-top-color: #00355e; 
     -webkit-animation: spin 4s linear infinite;
     animation: spin 4s linear infinite;
 }
@@ -59,10 +59,10 @@
     right: 15px;
     bottom: 15px;
     border-radius: 50%;
-    border: 3px solid transparent;
+    border: 4px solid transparent;
     border-top-color: #0e84df;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
+    -webkit-animation: spin 2.6s linear infinite;
+    animation: spin 2.6s linear infinite;
 }
 @-webkit-keyframes spin {
     0%   {
@@ -105,39 +105,52 @@
     left: 65%;
     -webkit-animation: slide 10s linear forwards;
     animation: slide 10s linear forwards;
-    animation-delay: 1s;
+    -webkit-animation-delay: 1.7s;
+    animation-delay: 1.7s;
 }
 
 #loader-text > *{
     line-height: 1;
     margin: 0;
+    opacity: 0;
 }
 
 
-.text-animate p{
-    -webkit-animation: fade 10s linear forwards;
-    animation: fade 10s linear forwards;
-    opacity: 0;
+#f1 {
+    -webkit-animation: fade 10s linear 2s forwards;
+    animation: fade 10s linear 2s forwards;
+}
+
+#f2 {
+    -webkit-animation: fade 10s linear 4s forwards;
+    animation: fade 10s linear 4s forwards;
+}
+#f3 {
+    /* -webkit-animation: fade 10s linear 6s 1 forwards , blinking 1.5s linear 16s infinite ; */
+    animation: fade 10s linear 6s 1 forwards ;
 }
 
 /* @-webkit-keyframes fade {
     0% {opacity: 0;}
-    5% {opacity: 1;}
-    6% {opacity: 0;}
-    7% {opacity: 1;}
-    8% {opacity: 0;}
-    9% {opacity: 1;}
+    7% {opacity: 0;}
+    9% {opacity: 0.2;}
+    13% {opacity: 1;}
+    17% {opacity: 0.2;}
+    21% {opacity: 1;}
+    25% {opacity: 0.2;}
+    29% {opacity: 1;}
     100% {opacity: 1;}
 } */
 
 @keyframes fade {
     0% {opacity: 0;}
-    10% {opacity: 0;}
-    12% {opacity: 1;}
-    14% {opacity: 0.2;}
-    16% {opacity: 1;}
-    18% {opacity: 0.2;}
-    20% {opacity: 1;}
+    7% {opacity: 0;}
+    9% {opacity: 0.2;}
+    13% {opacity: 1;}
+    17% {opacity: 0.2;}
+    21% {opacity: 1;}
+    25% {opacity: 0.2;}
+    29% {opacity: 1;}
     100% {opacity: 1;}
 }
 
@@ -145,8 +158,8 @@
     0%   {transform: translate(0%, 0%);}
     31%  {transform: translate(0%, 0%);}
     35%  {transform: translate(0%, -35%);}
-    64%  {transform: translate(0%, -35%);}
-    68%  {transform: translate(0%, -70%);}
+    53%  {transform: translate(0%, -35%);}
+    57%  {transform: translate(0%, -70%);}
     100% {transform: translate(0%, -70%);}
 }
 
@@ -154,23 +167,21 @@
     0%   {transform: translate(0%, 0%);}
     31%  {transform: translate(0%, 0%);}
     35%  {transform: translate(0%, -35%);}
-    64%  {transform: translate(0%, -35%);}
-    68%  {transform: translate(0%, -70%);}
+    53%  {transform: translate(0%, -35%);}
+    57%  {transform: translate(0%, -70%);}
     100% {transform: translate(0%, -70%);}
 }
 
-#f1 {
-    -webkit-animation-delay: 2s;
-    animation-delay: 2s;
+@-webkit-keyframes blinking {
+    0% {opacity: 1;}
+    50% {opacity: 0.2;}
+    100% {opacity: 1;}
 }
 
-#f2 {
-    -webkit-animation-delay: 4s;
-    animation-delay: 4s;
-}
-#f3 {
-    -webkit-animation-delay: 6.75s;
-    animation-delay: 6.75s;
+@keyframes blinking {
+    0% {opacity: 1;}
+    50% {opacity: 0.2;}
+    100% {opacity: 1;}
 }
 
 /* show page */
