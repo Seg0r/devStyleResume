@@ -12,7 +12,7 @@
 	height: 100%;
 	/* background-color: #07001a; */
     background-color: #000000;
-    background-image: url("../assets/hud/intro/big.png");
+    background-image: url("../assets/hud/intro.png");
     background-position: center; 
     background-size: contain;
     /* background-size: 300px;  */
@@ -25,8 +25,7 @@
     opacity: 0;
 }
 
-#loader {
-    display: block;
+#loader {    
     position: absolute;
     left: 49.7%;
     top: 49.7%;
@@ -91,64 +90,73 @@
 }
 
 #loader-text {
-    height: 100%;
-    width: 100%;
     display: grid;
+    /* display: grid; */
     /* place-items: center; */
     /* grid-template-columns: repeat(auto-fit,minmax(240px,1fr)) */
-}
-
-#loader-text > *{
-    /* display: grid; */
-    grid-column: 6;
-    grid-row: 4;
-    /* grid-template-columns: repeat(auto-fit,minmax(240px,1fr)) */
-}
-
-.center-text {
     font-family: "Orbitron";
     font-weight: 200;
     font-style: normal;
     font-size: 20px;
-    /* color: #093066; */
     color: #195ebf;
     white-space: pre-wrap;
-    /* 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; */
+    position: absolute;
+    top: 74%;
+    left: 65%;
+    -webkit-animation: slide 12s linear forwards;
+    animation: slide 12s linear forwards;
 }
 
-.fade-animate p{
-    -webkit-animation-name: fade;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-duration: 12s;
-    animation-name: fade;
-    animation-iteration-count: infinite;
-    animation-duration: 12s;
+#loader-text > *{
+    line-height: 1;
+    margin: 0;
+}
+
+
+.text-animate p{
+    -webkit-animation: fade 1s linear forwards;
+    animation: fade 1s linear forwards;
+    opacity: 0;
 }
 
 @-webkit-keyframes fade {
     0% {opacity: 0;}
-    20% {opacity: 1;}
-    33% {opacity: 1;}
-    53% {opacity: 0;}
-    100% {opacity: 0;}
+    100% {opacity: 1;}
 }
+
 @keyframes fade {
     0% {opacity: 0;}
-    20% {opacity: 1;}
-    33% {opacity: 1;}
-    53% {opacity: 0;}
-    100% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+@-webkit-keyframes slide {
+    0%   {transform: translate(0%, 0%);}
+    30%   {transform: translate(0%, 0%);}
+    36%  {transform: translate(0%, -35%);}
+    63%  {transform: translate(0%, -35%);}
+    69%  {transform: translate(0%, -70%);}
+    100% {transform: translate(0%, -70%);}
+}
+
+@keyframes slide {
+    0%   {transform: translate(0%, 0%);}
+    30%   {transform: translate(0%, 0%);}
+    36%  {transform: translate(0%, -35%);}
+    63%  {transform: translate(0%, -35%);}
+    69%  {transform: translate(0%, -70%);}
+    100% {transform: translate(0%, -70%);}
+}
+
+#f1 {
+    -webkit-animation-delay: 1s;
+    animation-delay: 1s;
 }
 
 #f2 {
-    -webkit-animation-delay: -8s;
-    animation-delay: -8s;
+    -webkit-animation-delay: 4s;
+    animation-delay: 4s;
 }
 #f3 {
-    -webkit-animation-delay: -4s;
-    animation-delay: -4s;
+    -webkit-animation-delay: 8s;
+    animation-delay: 8s;
 }
