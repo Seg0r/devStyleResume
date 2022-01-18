@@ -1,23 +1,19 @@
+// CHECK index.html
+
 import './style.css'
-import './loader.css'
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
-import { GreetingBox } from './GreetingBox'
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight, QuadraticBezierCurve3, AxesHelper, Fog, Color, FogExp2, Float32BufferAttribute, PointsMaterial, Object3D, AmbientLight, OrthographicCamera, Vector2, Spherical, Camera } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight,  AxesHelper, Vector2 } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
-// @ts-ignore
-//import * as POSTPROCESSING from "postprocessing";
 
 import { Universe } from './Universe';
 import { Stars } from './Stars';
-// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
-
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -30,7 +26,6 @@ const initAngles: DirectionAngles = {
     beta1: beta1,
     beta2: beta2
 }
-
 
 const universeSize = 4000;
 const solarSize = universeSize / 20;
