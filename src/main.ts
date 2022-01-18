@@ -1,6 +1,7 @@
 // CHECK index.html
 
-import './style.css'
+import './style.css';
+import './loader.css';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
@@ -108,12 +109,12 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-universe.addToScene(scene);
-stars.addToScene(scene);
-solarSystem.addToScene(scene);
-solarSystem.toggleSolarSystem();
-//magneticField.addToScene(scene);
-nebula.addToScene(scene);
+// universe.addToScene(scene);
+// stars.addToScene(scene);
+// solarSystem.addToScene(scene);
+// solarSystem.toggleSolarSystem();
+// magneticField.addToScene(scene);
+// nebula.addToScene(scene);
 
 
 //Lights
