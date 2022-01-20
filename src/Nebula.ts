@@ -58,7 +58,7 @@ export class Nebula {
         
         for (let file in Files) {
             if (isNaN(Number(file))){
-                this.textures.push ( new THREE.TextureLoader().load( 'assets/nebula/'+file+'.png' ));      
+                this.textures.push ( new THREE.TextureLoader().load( 'assets/nebula/'+file+'.webp' ));      
             }
         }
 

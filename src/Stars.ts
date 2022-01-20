@@ -30,7 +30,7 @@ export class Stars {
         this.camera = camera;
 
         const geometry2 = new THREE.SphereBufferGeometry(universSize / 4000);
-        const material2 = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const material2 = new THREE.MeshBasicMaterial({ color: 0xe0e0e0 });
         this.center = this.camera.cameraLookAt;
         const meshScaleFactor = universSize /1.5;
 
