@@ -79,8 +79,6 @@ export class Stars {
 
     private scaleAndRotateStars(scaleFactor: number, rotationValue: number) {
         let factorToSet = 0;
-        // scaleFactor/=(this.univerSize/80);
-        scaleFactor/=500;
         let factorDiff = scaleFactor - this.currScaleFactor
         const cameraDist = this.camera.position.distanceTo(this.center);
 

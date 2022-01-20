@@ -48,6 +48,9 @@ export class CameraUtils {
     upVector = new Vector3();
     dirVector = new Vector3();
     orbitControls: OrbitControls;
+    horizontalAngle: number = 0;
+    verticalAngle: number = 0;
+    universeFactor: number;
 
     //section scrolling
     sections: HTMLCollection;
@@ -63,10 +66,7 @@ export class CameraUtils {
     scrollbar: Group | undefined;
     lastScrollTween: TWEEN.Tween<UnknownProps> | undefined;
     newCameraSection: number = 0;
-    horizontalAngle: number = 0;
-    verticalAngle: number = 0;
-    universeFactor: number;
-    ;
+
 
 
     public get cameraLookAt() {
@@ -402,27 +402,37 @@ export class CameraUtils {
         let verticalFactor = 0;
 
         if (this.currTween?.isPlaying() || !this.panEnabled) {
-            this.camera.updateWorldMatrix(false, false);
-            this.currentCameraPos.copy(this.camera.position);
 
-            this.upVector.set(0, 1, 0);
-            this.camera.localToWorld(this.upVector)
-            this.upVector.sub(this.currentCameraPos);
-            this.upVector.normalize();
+            // Calculating camera position change without orbit controls
+            // this.camera.updateWorldMatrix(false, false);
+            // this.currentCameraPos.copy(this.camera.position);
 
-            this.sideVector.set(1, 0, 0);
-            this.camera.localToWorld(this.sideVector);
-            this.sideVector.sub(this.currentCameraPos);
-            this.sideVector.normalize();
+            // this.upVector.set(0, 1, 0);
+            // this.camera.localToWorld(this.upVector)
+            // this.upVector.sub(this.currentCameraPos);
+            // this.upVector.normalize();
 
-            this.dirVector.subVectors(this.currentCameraPos, this.lastPos);
-            horizontalFactor = -this.sideVector.dot(this.dirVector)/this.sideVector.length();
-            verticalFactor = this.upVector.dot(this.dirVector)/this.sideVector.length();
-            this.lastPos.copy(this.currentCameraPos);
+            // this.sideVector.set(1, 0, 0);
+            // this.camera.localToWorld(this.sideVector);
+            // this.sideVector.sub(this.currentCameraPos);
+            // this.sideVector.normalize();
 
-            horizontalFactor*=this.universeFactor;
-            verticalFactor*=this.universeFactor;
+            // this.dirVector.subVectors(this.currentCameraPos, this.lastPos);
+            // horizontalFactor = -this.sideVector.dot(this.dirVector)/this.sideVector.length();
+            // verticalFactor = this.upVector.dot(this.dirVector)/this.sideVector.length();
+            // this.lastPos.copy(this.currentCameraPos);
+
+            // horizontalFactor*=this.universeFactor;
+            // verticalFactor*=this.universeFactor;
+            // horizontalFactor/=500;
+            // verticalFactor/=500;
             //console.log(horizontalFactor,verticalFactor)
+
+            //Orbit controls easy way
+            horizontalFactor=this.horizontalAngle-this.orbitControls.getAzimuthalAngle();
+            verticalFactor=this.verticalAngle-this.orbitControls.getPolarAngle();
+            this.horizontalAngle=this.orbitControls.getAzimuthalAngle()
+            this.verticalAngle=this.orbitControls.getPolarAngle();
         }
 
         return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
