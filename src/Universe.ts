@@ -8,19 +8,21 @@ export class Universe {
     blueNebula: THREE.Mesh;
     pinkNebula: THREE.Mesh;
     yellowNebula: THREE.Mesh;
+    background: THREE.CubeTexture | undefined;
     
 
     constructor(univerSize: number) {
 
-        const fileFormat = ".jpg";
+        const fileFormat = ".webp";
         const loadingManager = new THREE.LoadingManager( () => {
 	
+            console.log("Loaded!");
             const loadingScreen = document.getElementById( 'loading-screen' )!;
             loadingScreen.classList.add( 'fade-out' );
 
-            loadingScreen.addEventListener( 'transitionend', this.onTransitionEnd );
-            
-        } );
+            loadingScreen.addEventListener( 'transitionend', this.onTransitionEnd ); 
+        },
+        );
 
         const loader = new THREE.TextureLoader(loadingManager);
         loader.setPath('/assets/scene/');
@@ -57,16 +59,16 @@ export class Universe {
         geometry = new THREE.BoxBufferGeometry(univerSize*2.2, univerSize*2.2, univerSize*2.2);
         this.yellowNebula = new THREE.Mesh(geometry, materialArray);
 
-
         //this.createGUI();
 
     }
 
     public addToScene(scene: Scene){
+        // scene.background=this.background;
         scene.add(this.blueNebula);
         scene.add(this.pinkNebula);
         scene.add(this.yellowNebula);
-
+        
     }
 
     public render(){

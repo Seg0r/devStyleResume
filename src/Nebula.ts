@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { AdditiveBlending, Group, Object3D, Scene, Vector3 } from 'three';
 import { saveAs } from 'file-saver';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import CLOUDS from '../assets/dataCloud.json'
+// import CLOUDS from '../assets/dataCloud.json'
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 
 const spriteOpacity = 1;
@@ -364,7 +364,7 @@ export class Nebula {
             
             // _this.points.copy(new THREE.ObjectLoader().parse( STARS ));
             _this.cloudGroup.clear();
-            _this.cloudGroup.copy(new THREE.ObjectLoader().parse( CLOUDS ));
+            // _this.cloudGroup.copy(new THREE.ObjectLoader().parse( CLOUDS ));
 
             }
         };

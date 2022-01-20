@@ -12,13 +12,15 @@
 	height: 100%;
 	/* background-color: #07001a; */
     background-color: #000000;
-    background-image: url("../assets/hud/intro.png");
+    background-image: url("../assets/hud/intro.webp");
     background-position: center; 
     background-size: contain;
     /* background-size: 300px;  */
     background-repeat: no-repeat;
 	opacity: 1;
+    will-change: opacity;
  	transition: 1s opacity 8s;
+     /* transition: 1s opacity ; */
 }
 
 #loading-screen.fade-out {
@@ -96,14 +98,17 @@
 
 
 #f1 {
+    will-change: opacity;
     animation: fade 0.7s 1s 1 linear both, blinking 1.5s 1.8s 1 linear forwards;
 }
 
 #f2 {
+    will-change: opacity;
     animation: fade 0.7s 4s 1 linear both, blinking 1.5s 4.7s 1 linear forwards;
 }
 
 #f3 {
+    will-change: opacity;
     animation: fade 0.7s 6.9s 1 linear both, blinking 1.5s 7.6s linear infinite;
 }
 
