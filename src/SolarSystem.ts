@@ -85,6 +85,7 @@ export class SolarSystem {
 
         this.sunLight = new PointLight(0xfe9b14, this.sunLightStrength, size*3, this.sunLightDecay);
         this.sunLight.position.copy(center);
+        this.sunLight.castShadow=false;
 
         this.lensflare = this.createLensflare(size);
 

@@ -1,11 +1,10 @@
 import { GUI } from 'lil-gui';
 import * as THREE from 'three';
-import { AdditiveBlending, DoubleSide, Group, Mesh, MeshToonMaterial, Object3D, Scene, Sprite, Vector3 } from 'three';
+import { AdditiveBlending, Group, Object3D, Scene, Vector3 } from 'three';
 import { saveAs } from 'file-saver';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import fs from 'fs';
-// import STARS from '../assets/dataStars.json'
 import CLOUDS from '../assets/dataCloud.json'
+import { DEFAULT_UNIVERSE_SIZE } from './main';
 
 const spriteOpacity = 1;
 
@@ -24,6 +23,7 @@ Middle_Nebula,
 export class Nebula {
 
     univerSize: number;
+    univerFactor: number;
     cloudGroup: THREE.Group = new Group();
     points: THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
     range: number;
@@ -43,18 +43,18 @@ export class Nebula {
         b6:0.55,
         b7:0.95    
     };
-
     bordersOld = Object.assign({}, this.borders);
 
-    constructor(universSize: number, starsCount: number, scene :Scene) {
+    constructor(universSize: number, scene :Scene) {
 
-        this.univerSize=universSize*2;
+        this.univerSize=universSize;
+        this.univerFactor=this.univerSize/DEFAULT_UNIVERSE_SIZE;
         this.points = new THREE.Points();
         this.range=50;
        
         this.resetFactor=0.99;
         this.scene=scene;
-        this.spriteScale=500;
+        this.spriteScale=this.univerSize/8;
         
         for (let file in Files) {
             if (isNaN(Number(file))){
@@ -102,7 +102,7 @@ export class Nebula {
         count = 6;
  
         for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
+            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(this.univerSize/10),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
         }
 
 
@@ -151,6 +151,9 @@ export class Nebula {
 
             const pivot = new Object3D();        
             const geometry = new THREE.PlaneBufferGeometry() ;
+            distance *= _this.univerFactor;
+            scaleX *= _this.univerFactor;
+            scaleY *= _this.univerFactor;
     
             const mesh = new THREE.Mesh( geometry, material );
 
@@ -221,7 +224,7 @@ export class Nebula {
             _this.borders.b5=1;
             _this.borders.b6=1;
             _this.borders.b7=1;
-            range =  _this.univerSize/4;
+            range =  _this.univerSize/2;
             _this.distanceFactor=0.3;
             _this.spriteScale=range;
 
@@ -278,11 +281,7 @@ export class Nebula {
         else if (this.borders.b5<rand && rand <= this.borders.b6){return this.textures[5];}
         else if (this.borders.b6<rand && rand <= this.borders.b7){return this.textures[6];}
         else{return this.textures[7];}
-
-
-
-
-        
+ 
     }
 
     public addToScene(scene: Scene) {

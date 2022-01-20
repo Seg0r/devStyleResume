@@ -1,10 +1,7 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import { throws } from 'assert';
-import { Vector3, QuadraticBezierCurve3, Quaternion, PerspectiveCamera, Camera, Curve, Vector, Points, CatmullRomCurve3, Vector2, Object3D, Euler, Spherical, ArrowHelper, MathUtils, Scene, TextureLoader, Group, PlaneBufferGeometry, Mesh, MeshBasicMaterial, AdditiveBlending, BufferGeometry, CircleGeometry, RingGeometry, LineBasicMaterial, Line, MultiplyBlending, OrthographicCamera, SphereBufferGeometry, MeshPhongMaterial, PointLight, MeshPhysicalMaterial, DirectionalLight, MeshToonMaterial } from 'three';
+import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, Object3D, ArrowHelper, MathUtils, Scene, Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, MeshPhysicalMaterial } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Line2 } from 'three/examples/jsm/lines/Line2.js';
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
+import { DEFAULT_UNIVERSE_SIZE } from './main';
 
 
 interface TweenObject {
@@ -13,9 +10,6 @@ interface TweenObject {
 }
 
 declare type UnknownProps = Record<string, any>;
-
-const cameraPanLimit = 25;
-const deltaPos = 5;
 
 const LEAN_LEFT = 30;
 const LEAN_RIGHT = -LEAN_LEFT;
@@ -42,6 +36,8 @@ export class CameraUtils {
     private _panEnabled: boolean = true;
     cameraDir: Vector3 = new Vector3();
     private _cameraLookAt = new Vector3();
+    private cameraPanLimit = 30;
+    private deltaPos = 5;
 
     //camera rotation factors
     lastPos = new Vector3();
@@ -67,6 +63,9 @@ export class CameraUtils {
     scrollbar: Group | undefined;
     lastScrollTween: TWEEN.Tween<UnknownProps> | undefined;
     newCameraSection: number = 0;
+    horizontalAngle: number = 0;
+    verticalAngle: number = 0;
+    universeFactor: number;
     ;
 
 
@@ -97,7 +96,7 @@ export class CameraUtils {
     }
 
 
-    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, main: HTMLElement) {
+    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, main: HTMLElement, universeSize: number) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
@@ -105,6 +104,9 @@ export class CameraUtils {
         this.orbitControls = controls;
         this.sections = main.children;
         this.main = main;
+        this.cameraPanLimit = universeSize/160;
+        this.deltaPos = universeSize/800;
+        this.universeFactor = DEFAULT_UNIVERSE_SIZE/universeSize;
     }
 
 
@@ -350,15 +352,15 @@ export class CameraUtils {
 
     private panCamera(mouse: Vector2) {
         this.dirVector.subVectors(this.camera.position, this.cameraCenter);
-        this.camera.position.addScaledVector(this.sideVector, CameraUtils.calcCameraPan(mouse.x, this.sideVector.dot(this.dirVector)));
-        this.camera.position.addScaledVector(this.upVector, CameraUtils.calcCameraPan(mouse.y, this.upVector.dot(this.dirVector)));
+        this.camera.position.addScaledVector(this.sideVector, this.calcCameraPan(mouse.x, this.sideVector.dot(this.dirVector)));
+        this.camera.position.addScaledVector(this.upVector, this.calcCameraPan(mouse.y, this.upVector.dot(this.dirVector)));
     }
 
-    static calcCameraPan(mouse: number, distance: number): number {
+    private calcCameraPan(mouse: number, distance: number): number {
         const sign = Math.sign(mouse);
-        let inertia = distance / (cameraPanLimit * 2);
+        let inertia = distance / (this.cameraPanLimit * 2);
         inertia = inertia < -1 ? -1 : inertia > 1 ? 1 : inertia;
-        return mouse * deltaPos * Math.abs(sign - inertia);
+        return mouse * this.deltaPos * Math.abs(sign - inertia);
     }
 
     render(mouse: Vector2) {
@@ -391,16 +393,18 @@ export class CameraUtils {
             this.upVector.normalize();
 
             this.sideVector.set(1, 0, 0);
-            this.camera.localToWorld(this.sideVector)
+            this.camera.localToWorld(this.sideVector);
             this.sideVector.sub(this.currentCameraPos);
             this.sideVector.normalize();
 
             this.dirVector.subVectors(this.currentCameraPos, this.lastPos);
-            horizontalFactor = -this.sideVector.dot(this.dirVector);
-            verticalFactor = this.upVector.dot(this.dirVector);
+            horizontalFactor = -this.sideVector.dot(this.dirVector)/this.sideVector.length();
+            verticalFactor = this.upVector.dot(this.dirVector)/this.sideVector.length();
             this.lastPos.copy(this.currentCameraPos);
 
-            //console.log(horizontalFactor, verticalFactor)
+            horizontalFactor*=this.universeFactor;
+            verticalFactor*=this.universeFactor;
+            console.log(horizontalFactor,verticalFactor)
         }
 
         return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
@@ -512,8 +516,9 @@ export class CameraUtils {
 
         const geometry = new SphereBufferGeometry(2, 20, 20);
         const material = new MeshPhysicalMaterial({
-            roughness: 0.2,
-            transmission: 1
+            roughness: 0,
+            transmission: 0.8,
+            depthTest: false
         });
         material.thickness=7;
         this.scrollbar = new Group();
@@ -530,16 +535,11 @@ export class CameraUtils {
         }
 
         const markGeo = new SphereBufferGeometry(0.7, 20, 20);
-        const markMat = new MeshBasicMaterial({ color: 0xfedd1f });
+        const markMat = new MeshBasicMaterial({ color: 0xfedd1f,depthTest: false });
         this.scrollBarMark = new Mesh(markGeo, markMat);
         
         this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
-
-        const scrollBarLight = new DirectionalLight(0xfffffff, 0.1);
-        this.scrollBarMark.add(scrollBarLight);
-        scrollBarLight.position.set(-200, 400, 0);
- 
 
     }
 

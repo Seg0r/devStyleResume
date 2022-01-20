@@ -7,7 +7,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, PointLight,  AxesHelper, Vector2 } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, Vector2 } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
 
@@ -28,7 +28,10 @@ const initAngles: DirectionAngles = {
     beta2: beta2
 }
 
+export const DEFAULT_UNIVERSE_SIZE = 4000;
+
 const universeSize = 4000;
+const universeFactor = universeSize/DEFAULT_UNIVERSE_SIZE;
 const solarSize = universeSize / 20;
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 
@@ -55,6 +58,7 @@ const renderer = new WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.autoClear = false;
+renderer.shadowMap.enabled = false
 
 
 const stats = new Stats();
@@ -74,18 +78,18 @@ controls.enabled = false;
 //box.addToScene(scene);
 
 //camera away from orbit control
-let cameraUtils = new CameraUtils(camera, solarCenter,controls,main);
+let cameraUtils = new CameraUtils(camera, solarCenter,controls,main,universeSize);
 
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
-    { vector: new THREE.Vector3(-1000, 250, 900), mark: true },
-    { vector: new THREE.Vector3(400, 200, 900), mark: true },
-    { vector: new THREE.Vector3(800, 200, -500), mark: false },
-    { vector: new THREE.Vector3(0, 200, -800), mark: true },
-    { vector: new THREE.Vector3(-800, 400, 10), mark: false },
-    { vector: new THREE.Vector3(-400, 600, 600), mark: true },
-    { vector: new THREE.Vector3(-1000, 100, 0), mark: true },
-    { vector: new THREE.Vector3(100, 600, 500), mark: true },
-    { vector: new THREE.Vector3(1000, 700, 700), mark: true }
+    { vector: new THREE.Vector3(-1000, 250, 900).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(400, 200, 900).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(800, 200, -500).multiplyScalar(universeFactor), mark: false },
+    { vector: new THREE.Vector3(0, 200, -800).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(-800, 400, 10).multiplyScalar(universeFactor), mark: false },
+    { vector: new THREE.Vector3(-400, 600, 600).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(-1000, 100, 0).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(100, 600, 500).multiplyScalar(universeFactor), mark: true },
+    { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(universeFactor), mark: true }
 ];
 
 cameraUtils.calcSplinePoints(cameraSplineDefinition);
@@ -96,7 +100,7 @@ main.addEventListener('wheel', cameraUtils.checkScroll, { passive: true });
 const universe = new Universe(universeSize);
 
 //Nebulas
-const nebula = new Nebula(universeSize, universeSize / 4, scene);
+const nebula = new Nebula(universeSize, scene);
 
 //Stars
 const stars = new Stars(universeSize, universeSize * 0.7, cameraUtils);
@@ -109,125 +113,37 @@ const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 2
 
 
 //Add to scene
-// universe.addToScene(scene);
-// stars.addToScene(scene);
-// solarSystem.addToScene(scene);
-// solarSystem.toggleSolarSystem();
+universe.addToScene(scene);
+stars.addToScene(scene);
+solarSystem.addToScene(scene);
+solarSystem.toggleSolarSystem();
 // magneticField.addToScene(scene);
-// nebula.addToScene(scene);
-
+nebula.addToScene(scene);
+cameraUtils.addScrollbar(scene);
 
 //Lights
-const pointLight = new PointLight(0xFFFFFF);
-//const pointLightHelper = new PointLightHelper(pointLight);
-pointLight.position.set(0, 0, 200);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 
 //Helpers
 
 //const gridHelper = new GridHelper(200,200)
 //scene.add(gridHelper);
-//scene.add(pointLightHelper);
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
-//scene.add(pointLight);
-cameraUtils.addScrollbar(scene);
-
-const worldAxis = new AxesHelper(100);
+// const worldAxis = new AxesHelper(100);
 //scene.add(worldAxis);
 
 
-//Camera positions
-// const cameraBoxPos = new Vector3(0, 0, 15);
-// const cameraSolarPos = new Vector3(400, -150, 100);
 
-// const curveToSolar = new QuadraticBezierCurve3(
-//     cameraBoxPos,
-//     new Vector3(300, -200, 400),
-//     cameraSolarPos
-// );
-
-// const curveFromSolar = new QuadraticBezierCurve3(
-//     cameraSolarPos,
-//     new Vector3(300, -200, 400),
-//     cameraBoxPos
-// );
-
-/* const points = curveToSolar.getPoints( 500 );
-const geometry = new BufferGeometry().setFromPoints( points );
-const material = new LineBasicMaterial( { color : 0xff0000 } );
-const curveObject = new Line( geometry, material );
-scene.add(curveObject); */
-
-
-// const cameraLookAtPoint = new Vector3(700, -100, 0);
-
-
-//First render
-//camera.position.copy(cameraBoxPos);
-//renderer.render(scene, camera);
-
-// const storyStage = {
-//     stage0: 0,
-//     stage1: 1,
-//     stage2: 2,
-//     stage3: 3,
-// }
-
-// let currentStory: number = storyStage.stage0;
-
-
-
-//scroll callback
-// function tellTheStory() {
-//     const main: HTMLElement = document.getElementById("main")!;
-//     const currOffsetPerc: number = Math.round(document.body.getBoundingClientRect().top / main.offsetHeight * -100)
-
-//     console.log(currOffsetPerc);
-
-//     if (currOffsetPerc < 20) {
-//         if (currentStory != storyStage.stage0) {
-//             currentStory = storyStage.stage0;
-//             //cameraTweenToPos(camera, curveToSolar.getPoint(0),3000);
-//             cameraTweenToPosAtCurve(camera, curveFromSolar, 5000);
-//             cameraTweenLook(camera, cameraBoxPos, box.getPosition(), 8000, TWEEN.Easing.Linear.None);
-//             console.log("Pierwsza animacja");
-//         }
-//         box.animateBox(currOffsetPerc, 0, 20);
-//     }
-//     else if (currOffsetPerc >= 20 && currOffsetPerc < 40) {
-//         if (currentStory != storyStage.stage1) {
-//             currentStory = storyStage.stage1;
-//             //cameraTweenToPos(camera, curveToSolar.getPoint(1),3000);
-//             cameraTweenToPosAtCurve(camera, curveToSolar, 5000);
-//             cameraTweenLook(camera, curveToSolar.getPoint(1), cameraLookAtPoint, 8000, TWEEN.Easing.Linear.None);
-//             console.log("Druga animacja");
-//             solarSystem.toggleSolarSystem();
-//             //controls.target.copy(solarCenter);
-//         }
-
-//     } else {
-//         if (currentStory != storyStage.stage2) {
-//             currentStory = storyStage.stage2;
-//             console.log("Trzecia animacja");
-//         }
-
-//     }
-// }
+//Callbacks
 
 // let scrolled = false;
 // function checkScroll() {
 //     if (!scrolled) {
 //         scrolled = true;
-//         //tellTheStory();
 //         setTimeout(function () { scrolled = false; }, 100);
 //     };
 // }
 // document.body.onscroll = checkScroll;;
-
-
-controls.target.copy(solarCenter);
-
-
 
 //resize callback
 function onWindowResize() {
@@ -237,8 +153,6 @@ function onWindowResize() {
     cameraUtils.setScrollbarPosition(camera.aspect*112,-200);
 }
 window.addEventListener('resize', onWindowResize, false);
-
-
 
 //enable OrbitControls on ctrl+y
 document.addEventListener('keydown', function (event) {
@@ -258,7 +172,6 @@ document.addEventListener('keydown', function (event) {
 
 
 let mouse = new Vector2(0, 0);
-
 function onDocumentMouseMove(event: any) {
     // event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -267,6 +180,10 @@ function onDocumentMouseMove(event: any) {
 
 document.addEventListener('mousemove', onDocumentMouseMove, false);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
+
+
+//prepare to animate
+controls.target.copy(solarCenter);
 
 //animate loop
 animate();

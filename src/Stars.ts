@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Camera, Euler, Group, Quaternion, Scene, Spherical, Vector2, Vector3 } from 'three';
 import { CameraUtils } from './CameraUtils';
+import { DEFAULT_UNIVERSE_SIZE } from './main';
 
 interface MeshState {
     mesh: THREE.Mesh;
@@ -19,14 +20,16 @@ export class Stars {
     center: Vector3;
     currScaleFactor: number = 0;
     currDeltaFactorMultiplayer = 1;
+    universeFactor: number;
 
 
     constructor(universSize: number, starsCount: number, camera: CameraUtils) {
 
+        this.universeFactor = DEFAULT_UNIVERSE_SIZE/universSize;
         this.univerSize = universSize * 2;
         this.camera = camera;
 
-        const geometry2 = new THREE.SphereBufferGeometry(universSize / 4000, 8, 5);
+        const geometry2 = new THREE.SphereBufferGeometry(universSize / 4000);
         const material2 = new THREE.MeshBasicMaterial({ color: 0xffffff });
         this.center = this.camera.cameraLookAt;
         const meshScaleFactor = universSize /1.5;
@@ -76,6 +79,7 @@ export class Stars {
 
     private scaleAndRotateStars(scaleFactor: number, rotationValue: number) {
         let factorToSet = 0;
+        // scaleFactor/=(this.univerSize/80);
         scaleFactor/=500;
         let factorDiff = scaleFactor - this.currScaleFactor
         const cameraDist = this.camera.position.distanceTo(this.center);
@@ -99,6 +103,7 @@ export class Stars {
 
 
     private distanceFactor(distance: number): number {
-        return Math.pow(distance, 1.85) / (this.univerSize / 8);
+        //TODO: scale with universe properly
+        return Math.pow(distance*this.universeFactor, 1.85) / (this.univerSize / 8);
     }
 }
