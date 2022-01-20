@@ -70,7 +70,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.rotateSpeed = 0.2;
-controls.enabled = false;
+controls.enabled = true;
 // controls.autoRotate=true;
 
 //GreetingBox
@@ -159,12 +159,10 @@ document.addEventListener('keydown', function (event) {
     if (event.ctrlKey && event.key === 'y') {
         if (main.style.visibility == "hidden") {
             main.style.visibility = "visible";
-            controls.enabled = false;
             cameraUtils.panEnabled = true;
         }
         else {
             main.style.visibility = "hidden";
-            controls.enabled = true;
             cameraUtils.panEnabled = false;
         }
     }

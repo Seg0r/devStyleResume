@@ -184,7 +184,7 @@ export class CameraUtils {
         lookAtPoint: Readonly<Vector3>, time: number,
         easingFun: (amount: number) => number) {
 
-        const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, viewFromPoint, lookAtPoint)
+        const endQuaternion = CameraUtils.calcCameraLookAtQuaternion(this.camera, viewFromPoint, lookAtPoint)
         this.tweenCameraQuaternion(time, endQuaternion, easingFun);
     }
 
@@ -228,31 +228,38 @@ export class CameraUtils {
 
     public moveCameraAlongSplineAndLean(curve: Readonly<Curve<Vector3>>, startPosition: number, endPosition: number, time: number, leanAngle: number) {
 
-        const endQuaternion = CameraUtils.calcCameraQuaternionLookAt(this.camera, curve.getPoint(endPosition), this.origin, leanAngle)
-
+        
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
         let startQuat: Quaternion;
         let calcQuat = new Quaternion();
+        let endQuaternion = new Quaternion();
         let posDirection: number;
         let startPos: number;
-        let destVector = new Vector3();
+        let currentVector = new Vector3();
+        let currentTarget = new Vector3();
+        let endTarget = new Vector3();
 
         const newTween = new TWEEN.Tween(part)
             .onStart((tween) => {
                 startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
                 startPos = this.startPosition;
                 posDirection = endPosition - this.startPosition;
-                destVector.copy(this.camera.position);
+                currentVector.copy(this.camera.position);
+                currentTarget.copy(this.orbitControls.target);
+                // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
+                endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera,curve.getPoint(endPosition), this.origin, leanAngle));
             })
             .to({ t: 1, pos: endPosition }, time)
             .onUpdate((tween) => {
                 let destPos = startPos + tween.t * posDirection;
                 destPos = destPos < 0 ? 0 : (destPos > 1 ? 1 : destPos);
-                destVector.lerp(curve.getPoint(destPos),tween.t);
-                this.camera.position.copy(destVector);
-                calcQuat.slerpQuaternions(startQuat, endQuaternion, tween.t)
-                this.camera.quaternion.copy(calcQuat);
+                currentVector.lerp(curve.getPoint(destPos),tween.t);
+                this.camera.position.copy(currentVector);
+                currentTarget.lerp(endTarget,tween.t);
+                this.orbitControls.target.copy(currentTarget);
+                // calcQuat.slerpQuaternions(startQuat, endQuaternion, tween.t)
+                // this.camera.quaternion.copy(calcQuat);
             })
             .easing(TWEEN.Easing.Cubic.InOut);
 
@@ -267,11 +274,8 @@ export class CameraUtils {
         return (Math.round((val) * 100)) / 100;
     }
 
-    static calcCameraQuaternionLookAt(_camera: Readonly<Camera>, endPosition: Vector3, lookAtVector: Vector3, leanAngle?: number): Quaternion {
+    static calcCameraLookAtQuaternion(_camera: Readonly<Camera>, endPosition: Vector3, lookAtVector: Vector3, leanAngle?: number): Quaternion {
         const camera: Camera = _camera.clone();
-        // backup original rotation and position
-        const startQuaternion = new Quaternion().copy(camera.quaternion);
-        const startPosition = new Vector3().copy(camera.position);
         // move and rotate (with lookAt + lean)
         camera.position.copy(endPosition);
         camera.lookAt(lookAtVector);
@@ -281,11 +285,25 @@ export class CameraUtils {
         return new Quaternion().copy(camera.quaternion);
     }
 
+    static calcCameraLookAtVector3(_camera: Readonly<Camera>, endPosition: Vector3, lookAtVector: Vector3, leanAngle?: number): Vector3 {
+        const camera: Camera = _camera.clone();
+        // move and rotate (with lookAt + lean)
+        camera.position.copy(endPosition);
+        camera.lookAt(lookAtVector);
+        const dist = camera.position.distanceTo(lookAtVector);
+
+        if (leanAngle)
+            camera.rotateY(leanAngle);
+
+        let vLeaned = new Vector3(0, 0, -1).applyEuler(camera.rotation).setLength(dist);
+
+        vLeaned = new Vector3().add(camera.position).add(vLeaned);
+       
+        return vLeaned;
+    }
+
     static calcCameraQuaternionRotateOnAxis(_camera: Readonly<Camera>, axis: Vector3, angle: number): Quaternion {
         const camera: Camera = _camera.clone();
-        // backup original rotation and position
-        const startQuaternion = new Quaternion().copy(camera.quaternion);
-        const startPosition = new Vector3().copy(camera.position);
         // move and rotate 
         camera.rotateOnAxis(axis, angle);
         //save quaternion
@@ -383,7 +401,7 @@ export class CameraUtils {
         let horizontalFactor = 0;
         let verticalFactor = 0;
 
-        if (this.currTween?.isPlaying() || this.orbitControls.enabled) {
+        if (this.currTween?.isPlaying() || !this.panEnabled) {
             this.camera.updateWorldMatrix(false, false);
             this.currentCameraPos.copy(this.camera.position);
 
@@ -404,7 +422,7 @@ export class CameraUtils {
 
             horizontalFactor*=this.universeFactor;
             verticalFactor*=this.universeFactor;
-            console.log(horizontalFactor,verticalFactor)
+            //console.log(horizontalFactor,verticalFactor)
         }
 
         return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
