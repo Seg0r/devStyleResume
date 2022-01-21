@@ -41,11 +41,11 @@ export class Stars {
             y = THREE.MathUtils.randFloatSpread(this.univerSize);
             z = THREE.MathUtils.randFloatSpread(this.univerSize);
 
+            //TODO: try InstancedMesh
             const mesh = new THREE.Mesh(geometry2, material2)
             mesh.position.set(x, y, z);
             const distanceX = new Vector2(x, z).distanceTo(new Vector2(this.center.x, this.center.z));
             const distance = mesh.position.distanceTo(this.center);
-            // mesh.scale.set(0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor);
             mesh.scale.set(0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor);
             mesh.lookAt(this.center);
 
