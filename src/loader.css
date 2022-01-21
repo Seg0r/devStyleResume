@@ -19,8 +19,7 @@
     background-repeat: no-repeat;
 	opacity: 1;
     will-change: opacity;
- 	transition: 1s opacity 8s;
-     /* transition: 1s opacity ; */
+ 	transition: 1s opacity;
 }
 
 #loading-screen.fade-out {
@@ -88,7 +87,9 @@
     position: absolute;
     top: 74%;
     left: 65%;
-    animation: slide 9s linear 0.7s 1 forwards;
+    -webkit-animation: slide 9s linear 1 forwards;
+    -ms-animation: slide 9s linear 1 forwards;
+    animation: slide 9s linear 1 forwards;
 }
 
 #loader-text > *{
@@ -99,17 +100,23 @@
 
 #f1 {
     will-change: opacity;
-    animation: fade 0.7s 1s 1 linear both, blinking 1.5s 1.8s 1 linear forwards;
+    -webkit-animation: fade 0.7s 0s 1 linear both, blinking 1.5s 0.8s 1 linear forwards;
+    -ms-animation: fade 0.7s 0s 1 linear both, blinking 1.5s 0.8s 1 linear forwards;
+    animation: fade 0.7s 0s 1 linear both, blinking 1.5s 0.8s 1 linear forwards;
 }
 
 #f2 {
     will-change: opacity;
-    animation: fade 0.7s 4s 1 linear both, blinking 1.5s 4.7s 1 linear forwards;
+    -webkit-animation: fade 0.7s 3s 1 linear both, blinking 1.5s 3.7s 1 linear forwards;
+    -ms-animation: fade 0.7s 3s 1 linear both, blinking 1.5s 3.7s 1 linear forwards;
+    animation: fade 0.7s 3s 1 linear both, blinking 1.5s 3.7s 1 linear forwards;
 }
 
 #f3 {
     will-change: opacity;
-    animation: fade 0.7s 6.9s 1 linear both, blinking 1.5s 7.6s linear infinite;
+    -webkit-animation: fade 0.7s 5.9s 1 linear both, blinking 1.5s 6.6s linear infinite;
+    -ms-animation:fade 0.7s 5.9s 1 linear both, blinking 1.5s 6.6s linear infinite;
+    animation: fade 0.7s 5.9s 1 linear both, blinking 1.5s 6.6s linear infinite;
 }
 
 
@@ -119,12 +126,12 @@
 }
 
 @keyframes slide {
-    0%   {transform: translate(0%, 0%);}
-    31%  {transform: translate(0%, 0%);}
-    35%  {transform: translate(0%, -35%);}
-    64%  {transform: translate(0%, -35%);}
-    68%  {transform: translate(0%, -70%);}
-    100% {transform: translate(0%, -70%);}
+    0%   {-webkit-transform: translate(0%, 0%);-ms-transform:translate(0%, 0%);transform: translate(0%, 0%);}
+    31%  {-webkit-transform: translate(0%, 0%);-ms-transform:translate(0%, 0%);transform: translate(0%, 0%);}
+    35%  {-webkit-transform: translate(0%, -35%);-ms-transform:translate(0%, -35%);transform: translate(0%, -35%);}
+    64%  {-webkit-transform: translate(0%, -35%);-ms-transform:translate(0%, -35%);transform: translate(0%, -35%);}
+    68%  {-webkit-transform: translate(0%, -70%);-ms-transform:translate(0%, -70%);transform: translate(0%, -70%);}
+    100% {-webkit-transform: translate(0%, -70%);-ms-transform:translate(0%, -70%);transform: translate(0%, -70%);}
 }
 
 @keyframes blinking {

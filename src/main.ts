@@ -35,11 +35,12 @@ const universeFactor = universeSize/DEFAULT_UNIVERSE_SIZE;
 const solarSize = universeSize / 20;
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 
+const startDate = new Date().getTime();
+
 //Hide scrollbar:
 var main = document.getElementById('main')!;
 if (main)
     main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
-
 
 //Scene
 const scene: Scene = new Scene();
@@ -97,11 +98,12 @@ main.addEventListener('wheel', cameraUtils.checkScroll, { passive: true });
 
 const loadingManager = new THREE.LoadingManager( () => {
     const loadingScreen = document.getElementById( 'loading-screen' )!;
-    
+    const timeDiff = new Date().getTime() - startDate;
+    const timeout = timeDiff >= 8000 ? 1 : 8000 - timeDiff;
     setTimeout(()=>{
         loadingScreen.classList.add( 'fade-out' );
-    },2000);
-    loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
+        loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
+    },timeout);   
 }
 );
 
@@ -119,18 +121,6 @@ const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles, loa
 
 //Magnetic field
 const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, camera);
-
-
-//Add to scene
-cameraUtils.addScrollbar(scene);
-stars.addToScene(scene);
-solarSystem.addToScene(scene);
-solarSystem.toggleSolarSystem();
-// magneticField.addToScene(scene);
-nebula.addToScene(scene);
-setTimeout(()=>{
-    universe.addToScene(scene);
-},7000);
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -186,21 +176,33 @@ function onDocumentMouseMove(event: any) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
-
 document.addEventListener('mousemove', onDocumentMouseMove, false);
-cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
+
+
+
+//Add to scene
+cameraUtils.addScrollbar(scene);
+stars.addToScene(scene);
+solarSystem.addToScene(scene);
+solarSystem.toggleSolarSystem();
+// magneticField.addToScene(scene);
+nebula.addToScene(scene);
+universe.addToScene(scene);
 
 
 //prepare to animate
 controls.target.copy(solarCenter);
+cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
 
 
-let clock = new THREE.Clock();
-let delta = 0;
-// 30 fps
-let interval = 1 / 30;
+// scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+
 
 //animate loop
+let clock = new THREE.Clock();
+let delta = 0;
+// 60 fps
+let interval = 1 / 60;
 animate();
 function animate() {
 
