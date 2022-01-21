@@ -1,5 +1,5 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, Object3D, ArrowHelper, MathUtils, Scene, Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, MeshPhysicalMaterial } from 'three';
+import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, Object3D, ArrowHelper, MathUtils, Scene, Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, MeshPhysicalMaterial, RingBufferGeometry, CircleBufferGeometry } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 
@@ -542,13 +542,12 @@ export class CameraUtils {
 
     createScrollbar() {
 
-        const geometry = new SphereBufferGeometry(2, 20, 20);
-        const material = new MeshPhysicalMaterial({
-            roughness: 0,
-            transmission: 0.8,
-            depthTest: false
+        const geometry = new RingBufferGeometry(1.5, 2, 20);
+        const material = new MeshBasicMaterial({
+            depthTest: false,
+            opacity: 0.2,
+            transparent: true
         });
-        material.thickness=7;
         this.scrollbar = new Group();
         //add scrollbar to camera to fix position
         this.camera.add(this.scrollbar);
@@ -562,7 +561,7 @@ export class CameraUtils {
             this.scrollbar.position.setY(index * 5)
         }
 
-        const markGeo = new SphereBufferGeometry(0.7, 20, 20);
+        const markGeo = new CircleBufferGeometry(1.2, 20);
         const markMat = new MeshBasicMaterial({ color: 0xfedd1f,depthTest: false });
         this.scrollBarMark = new Mesh(markGeo, markMat);
         
