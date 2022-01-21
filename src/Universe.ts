@@ -11,18 +11,9 @@ export class Universe {
     background: THREE.CubeTexture | undefined;
     
 
-    constructor(univerSize: number) {
+    constructor(univerSize: number, loadingManager: THREE.LoadingManager) {
 
         const fileFormat = ".webp";
-        const loadingManager = new THREE.LoadingManager( () => {
-	
-            console.log("Loaded!");
-            const loadingScreen = document.getElementById( 'loading-screen' )!;
-            loadingScreen.classList.add( 'fade-out' );
-
-            loadingScreen.addEventListener( 'transitionend', this.onTransitionEnd ); 
-        },
-        );
 
         const loader = new THREE.TextureLoader(loadingManager);
         loader.setPath('/assets/scene/');
@@ -68,18 +59,6 @@ export class Universe {
         scene.add(this.blueNebula);
         scene.add(this.pinkNebula);
         scene.add(this.yellowNebula);
-        
-    }
-
-    public render(){
-        //empty for now
-    }   
-
-    private onTransitionEnd( event:any ) {
-
-        const element = event.target;
-        element.remove();
-        
     }
 
 }

@@ -95,31 +95,42 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
 cameraUtils.calcSplinePoints(cameraSplineDefinition);
 main.addEventListener('wheel', cameraUtils.checkScroll, { passive: true });
 
+const loadingManager = new THREE.LoadingManager( () => {
+    const loadingScreen = document.getElementById( 'loading-screen' )!;
+    
+    setTimeout(()=>{
+        loadingScreen.classList.add( 'fade-out' );
+    },2000);
+    loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
+}
+);
 
 //Universe
-const universe = new Universe(universeSize);
+const universe = new Universe(universeSize,loadingManager);
 
 //Nebulas
-const nebula = new Nebula(universeSize, scene);
+const nebula = new Nebula(universeSize, scene, loadingManager);
 
 //Stars
 const stars = new Stars(universeSize, universeSize * 0.7, cameraUtils);
 
 //SolarSystem
-const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles);
+const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles, loadingManager);
 
 //Magnetic field
 const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, camera);
 
 
 //Add to scene
-universe.addToScene(scene);
+cameraUtils.addScrollbar(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);
 solarSystem.toggleSolarSystem();
 // magneticField.addToScene(scene);
 nebula.addToScene(scene);
-cameraUtils.addScrollbar(scene);
+setTimeout(()=>{
+    universe.addToScene(scene);
+},7000);
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -183,10 +194,29 @@ cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
 //prepare to animate
 controls.target.copy(solarCenter);
 
+
+let clock = new THREE.Clock();
+let delta = 0;
+// 30 fps
+let interval = 1 / 30;
+
 //animate loop
 animate();
 function animate() {
 
+    requestAnimationFrame(animate);
+    delta += clock.getDelta();
+  
+     if (delta  > interval) {
+         // The draw or time dependent code are here
+         render();
+  
+         delta = delta % interval;
+     }
+}
+
+
+function render() {
     TWEEN.update();
     stats.update();
     if (controls.enabled) {
@@ -195,19 +225,19 @@ function animate() {
 
     //render scene
     renderer.clear();
-    universe.render();
     solarSystem.render();
     stars.render();
     //magneticField.render();
     cameraUtils.render(mouse);
 
-    renderer.clearDepth();
-
+    // renderer.clearDepth();
     //render rest
     renderer.render(scene, camera);
-
-    requestAnimationFrame(animate);
 }
 
+function onTransitionEnd( event:any ) {
 
-
+    const element = event.target;
+    element.remove();
+    
+}

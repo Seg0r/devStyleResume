@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Group,   Mesh, MeshToonMaterial, Object3D, PointLight,  Scene, SphereBufferGeometry,  TextureLoader,  Vector3 } from "three";
+import { Group, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereBufferGeometry, TextureLoader, Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'lil-gui';
@@ -7,29 +7,29 @@ import * as UTILS from './utils/applyUV'
 import { gaussianRandom } from './utils/math';
 //import { vertexShader, fragmentShader } from "./utils/lavaShader";
 
-const alpha1=0.3;
-const alpha2=0.4;
-const beta1=1.3;
-const beta2=-0.8;
+const alpha1 = 0.3;
+const alpha2 = 0.4;
+const beta1 = 1.3;
+const beta2 = -0.8;
 
-const metalness=0;
-const roughness=1;
+const metalness = 0;
+const roughness = 1;
 
-const alphaDist=1.2;
-const betaDist=1.4;
+const alphaDist = 1.2;
+const betaDist = 1.4;
 
-const sunLightStrength=120;
-const sunLightDecay=6;
+const sunLightStrength = 120;
+const sunLightDecay = 6;
 
 
-export interface DirectionAngles  {
+export interface DirectionAngles {
     alpha1: number,
     alpha2: number,
     beta1: number,
     beta2: number
 }
 
-interface Options  {
+interface Options {
     alpha1: number,
     alpha2: number,
     beta1: number,
@@ -55,42 +55,45 @@ export class SolarSystem {
     private sunLightDecay: number = sunLightDecay;
     visible: Boolean = false;
     private lensflare: Lensflare;
-    vector3:Vector3;
+    vector3: Vector3;
 
     //postprocessing
     bloomPassToggle: boolean = true;
 
-    options: Options  =  {
-        alpha1:alpha1,
+    options: Options = {
+        alpha1: alpha1,
         alpha2: alpha2,
         beta1: beta1,
         beta2: beta2,
         metalness: metalness,
         roughness: roughness
-    } 
-    customUniforms!: { 
-        baseTexture: { type: string; value: THREE.Texture; }; 
-        baseSpeed: { type: string; value: number; }; 
-        noiseTexture: { type: string; value: THREE.Texture; }; 
-        noiseScale: { type: string; value: number; }; 
-        alpha: { type: string; value: number; }; 
-        time: { type: string; value: number; }; };
+    }
+    customUniforms!: {
+        baseTexture: { type: string; value: THREE.Texture; };
+        baseSpeed: { type: string; value: number; };
+        noiseTexture: { type: string; value: THREE.Texture; };
+        noiseScale: { type: string; value: number; };
+        alpha: { type: string; value: number; };
+        time: { type: string; value: number; };
+    };
+    loadingManager: THREE.LoadingManager;
 
-    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: THREE.LoadingManager) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
+        this.loadingManager=loadingManager;
 
         this.bornOrbiters(count, center, size);
 
-        this.sunLight = new PointLight(0xfe9b14, this.sunLightStrength, size*3, this.sunLightDecay);
+        this.sunLight = new PointLight(0xfe9b14, this.sunLightStrength, size * 3, this.sunLightDecay);
         this.sunLight.position.copy(center);
-        this.sunLight.castShadow=false;
+        this.sunLight.castShadow = false;
 
         this.lensflare = this.createLensflare(size);
 
-        this.bornMoons(count, center, size,this.options,initAngles.alpha1,initAngles.alpha2,alphaDist);
-        this.bornMoons(count*1.2, center, size,this.options,initAngles.beta1,initAngles.beta2,betaDist);
+        this.bornMoons(count, center, size, this.options, initAngles.alpha1, initAngles.alpha2, alphaDist);
+        this.bornMoons(count * 1.2, center, size, this.options, initAngles.beta1, initAngles.beta2, betaDist);
 
         //this.createGUI(center, size, count);
     }
@@ -99,47 +102,49 @@ export class SolarSystem {
 
 
         const _this = this;
-        let options: Options =  {
-            alpha1:alpha1,
+        let options: Options = {
+            alpha1: alpha1,
             alpha2: alpha2,
             beta1: beta1,
             beta2: beta2,
             metalness: metalness,
             roughness: roughness
-        } 
+        }
 
         const gui = new GUI()
         const lightFolder = gui.addFolder('Lights')
-        lightFolder.add(_this.sunLight, 'intensity', 0,200);
-        lightFolder.add(_this.sunLight, 'decay', 0,10);
+        lightFolder.add(_this.sunLight, 'intensity', 0, 200);
+        lightFolder.add(_this.sunLight, 'decay', 0, 10);
         lightFolder.open()
         const moonFolder = gui.addFolder('Moons')
-        moonFolder.add(options, 'alpha1', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'alpha2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'beta1', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'beta2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'beta2', -3,3).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'roughness', 0,1).step(0.1).onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        moonFolder.add(options, 'metalness', 0,1).step(0.1).listen().onChange( function () {
-            _this.reBornMoons(count,center, size, options);
-        } );
-        var obj = { button:function(){ 
-            options= _this.options;
-            _this.reBornMoons(count,center, size, options);
-         }};
-        moonFolder.add(obj,'button').name('Reset');
+        moonFolder.add(options, 'alpha1', -3, 3).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'alpha2', -3, 3).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'beta1', -3, 3).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'beta2', -3, 3).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'beta2', -3, 3).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'roughness', 0, 1).step(0.1).onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        moonFolder.add(options, 'metalness', 0, 1).step(0.1).listen().onChange(function () {
+            _this.reBornMoons(count, center, size, options);
+        });
+        var obj = {
+            button: function () {
+                options = _this.options;
+                _this.reBornMoons(count, center, size, options);
+            }
+        };
+        moonFolder.add(obj, 'button').name('Reset');
         moonFolder.open();
         // const bloomFolder = gui.addFolder('Bloom')
         // bloomFolder.add(_this.bloomPass, 'threshold', 0,1).step(0.1);
@@ -150,42 +155,42 @@ export class SolarSystem {
         gui.close();
     }
 
-    public reBornMoons(count: number, center: THREE.Vector3, size: number, options: Options   ) {
+    public reBornMoons(count: number, center: THREE.Vector3, size: number, options: Options) {
 
         this.moonSpeeds = [];
-        this.moonPivots= [];
-        this.moons= [];
+        this.moonPivots = [];
+        this.moons = [];
         this.solarSystem.clear();
-        this.orbiterPivots.forEach(orb=>this.solarSystem.add(orb));
-        
+        this.orbiterPivots.forEach(orb => this.solarSystem.add(orb));
 
-        this.bornMoons(count, center, size,options,options.alpha1,options.alpha2,alphaDist);
-        this.bornMoons(count, center, size,options,options.beta1,options.beta2,betaDist);
+
+        this.bornMoons(count, center, size, options, options.alpha1, options.alpha2, alphaDist);
+        this.bornMoons(count, center, size, options, options.beta1, options.beta2, betaDist);
     }
 
-    public bornMoons(count: number, center: THREE.Vector3, size: number,options:Options, alphaRot:number , betaRot:number, distance: number ) {
+    public bornMoons(count: number, center: THREE.Vector3, size: number, options: Options, alphaRot: number, betaRot: number, distance: number) {
 
         let geometry: ConvexGeometry;
 
-        const stoneTexture = new THREE.TextureLoader().load('assets/moons/stoneTexture.jpg');
-            stoneTexture.wrapS = THREE.RepeatWrapping;
-            stoneTexture.wrapT = THREE.RepeatWrapping;
-            const stoneNormalMap = new THREE.TextureLoader().load('assets/moons/stoneNormalMap.jpg');
+        const stoneTexture = new THREE.TextureLoader(this.loadingManager).load('assets/moons/stoneTexture.jpg');
+        stoneTexture.wrapS = THREE.RepeatWrapping;
+        stoneTexture.wrapT = THREE.RepeatWrapping;
+        const stoneNormalMap = new THREE.TextureLoader(this.loadingManager).load('assets/moons/stoneNormalMap.jpg');
         const material = new THREE.MeshStandardMaterial({
-                map: stoneTexture,
-                normalMap:stoneNormalMap,
-                roughness: options.roughness,
-                metalness: options.metalness
-            });
+            map: stoneTexture,
+            normalMap: stoneNormalMap,
+            roughness: options.roughness,
+            metalness: options.metalness
+        });
 
 
 
         // var noiseTexture = new THREE.TextureLoader().load('assets/moons/cloud.png' );
         // noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
-            
+
         // var lavaTexture = new THREE.TextureLoader().load('assets/moons/lava.jpg' );
         // lavaTexture.wrapS = lavaTexture.wrapT = THREE.RepeatWrapping; 
-        
+
         // // use "this." to create global object
         // this.customUniforms = {
         //     baseTexture: 	{ type: "t", value: lavaTexture },
@@ -195,7 +200,7 @@ export class SolarSystem {
         //     alpha: 			{ type: "f", value: 1.0 },
         //     time: 			{ type: "f", value: 1.0 }
         // };
-        
+
         // // create custom material from the shader code above
         // // that is within specially labeled script tags
         // var customMaterial = new THREE.ShaderMaterial( 
@@ -262,9 +267,8 @@ export class SolarSystem {
     }
 
     private createLensflare(size: number): Lensflare {
-        const textureLoader = new TextureLoader();
         //const textureFlare0 = textureLoader.load('assets/lensflare0.png');
-        const textureFlare3 = textureLoader.load('assets/lensflare3.png');
+        const textureFlare3 = new TextureLoader(this.loadingManager).load('assets/lensflare3.png');
 
         const lensflare = new Lensflare();
         //lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new THREE.Color(0xfe9b14)));
@@ -278,9 +282,9 @@ export class SolarSystem {
 
     private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
 
-        const geometry = new SphereBufferGeometry(size/1000, 8, 5);
+        const geometry = new SphereBufferGeometry(size / 1000, 8, 5);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
-        let radius = size /2;
+        let radius = size / 2;
 
         for (let i = 0; i < count; i++) {
 
@@ -321,37 +325,31 @@ export class SolarSystem {
         this.solarSystem.visible = false;
         scene.add(this.solarSystem);
         scene.add(this.sunLight);
-        //this.sunLight.add(this.lensflare);
+        this.sunLight.add(this.lensflare);
     }
 
     public render() {
-        var clock = new THREE.Clock();
         if (this.solarSystem.visible) {
 
             let pivot: Object3D;
             let moon: THREE.Mesh;
-            let vector3: Vector3 = new Vector3();
 
-            //const timer = 0.0001 * Date.now();
             for (let i = 0, il = this.orbiterPivots.length; i < il; i++) {
                 pivot = this.orbiterPivots[i];
                 pivot.rotateY(this.orbiterSpeeds[i] * 0.015);
-                pivot.rotateOnWorldAxis(vector3.set(0, 0, 1), 0.01);
-                pivot.rotateOnWorldAxis(vector3.set(1, 0, 0), 0.005);
+                pivot.rotateOnWorldAxis(this.vector3.set(0, 0, 1), 0.01);
+                pivot.rotateOnWorldAxis(this.vector3.set(1, 0, 0), 0.005);
             }
 
             for (let i = 0, il = this.moonPivots.length; i < il; i++) {
                 this.moonPivots[i].rotateY(0.001);
                 if (i <= this.moons.length) {
                     moon = this.moons[i];
-                    moon.rotateX(this.moonSpeeds[i]*0.01);
-                    moon.rotateY(this.moonSpeeds[i]*0.01);
-                    moon.rotateZ(this.moonSpeeds[i]*0.01);
+                    moon.rotateX(this.moonSpeeds[i] * 0.01);
+                    moon.rotateY(this.moonSpeeds[i] * 0.01);
+                    moon.rotateZ(this.moonSpeeds[i] * 0.01);
                 }
             }
-
-            // var delta = clock.getDelta();
-            // this.customUniforms.time.value += delta;
         }
     }
 

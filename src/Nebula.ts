@@ -45,7 +45,7 @@ export class Nebula {
     };
     bordersOld = Object.assign({}, this.borders);
 
-    constructor(universSize: number, scene :Scene) {
+    constructor(universSize: number, scene :Scene , loadingManager: THREE.LoadingManager) {
 
         this.univerSize=universSize;
         this.univerFactor=this.univerSize/DEFAULT_UNIVERSE_SIZE;
@@ -58,7 +58,7 @@ export class Nebula {
         
         for (let file in Files) {
             if (isNaN(Number(file))){
-                this.textures.push ( new THREE.TextureLoader().load( 'assets/nebula/'+file+'.webp' ));      
+                this.textures.push ( new THREE.TextureLoader(loadingManager).load( 'assets/nebula/'+file+'.webp' ));      
             }
         }
 
