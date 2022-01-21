@@ -325,7 +325,7 @@ export class SolarSystem {
         this.solarSystem.visible = false;
         scene.add(this.solarSystem);
         scene.add(this.sunLight);
-        this.sunLight.add(this.lensflare);
+        // this.sunLight.add(this.lensflare);
     }
 
     public render() {
