@@ -11,7 +11,7 @@ declare type UnknownProps = Record<string, any>;
 
 export class ScrollbarUtils {
 
-    
+
     sections: HTMLCollection;
     main: HTMLElement;
     camera: PerspectiveCamera;
@@ -26,24 +26,24 @@ export class ScrollbarUtils {
     newScrollbarSection: number = 0;
     prevSection: number = 0;
     cameraUtils: CameraUtils;
+    sectionChecked: boolean = false;
 
-    constructor(main:HTMLElement,cameraUtils: CameraUtils){
-        this.main=main;
-        this.sections=main.children
-        this.cameraUtils=cameraUtils;
-        this.camera=cameraUtils.camera;
+    constructor(main: HTMLElement, cameraUtils: CameraUtils) {
+        this.main = main;
+        this.sections = main.children
+        this.cameraUtils = cameraUtils;
+        this.camera = cameraUtils.camera;
     }
 
     private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
 
-    public checkScroll = (e: WheelEvent) => {
-        //e.preventDefault();
-        // if (!scrolled) {
-        //     scrolled = true;
-        //sectionScrolling(e);
-        this.sectionScrolling(e);
-        //     setTimeout(function () { scrolled = false; }, 100);
-        // };
+    public checkSection = (ev: any) => {
+        const _this = this;
+        if (!this.sectionChecked) {
+            this.sectionChecked = true;
+            this.sectionScrolling();
+            setTimeout(function () { _this.sectionChecked = false; }, 100);
+        };
     }
 
     public sectionScrolling2 = (e: Event) => {
@@ -63,33 +63,40 @@ export class ScrollbarUtils {
     }
 
 
-    public sectionScrolling(e: any) {
-        const deltaScroll = Math.sign(e.deltaY);
-        const currOffsetPerc: number = this.main.scrollTop / (this.main.scrollHeight - this.main.clientHeight);
+    public sectionScrolling() {
+        let cameraSection = 0;
 
-        let cameraSection = Math.floor(currOffsetPerc * this.sections.length);
-        if (cameraSection >= this.sections.length) {
-            cameraSection = this.sections.length - 1;
+        for (let index = 0; index < this.sections.length - 1; index++) {
+            if (ScrollbarUtils.isElementInViewport(this.sections[index] as HTMLElement)) {
+                console.log("Section " + index + " in view");
+                cameraSection = index;
+                break;
+            }
+            //non of section is in viewport
+            cameraSection = this.prevSection;
         }
 
-        let leanAngle = 0;
+        // const currOffsetPerc: number = this.main.scrollTop / (this.main.scrollHeight - this.main.clientHeight);
+        //  let cameraSection = Math.floor(currOffsetPerc * this.sections.length);
+        // if (cameraSection >= this.sections.length) {
+        //     cameraSection = this.sections.length - 1;
+        // }
 
-        if (this.sections[cameraSection].className == "left") {
+        let leanAngle = 0;
+        if (this.sections[cameraSection].classList.contains("left")) {
             leanAngle = LEAN_LEFT;
-        } else if (this.sections[cameraSection].className == "right") {
+        } else if (this.sections[cameraSection].classList.contains("right")) {
             leanAngle = LEAN_RIGHT;
         }
 
-         //calculate direction to avoid "overdue" wheel spin
-         const deltaSection = Math.sign(cameraSection - this.prevSection);
+        //  const deltaSection = Math.sign(cameraSection - this.prevSection);
 
-        if (cameraSection != this.prevSection && deltaSection == deltaScroll) {
-
-            //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
+        if (cameraSection != this.prevSection) {
             this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 3000, MathUtils.degToRad(leanAngle));
-
             this.prevSection = cameraSection;
             this.updateScrollBar(cameraSection);
+            //if last section - turn OrbitControls autorotate
+            this.cameraUtils.setAutoRotate(cameraSection == this.sections.length - 2);
         }
     }
 
@@ -109,7 +116,7 @@ export class ScrollbarUtils {
             .to({ t: cameraSection }, 1000)
             .onUpdate((tween: any) => {
                 const pos = tween.t * SCROLL_BAR_DISTANCE;
-                this.scrollBarMark?.position.set(0, pos, 0)   
+                this.scrollBarMark?.position.set(0, pos, 0)
             })
             .easing(TWEEN.Easing.Cubic.InOut)
             .onComplete((tween) => {
@@ -151,9 +158,9 @@ export class ScrollbarUtils {
         }
 
         const markGeo = new CircleBufferGeometry(1.2, 20);
-        const markMat = new MeshBasicMaterial({ color: 0xfedd1f,depthTest: false });
+        const markMat = new MeshBasicMaterial({ color: 0xfedd1f, depthTest: false });
         this.scrollBarMark = new Mesh(markGeo, markMat);
-        
+
         this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
 
@@ -164,18 +171,16 @@ export class ScrollbarUtils {
         this.scrollbar?.position.setZ(z);
     }
 
-
-
-
-    public isElementInViewport (el:HTMLElement) {
-
+    static isElementInViewport(el: HTMLElement) {
         var rect = el.getBoundingClientRect();
+        var elemTop = rect.top;
+        var elemBottom = rect.bottom;
 
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
-        );
+        // Only completely visible elements return true:
+        // return (elemTop >= 0) && (elemBottom <= window.innerHeight);
+        // Partially visible elements return true:
+        return elemTop < window.innerHeight && elemBottom >= 0;
     }
+
+
 }

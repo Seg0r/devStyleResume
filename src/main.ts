@@ -71,8 +71,8 @@ document.querySelector('#main')!.appendChild(stats.dom);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.rotateSpeed = 0.2;
 controls.enabled = true;
+controls.rotateSpeed = 0.2;
 // controls.autoRotate=true;
 
 
@@ -107,7 +107,13 @@ const loadingManager = new THREE.LoadingManager( () => {
 
 //Scrollbar and scroll handling
 let scrollbarUtils = new ScrollbarUtils(main,cameraUtils);
-main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
+//main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
+
+addEventListener('DOMContentLoaded', scrollbarUtils.checkSection, false);
+window.addEventListener('load', scrollbarUtils.checkSection, false);
+window.addEventListener('scroll', scrollbarUtils.checkSection, false);
+window.addEventListener('resize', scrollbarUtils.checkSection, false);
+window.addEventListener('wheel', scrollbarUtils.checkSection, false);
 
 //Universe
 const universe = new Universe(universeSize,loadingManager);
@@ -182,7 +188,8 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 
-    //Add to scene
+
+//Add to scene
 scrollbarUtils.addScrollbar(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);

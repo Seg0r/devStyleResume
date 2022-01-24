@@ -31,7 +31,12 @@ main {
   
   display: grid;
   grid-template-columns: repeat(20, 1fr);
+  scroll-snap-type: y proximity;
   
+}
+
+main > * {
+  grid-column: 6 / span 10;
 }
 
 
@@ -64,6 +69,7 @@ canvas {
     font-size: 1.25rem;
     line-height: 1.5;
     margin-bottom: var(--spacing);
+    scroll-snap-align: start;
   }
 
 
@@ -80,6 +86,7 @@ canvas {
     padding: 0;
     margin-bottom: var(--spacing);
     display:grid;
+    scroll-snap-align: center;
   }
 
   blockquote p {

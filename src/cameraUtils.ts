@@ -28,7 +28,7 @@ export class CameraUtils {
 
     prevSplinePoint = 0
     cameraSplineVectors: number[] = [];
-    cameraSpline: CatmullRomCurve3 ;
+    cameraSpline: CatmullRomCurve3;
 
     //camera pan variables
     cameraCenter = new Vector3();
@@ -52,7 +52,7 @@ export class CameraUtils {
     verticalAngle: number = 0;
     universeFactor: number;
 
-    
+
 
 
 
@@ -83,15 +83,15 @@ export class CameraUtils {
     }
 
 
-    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, universeSize: number, cameraSplineDefinition:SplineDef) {
+    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, universeSize: number, cameraSplineDefinition: SplineDef) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
         this.setPanCameraConstants();
         this.orbitControls = controls;
-        this.cameraPanLimit = universeSize/160;
-        this.deltaPos = universeSize/800;
-        this.universeFactor = DEFAULT_UNIVERSE_SIZE/universeSize;
+        this.cameraPanLimit = universeSize / 160;
+        this.deltaPos = universeSize / 800;
+        this.universeFactor = DEFAULT_UNIVERSE_SIZE / universeSize;
         const calcSpline = this.calcSplinePoints(cameraSplineDefinition);
         this.cameraSpline = calcSpline.curve;
         this.cameraSplineVectors = calcSpline.vectors;
@@ -216,9 +216,9 @@ export class CameraUtils {
 
     public moveCameraAlongSplineAndLean(section: number, time: number, leanAngle: number) {
 
-        
+
         let splinePoint = this.cameraSplineVectors[section]
-       
+
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
         let startQuat: Quaternion;
@@ -238,15 +238,15 @@ export class CameraUtils {
                 currentVector.copy(this.camera.position);
                 currentTarget.copy(this.orbitControls.target);
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
-                endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera,this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
+                endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera, this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
             })
             .to({ t: 1, pos: splinePoint }, time)
             .onUpdate((tween) => {
                 let destPos = startPos + tween.t * posDirection;
                 destPos = destPos < 0 ? 0 : (destPos > 1 ? 1 : destPos);
-                currentVector.lerp(this.cameraSpline.getPoint(destPos),tween.t);
+                currentVector.lerp(this.cameraSpline.getPoint(destPos), tween.t);
                 this.camera.position.copy(currentVector);
-                currentTarget.lerp(endTarget,tween.t);
+                currentTarget.lerp(endTarget, tween.t);
                 this.orbitControls.target.copy(currentTarget);
                 // calcQuat.slerpQuaternions(startQuat, endQuaternion, tween.t)
                 // this.camera.quaternion.copy(calcQuat);
@@ -288,7 +288,7 @@ export class CameraUtils {
         let vLeaned = new Vector3(0, 0, -1).applyEuler(camera.rotation).setLength(dist);
 
         vLeaned = new Vector3().add(camera.position).add(vLeaned);
-       
+
         return vLeaned;
     }
 
@@ -301,7 +301,7 @@ export class CameraUtils {
     }
 
 
-    public calcSplinePoints(splineDef: SplineDef): {curve: CatmullRomCurve3, vectors:any}  {
+    public calcSplinePoints(splineDef: SplineDef): { curve: CatmullRomCurve3, vectors: any } {
 
         const cameraSpline = new CatmullRomCurve3(splineDef.map(a => a.vector));
         const marks = splineDef.map(a => a.mark)
@@ -333,7 +333,7 @@ export class CameraUtils {
             return marks[idx];
         });
 
-        return {curve:cameraSpline, vectors: cameraSplineVectors};
+        return { curve: cameraSpline, vectors: cameraSplineVectors };
     }
 
 
@@ -421,18 +421,26 @@ export class CameraUtils {
             //console.log(horizontalFactor,verticalFactor)
 
             //Orbit controls easy way
-            horizontalFactor=this.horizontalAngle-this.orbitControls.getAzimuthalAngle();
-            verticalFactor=this.verticalAngle-this.orbitControls.getPolarAngle();
-            this.horizontalAngle=this.orbitControls.getAzimuthalAngle()
-            this.verticalAngle=this.orbitControls.getPolarAngle();
+            horizontalFactor = this.horizontalAngle - this.orbitControls.getAzimuthalAngle();
+            verticalFactor = this.verticalAngle - this.orbitControls.getPolarAngle();
+            this.horizontalAngle = this.orbitControls.getAzimuthalAngle()
+            this.verticalAngle = this.orbitControls.getPolarAngle();
         }
 
         return { horizontalFactor: horizontalFactor, verticalFactor: verticalFactor }
     }
 
 
-    
-
+    public setAutoRotate(state: boolean) {
+        if (state) {
+            this.orbitControls.autoRotateSpeed = 0.5;
+            this.orbitControls.autoRotate = true;
+            this.panEnabled = false;
+        } else {
+            this.orbitControls.autoRotate = false;
+            this.panEnabled = true;
+        }
+    }
 
 
 }
