@@ -64,23 +64,19 @@ export class ScrollbarUtils {
 
 
     public sectionScrolling() {
-        let cameraSection = 0;
+        let cameraSection = -1;
 
         for (let index = 0; index < this.sections.length - 1; index++) {
             if (ScrollbarUtils.isElementInViewport(this.sections[index] as HTMLElement)) {
-                console.log("Section " + index + " in view");
+                // console.log("Section " + index + " in view");
                 cameraSection = index;
-                break;
             }
-            //non of section is in viewport
-            cameraSection = this.prevSection;
         }
 
-        // const currOffsetPerc: number = this.main.scrollTop / (this.main.scrollHeight - this.main.clientHeight);
-        //  let cameraSection = Math.floor(currOffsetPerc * this.sections.length);
-        // if (cameraSection >= this.sections.length) {
-        //     cameraSection = this.sections.length - 1;
-        // }
+        if (cameraSection == -1) {
+            //non of section is in viewport
+            cameraSection=this.prevSection
+        }
 
         let leanAngle = 0;
         if (this.sections[cameraSection].classList.contains("left")) {
@@ -92,8 +88,12 @@ export class ScrollbarUtils {
         //  const deltaSection = Math.sign(cameraSection - this.prevSection);
 
         if (cameraSection != this.prevSection) {
+
+            //move camera
             this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 3000, MathUtils.degToRad(leanAngle));
             this.prevSection = cameraSection;
+            
+            //update scrollbar
             this.updateScrollBar(cameraSection);
             //if last section - turn OrbitControls autorotate
             this.cameraUtils.setAutoRotate(cameraSection == this.sections.length - 2);
@@ -175,6 +175,7 @@ export class ScrollbarUtils {
         var rect = el.getBoundingClientRect();
         var elemTop = rect.top;
         var elemBottom = rect.bottom;
+        // console.log(elemTop,elemBottom,window.innerHeight)
 
         // Only completely visible elements return true:
         // return (elemTop >= 0) && (elemBottom <= window.innerHeight);
