@@ -1,5 +1,5 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, Object3D, ArrowHelper, MathUtils, Scene, Group, Mesh, MeshBasicMaterial, SphereBufferGeometry, MeshPhysicalMaterial, RingBufferGeometry, CircleBufferGeometry } from 'three';
+import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, ArrowHelper } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 
@@ -10,11 +10,7 @@ interface TweenObject {
 }
 
 declare type UnknownProps = Record<string, any>;
-
-const LEAN_LEFT = 30;
-const LEAN_RIGHT = -LEAN_LEFT;
-
-const SCROLL_BAR_DISTANCE = -10
+declare type SplineDef = { vector: Vector3, mark: boolean }[]
 
 export class CameraUtils {
 
@@ -29,6 +25,10 @@ export class CameraUtils {
     origin: Vector3;
     yAxis = new Vector3(0, 1, 0);
     startPosition: number = 0;
+
+    prevSplinePoint = 0
+    cameraSplineVectors: number[] = [];
+    cameraSpline: CatmullRomCurve3 ;
 
     //camera pan variables
     cameraCenter = new Vector3();
@@ -52,20 +52,7 @@ export class CameraUtils {
     verticalAngle: number = 0;
     universeFactor: number;
 
-    //section scrolling
-    sections: HTMLCollection;
-    main: HTMLElement;
-    currentSection = 0;
-    scrollUp = 0;
-    scrollDown = 0;
-    prevSplinePoint = 0
-    cameraSplineVectors: number[] = [];
-    cameraSpline: CatmullRomCurve3 | undefined;
-    scrollBarMark: Object3D | undefined;
-    lastCameraSection: number = 0;
-    scrollbar: Group | undefined;
-    lastScrollTween: TWEEN.Tween<UnknownProps> | undefined;
-    newCameraSection: number = 0;
+    
 
 
 
@@ -96,17 +83,18 @@ export class CameraUtils {
     }
 
 
-    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, main: HTMLElement, universeSize: number) {
+    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, universeSize: number, cameraSplineDefinition:SplineDef) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
         this.setPanCameraConstants();
         this.orbitControls = controls;
-        this.sections = main.children;
-        this.main = main;
         this.cameraPanLimit = universeSize/160;
         this.deltaPos = universeSize/800;
         this.universeFactor = DEFAULT_UNIVERSE_SIZE/universeSize;
+        const calcSpline = this.calcSplinePoints(cameraSplineDefinition);
+        this.cameraSpline = calcSpline.curve;
+        this.cameraSplineVectors = calcSpline.vectors;
     }
 
 
@@ -226,9 +214,11 @@ export class CameraUtils {
         })
     }
 
-    public moveCameraAlongSplineAndLean(curve: Readonly<Curve<Vector3>>, startPosition: number, endPosition: number, time: number, leanAngle: number) {
+    public moveCameraAlongSplineAndLean(section: number, time: number, leanAngle: number) {
 
         
+        let splinePoint = this.cameraSplineVectors[section]
+       
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
         let startQuat: Quaternion;
@@ -244,17 +234,17 @@ export class CameraUtils {
             .onStart((tween) => {
                 startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
                 startPos = this.startPosition;
-                posDirection = endPosition - this.startPosition;
+                posDirection = splinePoint - this.startPosition;
                 currentVector.copy(this.camera.position);
                 currentTarget.copy(this.orbitControls.target);
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
-                endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera,curve.getPoint(endPosition), this.origin, leanAngle));
+                endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera,this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
             })
-            .to({ t: 1, pos: endPosition }, time)
+            .to({ t: 1, pos: splinePoint }, time)
             .onUpdate((tween) => {
                 let destPos = startPos + tween.t * posDirection;
                 destPos = destPos < 0 ? 0 : (destPos > 1 ? 1 : destPos);
-                currentVector.lerp(curve.getPoint(destPos),tween.t);
+                currentVector.lerp(this.cameraSpline.getPoint(destPos),tween.t);
                 this.camera.position.copy(currentVector);
                 currentTarget.lerp(endTarget,tween.t);
                 this.orbitControls.target.copy(currentTarget);
@@ -311,9 +301,9 @@ export class CameraUtils {
     }
 
 
-    public calcSplinePoints(splineDef: { vector: Vector3, mark: boolean }[]) {
+    public calcSplinePoints(splineDef: SplineDef): {curve: CatmullRomCurve3, vectors:any}  {
 
-        this.cameraSpline = new CatmullRomCurve3(splineDef.map(a => a.vector));
+        const cameraSpline = new CatmullRomCurve3(splineDef.map(a => a.vector));
         const marks = splineDef.map(a => a.mark)
 
         const points: number[] = [];
@@ -328,10 +318,10 @@ export class CameraUtils {
 
 
         for (let index = 0; index <= grain; index++) {
-            const curvePoint = this.cameraSpline.getPointAt(index * 1 / grain);
+            const curvePoint = cameraSpline.getPointAt(index * 1 / grain);
 
-            for (let index2 = 0; index2 < this.cameraSpline.points.length; index2++) {
-                const currDistance = this.cameraSpline.points[index2].distanceTo(curvePoint);
+            for (let index2 = 0; index2 < cameraSpline.points.length; index2++) {
+                const currDistance = cameraSpline.points[index2].distanceTo(curvePoint);
                 if (currDistance < distance[index2]) {
                     distance[index2] = currDistance;
                     points[index2] = index / grain;
@@ -339,9 +329,11 @@ export class CameraUtils {
             }
         }
 
-        this.cameraSplineVectors = points.filter((val, idx) => {
+        const cameraSplineVectors = points.filter((val, idx) => {
             return marks[idx];
         });
+
+        return {curve:cameraSpline, vectors: cameraSplineVectors};
     }
 
 
@@ -439,140 +431,8 @@ export class CameraUtils {
     }
 
 
-    private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
+    
 
 
-    public checkScroll = (e: WheelEvent) => {
-        //e.preventDefault();
-        // if (!scrolled) {
-        //     scrolled = true;
-        //sectionScrolling(e);
-        this.sectionScrolling(e);
-        //     setTimeout(function () { scrolled = false; }, 100);
-        // };
-    }
-
-    public sectionScrolling2 = (e: Event) => {
-        if (this.scrollDirection(e) > 0) {
-            if (++this.scrollUp % 2) {
-                if (this.currentSection > 0) {
-                    this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                }
-            }
-        } else {
-            if (++this.scrollDown % 2) {
-                if (this.currentSection < this.sections.length) {
-                    this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                }
-            }
-        }
-    }
-
-
-    public sectionScrolling(e: any) {
-        const deltaScroll = Math.sign(e.deltaY);
-        const currOffsetPerc: number = this.main.scrollTop / (this.main.scrollHeight - this.main.clientHeight);
-
-        let cameraSection = Math.floor(currOffsetPerc * this.sections.length);
-        if (cameraSection >= this.sections.length) {
-            cameraSection = this.sections.length - 1;
-        }
-
-        let leanAngle = 0;
-
-        if (this.sections[cameraSection].className == "left") {
-            leanAngle = LEAN_LEFT;
-        } else if (this.sections[cameraSection].className == "right") {
-            leanAngle = LEAN_RIGHT;
-        }
-
-
-        let splinePoint = cameraSection * (1 / (this.sections.length - 1))
-        splinePoint = this.cameraSplineVectors[cameraSection]
-        // console.log(splinePoint)
-
-        //calculate direction to avoid "overdue" wheel spin
-        const deltaSpline = Math.sign(splinePoint - this.prevSplinePoint);
-
-        if (this.cameraSpline && splinePoint != this.prevSplinePoint && deltaSpline == deltaScroll) {
-
-            //cameraUtils.moveCameraToPointFromSpline(cameraSpline,splinePoint,3000)
-            this.moveCameraAlongSplineAndLean(this.cameraSpline!, this.prevSplinePoint, splinePoint, 3000, MathUtils.degToRad(leanAngle));
-
-            this.prevSplinePoint = splinePoint;
-            this.updateScrollBar(cameraSection);
-        }
-    }
-
-    updateScrollBar(cameraSection: number) {
-
-        this.newCameraSection = cameraSection;
-        if (!this.lastScrollTween || !this.lastScrollTween.isPlaying()) {
-            this.lastScrollTween = this.startNewScrollBarTween(cameraSection);
-            // this.lastScrollTween!.start();
-        }
-    }
-
-    private startNewScrollBarTween(cameraSection: number) {
-        let part = { t: this.lastCameraSection };
-
-        return new TWEEN.Tween(part)
-            .to({ t: cameraSection }, 1000)
-            .onUpdate((tween: any) => {
-                const pos = tween.t * SCROLL_BAR_DISTANCE;
-                this.scrollBarMark?.position.set(0, pos, 0)   
-            })
-            .easing(TWEEN.Easing.Cubic.InOut)
-            .onComplete((tween) => {
-                // console.log("end:" + tween.t + " this.newCameraSection:" + this.newCameraSection)
-                this.lastCameraSection = tween.t;
-                if (this.lastCameraSection != this.newCameraSection) {
-                    this.lastScrollTween = this.startNewScrollBarTween(this.newCameraSection);
-                }
-            }).start()
-    }
-
-    public addScrollbar(scene: Scene) {
-
-        if (!this.scrollBarMark) {
-            scene.add(this.camera)
-            this.createScrollbar();
-        }
-    }
-
-    createScrollbar() {
-
-        const geometry = new RingBufferGeometry(1.5, 2, 20);
-        const material = new MeshBasicMaterial({
-            depthTest: false,
-            opacity: 0.2,
-            transparent: true
-        });
-        this.scrollbar = new Group();
-        //add scrollbar to camera to fix position
-        this.camera.add(this.scrollbar);
-
-        this.setScrollbarPosition(this.camera.aspect * 112, -200);
-
-        for (let index = 0; index < this.sections.length - 1; index++) {
-            const circleMesh = new Mesh(geometry, material);
-            circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
-            this.scrollbar.add(circleMesh);
-            this.scrollbar.position.setY(index * 5)
-        }
-
-        const markGeo = new CircleBufferGeometry(1.2, 20);
-        const markMat = new MeshBasicMaterial({ color: 0xfedd1f,depthTest: false });
-        this.scrollBarMark = new Mesh(markGeo, markMat);
-        
-        this.scrollBarMark.renderOrder = 1;
-        this.scrollbar.add(this.scrollBarMark);
-
-    }
-
-    public setScrollbarPosition(x: number, z: number) {
-        this.scrollbar?.position.setX(x);
-        this.scrollbar?.position.setZ(z);
-    }
 
 }

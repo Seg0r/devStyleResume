@@ -15,6 +15,7 @@ import { Universe } from './Universe';
 import { Stars } from './Stars';
 import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
+import { ScrollbarUtils } from './ScrollbarUtils';
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -59,7 +60,7 @@ const renderer = new WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.autoClear = false;
-renderer.shadowMap.enabled = false
+renderer.shadowMap.enabled = false;
 
 
 const stats = new Stats();
@@ -74,13 +75,8 @@ controls.rotateSpeed = 0.2;
 controls.enabled = true;
 // controls.autoRotate=true;
 
-//GreetingBox
-//const box = new GreetingBox();
-//box.addToScene(scene);
 
-//camera away from orbit control
-let cameraUtils = new CameraUtils(camera, solarCenter,controls,main,universeSize);
-
+//CameraUtils - tweens, camera path
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(-1000, 250, 900).multiplyScalar(universeFactor), mark: true },
     { vector: new THREE.Vector3(400, 200, 900).multiplyScalar(universeFactor), mark: true },
@@ -93,19 +89,25 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(universeFactor), mark: true }
 ];
 
-cameraUtils.calcSplinePoints(cameraSplineDefinition);
-main.addEventListener('wheel', cameraUtils.checkScroll, { passive: true });
+let cameraUtils = new CameraUtils(camera, solarCenter,controls,universeSize,cameraSplineDefinition);
 
+
+//Loading big images
 const loadingManager = new THREE.LoadingManager( () => {
     const loadingScreen = document.getElementById( 'loading-screen' )!;
     const timeDiff = new Date().getTime() - startDate;
-    const timeout = timeDiff >= 8000 ? 1 : 8000 - timeDiff;
+    const minDiff = 10000;
+    const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
     setTimeout(()=>{
         loadingScreen.classList.add( 'fade-out' );
         loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
     },timeout);   
 }
 );
+
+//Scrollbar and scroll handling
+let scrollbarUtils = new ScrollbarUtils(main,cameraUtils);
+main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
 
 //Universe
 const universe = new Universe(universeSize,loadingManager);
@@ -151,7 +153,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    cameraUtils.setScrollbarPosition(camera.aspect*112,-200);
+    scrollbarUtils.setScrollbarPosition(camera.aspect*112,-200);
 }
 window.addEventListener('resize', onWindowResize, false);
 
@@ -180,8 +182,8 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 
-//Add to scene
-cameraUtils.addScrollbar(scene);
+    //Add to scene
+scrollbarUtils.addScrollbar(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);
 solarSystem.toggleSolarSystem();
@@ -193,7 +195,6 @@ universe.addToScene(scene);
 //prepare to animate
 controls.target.copy(solarCenter);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
-
 
 // scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
 
