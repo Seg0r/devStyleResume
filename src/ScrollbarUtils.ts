@@ -27,6 +27,7 @@ export class ScrollbarUtils {
     prevSection: number = 0;
     cameraUtils: CameraUtils;
     sectionChecked: boolean = false;
+    chevronVisible = false;
 
     constructor(main: HTMLElement, cameraUtils: CameraUtils) {
         this.main = main;
@@ -37,7 +38,7 @@ export class ScrollbarUtils {
 
     private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
 
-    public checkSection = (ev: any) => {
+    public checkScroll = (ev: any) => {
         const _this = this;
         if (!this.sectionChecked) {
             this.sectionChecked = true;
@@ -96,8 +97,12 @@ export class ScrollbarUtils {
             //update scrollbar
             this.updateScrollBar(cameraSection);
             //if last section - turn OrbitControls autorotate
-            this.cameraUtils.setAutoRotate(cameraSection == this.sections.length - 2);
+            this.cameraUtils.setAutoRotate(this.isLastSection());
         }
+    }
+
+    isLastSection():boolean{
+        return this.prevSection == this.sections.length - 2
     }
 
     updateScrollBar(cameraSection: number) {
@@ -183,5 +188,41 @@ export class ScrollbarUtils {
         return elemTop < window.innerHeight && elemBottom >= 0;
     }
 
+
+    public userIdle() {
+        var t:NodeJS.Timeout;
+        window.onload = resetTimer;
+        window.onmousemove = resetTimer;
+        window.onmousedown = resetTimer;  // catches touchscreen presses as well      
+        window.ontouchstart = resetTimer; // catches touchscreen swipes as well      
+        window.ontouchmove = resetTimer;  // required by some devices 
+        window.onclick = resetTimer;      // catches touchpad clicks as well
+        window.onkeydown = resetTimer;   
+        window.addEventListener('scroll', resetTimer, true); 
+        window.addEventListener('wheel', resetTimer, true);
+    
+        const fadeInChevron = () => {
+            if (!this.chevronVisible && !this.isLastSection()) {
+                const chevron = document.getElementById('chevron')!;
+                chevron.classList.add('chevron-container-fade-in');
+                chevron.classList.remove('chevron-container-fade');
+                this.chevronVisible = true;
+            };
+        }
+    
+        function resetTimer() {
+            clearTimeout(t);
+            t = setTimeout(fadeInChevron, 6000);  // time is in milliseconds
+        }
+    }
+
+    public fadeOutChevron = () => {
+    if (this.chevronVisible) {
+        const chevron = document.getElementById('chevron')!;
+        chevron.classList.add('chevron-container-fade');
+        chevron.classList.remove('chevron-container-fade-in');
+        this.chevronVisible = false;
+    };
+}
 
 }

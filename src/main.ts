@@ -2,6 +2,7 @@
 
 import './style.css';
 import './loader.css';
+import './chevron.scss';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
@@ -32,7 +33,7 @@ const initAngles: DirectionAngles = {
 export const DEFAULT_UNIVERSE_SIZE = 4000;
 
 const universeSize = 4000;
-const universeFactor = universeSize/DEFAULT_UNIVERSE_SIZE;
+const universeFactor = universeSize / DEFAULT_UNIVERSE_SIZE;
 const solarSize = universeSize / 20;
 const solarCenter: Vector3 = new Vector3(0, 0, 0);
 
@@ -89,34 +90,41 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(universeFactor), mark: true }
 ];
 
-let cameraUtils = new CameraUtils(camera, solarCenter,controls,universeSize,cameraSplineDefinition);
+let cameraUtils = new CameraUtils(camera, solarCenter, controls, universeSize, cameraSplineDefinition);
 
 
 //Loading big images
-const loadingManager = new THREE.LoadingManager( () => {
-    const loadingScreen = document.getElementById( 'loading-screen' )!;
+const loadingManager = new THREE.LoadingManager(() => {
+    const loadingScreen = document.getElementById('loading-screen')!;
     const timeDiff = new Date().getTime() - startDate;
     const minDiff = 10000;
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
-    setTimeout(()=>{
-        loadingScreen.classList.add( 'fade-out' );
-        loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
-    },timeout);   
+    setTimeout(() => {
+        loadingScreen.classList.add('fade-out');
+        loadingScreen.addEventListener('transitionend', onTransitionEnd);
+    }, timeout);
 }
 );
 
+
+
 //Scrollbar and scroll handling
-let scrollbarUtils = new ScrollbarUtils(main,cameraUtils);
+let scrollbarUtils = new ScrollbarUtils(main, cameraUtils);
 //main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
 
-addEventListener('DOMContentLoaded', scrollbarUtils.checkSection, false);
-window.addEventListener('load', scrollbarUtils.checkSection, false);
-window.addEventListener('scroll', scrollbarUtils.checkSection, false);
-window.addEventListener('resize', scrollbarUtils.checkSection, false);
-window.addEventListener('wheel', scrollbarUtils.checkSection, false);
+addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
+window.addEventListener('load', scrollbarUtils.checkScroll, false);
+window.addEventListener('scroll', scrollbarUtils.checkScroll, false);
+window.addEventListener('resize', scrollbarUtils.checkScroll, false);
+window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
+
+window.addEventListener('scroll', scrollbarUtils.fadeOutChevron, false);
+window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
+
+scrollbarUtils.userIdle();
 
 //Universe
-const universe = new Universe(universeSize,loadingManager);
+const universe = new Universe(universeSize, loadingManager);
 
 //Nebulas
 const nebula = new Nebula(universeSize, scene, loadingManager);
@@ -159,7 +167,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    scrollbarUtils.setScrollbarPosition(camera.aspect*112,-200);
+    scrollbarUtils.setScrollbarPosition(camera.aspect * 112, -200);
 }
 window.addEventListener('resize', onWindowResize, false);
 
@@ -216,13 +224,13 @@ function animate() {
 
     requestAnimationFrame(animate);
     delta += clock.getDelta();
-  
-     if (delta  > interval) {
-         // The draw or time dependent code are here
-         render();
-  
-         delta = delta % interval;
-     }
+
+    if (delta > interval) {
+        // The draw or time dependent code are here
+        render();
+
+        delta = delta % interval;
+    }
 }
 
 
@@ -245,9 +253,11 @@ function render() {
     renderer.render(scene, camera);
 }
 
-function onTransitionEnd( event:any ) {
+function onTransitionEnd(event: any) {
 
     const element = event.target;
     element.remove();
-    
+
 }
+
+

@@ -32,7 +32,7 @@ main {
   
   display: grid;
   grid-template-columns: repeat(20, 1fr);
-  scroll-snap-type: y proximity;  
+  /* scroll-snap-type: y proximity;   */
 
   cursor: url('../assets/hud/cursor.png'), pointer;
 }
