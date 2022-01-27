@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Camera, Euler, Group, Quaternion, Scene, Spherical, Vector2, Vector3 } from 'three';
+import { Group, Scene, Vector2, Vector3 } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 

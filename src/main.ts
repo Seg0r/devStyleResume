@@ -17,6 +17,7 @@ import { Stars } from './Stars';
 import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
+import { Rock } from './Rock';
 
 const alpha1 = 0.3;
 const alpha2 = 0.4;
@@ -94,10 +95,10 @@ let cameraUtils = new CameraUtils(camera, solarCenter, controls, universeSize, c
 
 
 //Loading big images
+let minDiff = 10000;
 const loadingManager = new THREE.LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
-    const timeDiff = new Date().getTime() - startDate;
-    const minDiff = 10000;
+    const timeDiff = new Date().getTime() - startDate;    
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
     setTimeout(() => {
         loadingScreen.classList.add('fade-out');
@@ -122,6 +123,9 @@ window.addEventListener('scroll', scrollbarUtils.fadeOutChevron, false);
 window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
 
 scrollbarUtils.userIdle();
+
+//Rock
+const rock = new Rock(universeSize);
 
 //Universe
 const universe = new Universe(universeSize, loadingManager);
@@ -199,19 +203,33 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 //Add to scene
 scrollbarUtils.addScrollbar(scene);
+rock.addToScene(scene);
 stars.addToScene(scene);
-solarSystem.addToScene(scene);
-solarSystem.toggleSolarSystem();
+// solarSystem.addToScene(scene);
+// solarSystem.toggleSolarSystem();
 // magneticField.addToScene(scene);
-nebula.addToScene(scene);
-universe.addToScene(scene);
+// nebula.addToScene(scene);
+// universe.addToScene(scene);
+
+
+
+//DEBUG
+if(true){
+    main.style.visibility = "hidden";
+    cameraUtils.panEnabled = false;
+    minDiff = 100;
+    // scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+}
+
+
+
 
 
 //prepare to animate
 controls.target.copy(solarCenter);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
 
-// scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+
 
 
 //animate loop
@@ -247,6 +265,7 @@ function render() {
     stars.render();
     //magneticField.render();
     cameraUtils.render(mouse);
+    rock.render();
 
     // renderer.clearDepth();
     //render rest
