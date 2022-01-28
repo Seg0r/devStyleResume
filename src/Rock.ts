@@ -96,7 +96,7 @@ float flow(in vec2 p)
 		p = mix(bp,p,.77);
 		
 		//intensity scaling
-		z *= 1.4;
+		z *= 1.7;
 		//octave scaling
 		p *= 2.;
 		bp *= 1.9;
@@ -111,7 +111,7 @@ void main()
 	p*= 3.;
 	float rz = flow(p);
 	
-	vec3 col = vec3(.2,0.07,0.01)/rz;
+	vec3 col = vec3(.13,0.07,0.01)/rz;
 	col=pow(col,vec3(1.4));
 	gl_FragColor = vec4(col,1.0);
 }
