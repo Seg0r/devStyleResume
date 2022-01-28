@@ -2,13 +2,41 @@ import { Group, ImageUtils, Scene, TextureLoader, Vector2, Vector3 } from 'three
 import { CameraUtils } from './CameraUtils';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 import * as THREE from 'three';
+// @ts-ignore  
+import {classicNoise3D} from './utils/classicnoise3d.glsl';
 
-const defaultVertexShader = `
-varying vec2 vUv; 
-void main()
-{
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0 );
+const defaultVertexShader =classicNoise3D+`
+
+varying vec2 vUv;
+varying float noise;
+uniform float iTime;
+
+float turbulence( vec3 p ) {
+
+  float w = 100.0;
+  float t = -.5;
+
+  for (float f = 1.0 ; f <= 10.0 ; f++ ){
+    float power = pow( 2.0, f );
+    t += abs( pnoise( vec3( power * p ), vec3( 10.0, 10.0, 10.0 ) ) / power );
+  }
+
+  return t;
+
+}
+
+void main() {
+
+vUv = uv;
+
+  // add time to the noise parameters so it's animated
+  noise = 2000.0 *  -.10 * turbulence( .5 * normal + .1 * iTime );
+  float b = 50.0 * pnoise( 0.005 * position + vec3( .5 * iTime ), vec3( 100.0 ) );
+  float displacement = - noise + b;
+
+  vec3 newPosition = position + normal * displacement;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+
 }
 `;
 
@@ -98,42 +126,53 @@ void main() {
 export class Rock {
 
     univerSize: number;
-    tuniform: { iTime: { type: string; value: number; }; iChannel0: { type: string; value: THREE.Texture; }; };
-    clock: any;
+    clock: THREE.Clock;
     mesh: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>;
+    tuniform: { [uniform: string]: THREE.IUniform<any>; };
 
     constructor(size: number) {
         this.univerSize = size;
-        const rock = this.createRock();
-        this.tuniform = rock.uniform;
-        this.mesh = rock.mesh;
+        const {uniform,mesh} = this.createRock();
+        this.tuniform = uniform;
+        this.mesh = mesh;
         this.clock= new THREE.Clock();
     }
 
     createRock() {
 
+        const shader = Rock.lavaShader();
+
+        const mat = new THREE.ShaderMaterial({
+            uniforms: shader.uniforms,
+            vertexShader: shader.vertexShader,
+            fragmentShader: shader.fragmentShader,
+        });
+
+        const geo = new THREE.SphereBufferGeometry(600, 600,40,40);
+
+        const mesh =  new THREE.Mesh(geo,mat);
+
+        return {uniform: shader.uniforms, mesh: mesh}
+    }
+
+    static lavaShader(): THREE.Shader {
         const tuniform = {
             iTime: { type: 'f', value: 0.1 },
-            iChannel0: { type: 't', value: new TextureLoader().load('../assets/noise1.png')},
-            iResolution: { type: "v2", value: new THREE.Vector2()}
+            iChannel0: { type: 't', value: new TextureLoader().load('../assets/noise1.png') },
+            iResolution: { type: "v2", value: new THREE.Vector2() }
         };
 
         tuniform.iChannel0.value.wrapS = tuniform.iChannel0.value.wrapT = THREE.MirroredRepeatWrapping;
         tuniform.iResolution.value.x = 1; // window.innerWidth;
         tuniform.iResolution.value.y = 1; // window.innerHeight;
 
-        const mat = new THREE.ShaderMaterial( {
-            uniforms: tuniform,
-            vertexShader: defaultVertexShader,
-            fragmentShader: lavaFragmentShader,
-            // side:THREE.DoubleSide
-        } );
+        const shader: THREE.Shader = {
+            uniforms:tuniform,
+            vertexShader:defaultVertexShader, 
+            fragmentShader:lavaFragmentShader
+        };
 
-        const geo = new THREE.SphereBufferGeometry(700, 700,200,200);
-
-        const mesh =  new THREE.Mesh(geo,mat);
-
-        return {uniform: tuniform, mesh: mesh}
+        return shader;
     }
 
     addToScene(scene: Scene) {
