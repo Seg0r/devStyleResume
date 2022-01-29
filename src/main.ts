@@ -218,7 +218,7 @@ if(true){
     main.style.visibility = "hidden";
     cameraUtils.panEnabled = false;
     minDiff = 100;
-    // scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+    //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
 }
 
 

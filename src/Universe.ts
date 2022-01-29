@@ -16,7 +16,7 @@ export class Universe {
         const fileFormat = ".webp";
 
         const loader = new THREE.TextureLoader(loadingManager);
-        loader.setPath('/assets/scene/');
+        loader.setPath('/assets/universe/');
         let materialArray = [
             new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_right1' + fileFormat) }),
             new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_left2' + fileFormat) }),
