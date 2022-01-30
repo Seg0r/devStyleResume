@@ -1,4 +1,4 @@
-export const classicNoise3D = `
+const classicNoise3D = `
 //
 // GLSL textureless classic 3D noise "cnoise",
 // with an RSL-style periodic variant "pnoise".
@@ -177,3 +177,5 @@ float pnoise(vec3 P, vec3 rep)
   return 2.2 * n_xyz;
 }
 `
+
+export default classicNoise3D;
