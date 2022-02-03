@@ -7,6 +7,7 @@ const shader = `
 uniform float iTime;
 uniform sampler2D iChannel0;
 uniform vec2 iResolution;
+uniform float iDelta;
 
 #define time iTime*0.1
 
@@ -28,7 +29,7 @@ vec2 gradn(vec2 p)
 
 float flow(in vec2 p)
 {
-	float z=2.;
+	float z=3.;
 	float rz = 0.;
 	vec2 bp = p;
 	for (float i= 1.;i < 7.;i++ )
@@ -85,8 +86,7 @@ void main()
 	
 	col=pow(col,vec3(1.4));
 	gl_FragColor = vec4(col,1.0);
-	gl_FragColor.rgb += col*fres*15.0;
-	// gl_FragColor = vec4(fres);
+	gl_FragColor.rgb += col*fres*10.0;
 	
 }
 `
