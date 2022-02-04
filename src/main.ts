@@ -19,26 +19,25 @@ import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
 
-const alpha1 = 0.3;
-const alpha2 = 0.4;
-const beta1 = 1.3;
-const beta2 = -0.8;
 
 const initAngles: DirectionAngles = {
-    alpha1: alpha1,
-    alpha2: alpha2,
-    beta1: beta1,
-    beta2: beta2
+    alpha1: 0.3,
+    alpha2: 0.4,
+    beta1: 1.3,
+    beta2: -0.8
 }
 
+//dont change!
 export const DEFAULT_UNIVERSE_SIZE = 4000;
 
-const universeSize = 4000;
-const universeFactor = universeSize / DEFAULT_UNIVERSE_SIZE;
-const solarSize = universeSize / 20;
-const solarCenter: Vector3 = new Vector3(0, 0, 0);
+//this you can change
+const UNIVERSE_SIZE = 4000;
+const UNIVERSE_FACTOR = UNIVERSE_SIZE / DEFAULT_UNIVERSE_SIZE;
+const SOLAR_SIZE = UNIVERSE_SIZE / 20;
+const SOLAR_CENTER: Vector3 = new Vector3(0, 0, 0);
+const MAIN_COLOR = 0xfedd1f;
 
-const startDate = new Date().getTime();
+
 
 //Hide scrollbar:
 var main = document.getElementById('main')!;
@@ -48,7 +47,7 @@ if (main)
 //Scene
 const scene: Scene = new Scene();
 // scene.background = new THREE.Color( 0x666666 );
-const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, universeSize * 4);
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, UNIVERSE_SIZE * 4);
 
 
 //Renderer
@@ -80,22 +79,23 @@ controls.rotateSpeed = 0.2;
 
 //CameraUtils - tweens, camera path
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
-    { vector: new THREE.Vector3(-1000, 250, 900).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(400, 200, 900).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(800, 200, -500).multiplyScalar(universeFactor), mark: false },
-    { vector: new THREE.Vector3(0, 200, -800).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(-800, 400, 10).multiplyScalar(universeFactor), mark: false },
-    { vector: new THREE.Vector3(-400, 600, 600).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(-1000, 100, 0).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(100, 600, 500).multiplyScalar(universeFactor), mark: true },
-    { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(universeFactor), mark: true }
+    { vector: new THREE.Vector3(-1000, 250, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(400, 200, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(800, 200, -500).multiplyScalar(UNIVERSE_FACTOR), mark: false },
+    { vector: new THREE.Vector3(0, 200, -800).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(-800, 400, 10).multiplyScalar(UNIVERSE_FACTOR), mark: false },
+    { vector: new THREE.Vector3(-400, 600, 600).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(-1000, 100, 0).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(100, 600, 500).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
 ];
 
-let cameraUtils = new CameraUtils(camera, solarCenter, controls, universeSize, cameraSplineDefinition);
+let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition);
 
 
 //Loading big images
 let minDiff = 10000;
+const startDate = new Date().getTime();
 const loadingManager = new THREE.LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
     const timeDiff = new Date().getTime() - startDate;    
@@ -110,7 +110,7 @@ const loadingManager = new THREE.LoadingManager(() => {
 
 
 //Scrollbar and scroll handling
-let scrollbarUtils = new ScrollbarUtils(main, cameraUtils);
+let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
 //main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
 
 addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
@@ -125,22 +125,22 @@ window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
 scrollbarUtils.userIdle();
 
 //Rock
-const rock = new Rock(universeSize, scene, loadingManager, {inside: "666666", surface:"98e898"});
+const rock = new Rock(UNIVERSE_SIZE, scene, loadingManager, {inside: 0x666666, surface: MAIN_COLOR});
 
 //Universe
-const universe = new Universe(universeSize, loadingManager);
+const universe = new Universe(UNIVERSE_SIZE, loadingManager);
 
 //Nebulas
-const nebula = new Nebula(universeSize, scene, loadingManager);
+const nebula = new Nebula(UNIVERSE_SIZE, scene, loadingManager);
 
 //Stars
-const stars = new Stars(universeSize, universeSize * 0.7, cameraUtils);
+const stars = new Stars(UNIVERSE_SIZE, UNIVERSE_SIZE * 0.7, cameraUtils);
 
 //SolarSystem
-const solarSystem = new SolarSystem(solarCenter, solarSize, 800, initAngles, loadingManager);
+const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager);
 
 //Magnetic field
-const magneticField: MagneticField = new MagneticField(solarCenter, solarSize, 20, initAngles, renderer, camera);
+const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -235,8 +235,8 @@ if(true){
 
 
 //prepare to animate
-controls.target.copy(solarCenter);
-cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, solarCenter);
+controls.target.copy(SOLAR_CENTER);
+cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
 
 
 
