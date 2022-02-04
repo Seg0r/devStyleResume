@@ -1,7 +1,5 @@
 const shader = `
-uniform float time;
 uniform float progress;
-uniform float inside;
 
 
 attribute vec3 centroid1;

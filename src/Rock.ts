@@ -1,4 +1,4 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Clock, Color, DoubleSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
+import { AdditiveBlending, BufferAttribute, BufferGeometry, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import {DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -20,8 +20,8 @@ import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 import explosionVertex from "./utils/shaders/explosionVertexIco.glsl";
 
 export interface Options {
-    surface: String;
-    inside: String;
+    surface: ColorRepresentation;
+    inside: ColorRepresentation;
     background?: String;
 };
 
@@ -32,9 +32,6 @@ function getRandomAxis() {
         Math.random() - 0.5
     ).normalize();
 }
-const sign = function (n: number) {
-    return n === 0 ? 1 : n / Math.abs(n);
-};
 
 function getCentroid(geometry: BufferGeometry) {
     let ar = geometry.attributes.position.array;
@@ -60,11 +57,10 @@ export class Rock {
     coronaSprite!: Sprite;
     loader: any;
     inverted = false;
-    material: any;
+    material!: ShaderMaterial;
     scene: Scene;
     mesh1!: Mesh<any, any>;
-    material1: any;
-    textureCube: any;
+    material1!: ShaderMaterial;
     loadingManager: LoadingManager;
     settings: { progress: number } = {progress:0};
     surfaceColor: Color;
@@ -78,8 +74,8 @@ export class Rock {
         this.tuniform = uniform;
         // this.mesh = mesh;
         this.clock = new Clock();
-        this.surfaceColor = new Color(parseInt("0x" + options.surface));
-        this.insideColor = new Color(parseInt("0x" + options.inside));
+        this.surfaceColor = new Color(options.surface);
+        this.insideColor = new Color(options.inside);
         this.createHalo();
         this.importRock();
     }
@@ -117,7 +113,7 @@ export class Rock {
 
     importRock() {
 
-        this.loader = new GLTFLoader(this.loadingManager).setPath("models/");
+        this.loader = new GLTFLoader(this.loadingManager).setPath("../assets/");
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('../node_modules/three/examples/js/libs/draco/gltf/');
         
@@ -133,7 +129,7 @@ export class Rock {
         const that = this;
 
         this.loader.load(
-            "../assets/glb/ico-more.glb",
+            "/glb/ico-more.glb",
             function (gltf: any) {
                 let voron:any[] = [];
                 let geoms: any[] = [];
@@ -259,20 +255,17 @@ export class Rock {
             centroid1[i + 2] = centroidVector.z;
         }
         vtemp.setAttribute(
-            "centroid",
+            "centroid1",
             new BufferAttribute(new Float32Array(centroid), 3)
         );
         vtemp1.setAttribute(
-            "centroid",
+            "centroid1",
             new BufferAttribute(new Float32Array(centroid1), 3)
         );
 
         return { surface: vtemp, volume: vtemp1 };
     }
 
-    onLoad() {
-        throw new Error('Method not implemented.');
-    }
 
     createRock() {
 
@@ -322,7 +315,7 @@ export class Rock {
             inside: { type: "f", value: 0 },
             surfaceColor: { type: "v3", value: that.surfaceColor },
             insideColor: { type: "v3", value: that.insideColor },
-            tCube: { value: that.textureCube },
+            // tCube: { value: that.textureCube },
             pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
             uvRate1: { value: new Vector2(1, 1) }
         };
@@ -356,15 +349,11 @@ export class Rock {
 
     time = 0;
     mouseX = 0;
-     ta = 0;
 
     render(targetMouseX: number) {
 
         this.mouseX += (targetMouseX - this.mouseX)*0.05;
-        this.ta = Math.abs(this.mouseX);
-        this.settings.progress = this.ta;
-        this.scene.rotation.y = Math.PI/2 - this.ta*(2 - this.ta)*Math.PI * Math.sign(this.mouseX);
-        this.scene.rotation.z = Math.PI/2 - this.ta*(2 - this.ta)*Math.PI * Math.sign(this.mouseX);
+        this.settings.progress = Math.abs(this.mouseX);
 
         this.time += 0.05;
         this.material.uniforms.progress.value = Math.abs(this.settings.progress);

@@ -1,6 +1,6 @@
 
 import * as TWEEN from '@tweenjs/tween.js';
-import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, PerspectiveCamera, Camera, MathUtils } from 'three';
+import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, PerspectiveCamera, Camera, MathUtils, ColorRepresentation } from 'three';
 import { CameraUtils } from './CameraUtils';
 
 const LEAN_LEFT = 30;
@@ -28,12 +28,14 @@ export class ScrollbarUtils {
     cameraUtils: CameraUtils;
     sectionChecked: boolean = false;
     chevronVisible = false;
+    color: ColorRepresentation;
 
-    constructor(main: HTMLElement, cameraUtils: CameraUtils) {
+    constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
         this.main = main;
         this.sections = main.children
         this.cameraUtils = cameraUtils;
         this.camera = cameraUtils.camera;
+        this.color = color;
     }
 
     private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
@@ -163,7 +165,7 @@ export class ScrollbarUtils {
         }
 
         const markGeo = new CircleBufferGeometry(1.2, 20);
-        const markMat = new MeshBasicMaterial({ color: 0xfedd1f, depthTest: false });
+        const markMat = new MeshBasicMaterial({ color: this.color, depthTest: false });
         this.scrollBarMark = new Mesh(markGeo, markMat);
 
         this.scrollBarMark.renderOrder = 1;
