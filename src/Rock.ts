@@ -18,6 +18,8 @@ import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 // @ts-ignore 
 import explosionVertex from "./utils/shaders/explosionVertexIco.glsl";
+// @ts-ignore 
+import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
 
 export interface Options {
     surface: ColorRepresentation;
@@ -66,7 +68,7 @@ export class Rock {
     surfaceColor: Color;
     insideColor: Color;
 
-    constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options) {
+    constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options ) {
         this.univerSize = size;
         this.loadingManager=loadingManager;
         this.scene=scene;
@@ -309,29 +311,65 @@ export class Rock {
 
     prepareMaterial() {
         let that = this;
+        const rock = new TextureLoader().load('../assets/moons/stoneTexture.jpg');
+        rock.wrapS = rock.wrapT = MirroredRepeatWrapping;
+
+        const noise = new TextureLoader().load('../assets/noise1.png');
+        noise.wrapS = noise.wrapT = MirroredRepeatWrapping;
+
         const uniforms = {
-            time: { type: "f", value: 0 },
-            progress: { type: "f", value: 0 },
-            inside: { type: "f", value: 0 },
+            time: { type: "f", value: 0.0 },
+            progress: { type: "f", value: 0.0 },
+            inside: { type: "f", value: 0.0 },
             surfaceColor: { type: "v3", value: that.surfaceColor },
             insideColor: { type: "v3", value: that.insideColor },
-            // tCube: { value: that.textureCube },
+            tRock: { value: rock },
+            iNoise: { type: 't', value: noise },
             pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
-            uvRate1: { value: new Vector2(1, 1) }
+            uvRate1: { value: new Vector2(1, 1)},
+            iResolution: { type: "v2", value: new Vector2() }
         };
+        const uniforms1 = {
+            time: { type: "f", value: 0.0 },
+            progress: { type: "f", value: 0.0 },
+            inside: { type: "f", value: 0.0 },
+            surfaceColor: { type: "v3", value: that.surfaceColor },
+            insideColor: { type: "v3", value: that.insideColor },
+            tRock: { value: rock },
+            iNoise: { type: 't', value: noise },
+            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
+            uvRate1: { value: new Vector2(1, 1)},
+            iResolution: { type: "v2", value: new Vector2() }
+        };
+
+        uniforms1.iResolution.value.x =  1; // window.innerWidth;
+        uniforms1.iResolution.value.x = 1;
+        uniforms.iResolution.value.y = 1; // window.innerHeight;
+        uniforms.iResolution.value.y = 1;
+
         this.material = new ShaderMaterial({
             extensions: {
-                // derivatives: "#extension GL_OES_standard_derivatives : enable"
                 derivatives: true
             },
             side: DoubleSide,
             uniforms: uniforms,
-            vertexShader: explosionVertex,
+            vertexShader: explosionLavaVertex,
             fragmentShader: explosionFragment
         });
 
-        this.material1 = this.material.clone();
+        this.material1 = new ShaderMaterial({
+            extensions: {
+                derivatives: true
+            },
+            side: DoubleSide,
+            uniforms: uniforms1,
+            vertexShader: explosionLavaVertex,
+            fragmentShader: explosionFragment
+        });
+
+        // this.material1 = this.material.clone();
         this.material1.uniforms.inside.value = 1;
+        
 
     }
 
@@ -358,8 +396,15 @@ export class Rock {
         this.time += 0.05;
         this.material.uniforms.progress.value = Math.abs(this.settings.progress);
         this.material1.uniforms.progress.value = Math.abs(this.settings.progress);
-        this.tuniform.iTime.value += this.clock.getDelta();
-        this.tuniform.iDelta.value += this.tuniform.iDelta.value < 500 ? 0.3 : 0.0;
+
+        
+        this.material.uniforms.time.value = this.time;
+        this.material1.uniforms.time.value = this.time;
+
+        // console.log(this.material1.uniforms.progress.value)
+        
+        // this.tuniform.iTime.value += this.clock.getDelta();
+        // this.tuniform.iDelta.value += this.tuniform.iDelta.value < 500 ? 0.3 : 0.0;
         // console.log(this.tuniform.iDelta.value)
         this.coronaSprite.material.rotation += 0.001;
         this.coronaSprite.scale.addScalar(10 * Math.sin(this.time));

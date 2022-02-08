@@ -124,6 +124,7 @@ window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
 
 scrollbarUtils.userIdle();
 
+
 //Rock
 const rock = new Rock(UNIVERSE_SIZE, scene, loadingManager, {inside: 0x666666, surface: MAIN_COLOR});
 
@@ -141,6 +142,7 @@ const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, l
 
 //Magnetic field
 const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
+
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);

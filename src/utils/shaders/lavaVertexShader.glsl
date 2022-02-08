@@ -38,9 +38,6 @@ void main() {
   float displacement = - noise + b;
   vec3 newPosition = position + normal * displacement;
 
-	// position = rotate(position);
-	// vec3 newPosition = position + vec3( 5.5 * iTime );
-
   vec4 worldPosition = modelViewMatrix * vec4( newPosition, 1.0 );
 
   vNormal = normalize(normalMatrix * normal);

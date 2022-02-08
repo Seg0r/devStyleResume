@@ -58,6 +58,10 @@ export class Universe {
 
     }
 
+    public getNebulaTexture(){
+        
+    }
+
     public addToScene(scene: Scene){
         // scene.background=this.background;
         scene.add(this.blueNebula);
