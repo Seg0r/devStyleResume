@@ -55,35 +55,21 @@ void main() {
 
   vUv = uv;
 
-  // float f = iDelta;
-  float f = 0.01;
-
-
-
-
   vNormal2 = normalize(normalMatrix * normal);
   vNormal = normal;
 
   vec3 newposition = position;
 
-  float vTemp =  1. - ((centroid1.x + centroid1.y)*0.5 + 1.)/2.;
+  float vTemp =  1. - (position.y*0.9 + 1.)/2.;
 
-  float tProgress = max(0.0, (progress - vTemp*0.4) /0.6);
-  vec3 newnormal = rotate(normal,axis,tProgress*(3. + offset*7.));
-  
+  float tProgress = max(0.0, (progress - vTemp*0.2) /0.8);
 
-    // add time to the noise parameters so it's animated
-  noise = f * turbulence( .35 * vNormal + 5.5 * time );
-  float b = .2 * pnoise( 0.005 * position + vec3( .6 * time ), vec3( 1.0 ) );
-  float displacement = noise + b;
+  vec3 newnormal = rotate(normal,axis,tProgress*(3. + offset*10.));
 
-  if(progress>0.5){
-    newposition = rotate(newposition - centroid1,axis,(1. - vTemp)*tProgress*(3. + offset*10.)) + centroid1;
-    newposition += newposition + (1.5 - vTemp)*centroid1*(tProgress)*(3. + vTemp*7. + offset*3.);
-  }else{
-    vec3 newnormal2 = rotate(normal,axis,(3. + offset*7.));
-    // newposition += newposition + newnormal2 * displacement;
-  }
+
+  newposition = rotate(newposition - centroid1,axis,(1. - vTemp)*tProgress*(3. + offset*10.)) + centroid1;
+  newposition = newposition + (1.5 - vTemp)*centroid1*(tProgress)*(3. + vTemp*7. + offset*3.);
+
 
   vec4 worldPosition = modelViewMatrix * vec4( newposition, 1.0 );
 

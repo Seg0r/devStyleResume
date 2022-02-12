@@ -1,11 +1,11 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
+import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import {DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
 // @ts-ignore  
-import lavaFragmentShader from './utils/shaders/lavaFragmentShader.glsl';
+import lavaFragmentShader from './utils/shaders/lavaFragment.glsl';
 // @ts-ignore
 import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 
@@ -16,8 +16,6 @@ import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 
 // @ts-ignore 
 import explosionFragment from "./utils/shaders/explosionFragment.glsl";
-// @ts-ignore 
-import explosionVertex from "./utils/shaders/explosionVertexIco.glsl";
 // @ts-ignore 
 import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
 
@@ -53,20 +51,18 @@ export class Rock {
 
     univerSize: number;
     clock: Clock;
-    mesh!: Mesh<BufferGeometry, ShaderMaterial>;
     tuniform: { [uniform: string]: IUniform<any>; };
     haloSprite!: Sprite;
     coronaSprite!: Sprite;
     loader: any;
-    inverted = false;
     material!: ShaderMaterial;
     scene: Scene;
-    mesh1!: Mesh<any, any>;
     material1!: ShaderMaterial;
     loadingManager: LoadingManager;
-    settings: { progress: number } = {progress:0};
+    progress=0;
     surfaceColor: Color;
     insideColor: Color;
+    mesh: Mesh<SphereBufferGeometry, ShaderMaterial>;
 
     constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options ) {
         this.univerSize = size;
@@ -74,12 +70,13 @@ export class Rock {
         this.scene=scene;
         const { uniform, mesh } = this.createRock();
         this.tuniform = uniform;
-        // this.mesh = mesh;
+        this.mesh = mesh;
         this.clock = new Clock();
         this.surfaceColor = new Color(options.surface);
         this.insideColor = new Color(options.inside);
         this.createHalo();
         this.importRock();
+        console.log("test")
     }
 
 
@@ -131,7 +128,8 @@ export class Rock {
         const that = this;
 
         this.loader.load(
-            "/glb/ico-more.glb",
+            // "/glb/ico-more.glb",
+            "/glb/sphere.glb",            
             function (gltf: any) {
                 let voron:any[] = [];
                 let geoms: any[] = [];
@@ -159,14 +157,8 @@ export class Rock {
                     else {
                         j++;
                         let vtempo = that.processSurface(v, j);
-
-                        if (that.inverted) {
-                            geoms1.push(vtempo.surface);
-                            geoms.push(vtempo.volume);
-                        } else {
-                            geoms.push(vtempo.surface);
-                            geoms1.push(vtempo.volume);
-                        }
+                        geoms.push(vtempo.surface);
+                        geoms1.push(vtempo.volume); 
 
                         return true;
                     }
@@ -174,17 +166,19 @@ export class Rock {
 
                 let s = BufferGeometryUtils.mergeBufferGeometries(geoms,false);
 
-                that.mesh = new Mesh(s, that.material);
+                const meshInside = new Mesh(s, that.material);
+                meshInside.frustumCulled = false;
 
                 let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1,false);
-                that.mesh1 = new Mesh(s1, that.material1);
+                const meshSurface = new Mesh(s1, that.material1);
+                meshSurface.frustumCulled = false;
 
-                const scale = that.univerSize/20;
-                that.mesh.scale.set(scale,scale,scale);
-                that.mesh1.scale.set(scale,scale,scale);
+                const scale = that.univerSize/9.5;
+                meshInside.scale.set(scale,scale,scale);
+                meshSurface.scale.set(scale,scale,scale);
                 
-                that.scene.add(that.mesh)
-                that.scene.add(that.mesh1)
+                that.scene.add(meshInside)
+                that.scene.add(meshSurface)
                 // that.onLoad();
             },
             undefined,
@@ -197,24 +191,22 @@ export class Rock {
         let c = v.position;
         let vtemp, vtemp1;
         vtemp = v.children[0].geometry.clone();
-        vtemp = vtemp.applyMatrix4(
-            new Matrix4().makeTranslation(c.x, c.y, c.z)
-        );
+        // vtemp = vtemp.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
+        vtemp = vtemp.applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
         vtemp1 = v.children[1].geometry;
-        vtemp1 = vtemp1
-            .clone()
-            .applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
+        // vtemp1 = vtemp1.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
+        vtemp1 = vtemp1.clone().applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
 
         let len = v.children[0].geometry.attributes.position.array.length / 3;
         let len1 = v.children[1].geometry.attributes.position.array.length / 3;
         //  id
-        let offset = new Array(len).fill(j / 100);
+        let offset = new Array(len).fill(j / 500);
         vtemp.setAttribute(
             "offset",
             new BufferAttribute(new Float32Array(offset), 1)
         );
 
-        let offset1 = new Array(len1).fill(j / 100);
+        let offset1 = new Array(len1).fill(j / 500);
         vtemp1.setAttribute(
             "offset",
             new BufferAttribute(new Float32Array(offset1), 1)
@@ -268,6 +260,26 @@ export class Rock {
         return { surface: vtemp, volume: vtemp1 };
     }
 
+    static lavaShader(): Shader {
+        const noise = new TextureLoader().load('../assets/noise1.png');
+        noise.repeat.set(2, 2);
+        const tuniform = {
+            iTime: { type: 'f', value: 0.0 },
+            iDelta: { type: 'f', value: 100.0 },
+            iNoise: { type: 't', value: noise },
+            iResolution: { type: "v2", value: new Vector2(1,1) }
+        };
+
+        tuniform.iNoise.value.wrapS = tuniform.iNoise.value.wrapT = MirroredRepeatWrapping;
+
+        const shader: Shader = {
+            uniforms: tuniform,
+            vertexShader: lavaVertexShader,
+            fragmentShader: lavaFragmentShader
+        };
+
+        return shader;
+    }
 
     createRock() {
 
@@ -279,35 +291,15 @@ export class Rock {
             fragmentShader: shader.fragmentShader,
         });
 
-        const geo = new SphereBufferGeometry(600, 600, 40, 40);
+        const scale = this.univerSize/8;
+        const geo = new SphereBufferGeometry(scale, scale, 40, 40);
 
         const mesh = new Mesh(geo, mat);
 
         return { uniform: shader.uniforms, mesh: mesh }
     }
 
-    static lavaShader(): Shader {
-        const noise = new TextureLoader().load('../assets/noise1.png');
-        noise.repeat.set(2, 2);
-        const tuniform = {
-            iTime: { type: 'f', value: 0.1 },
-            iDelta: { type: 'f', value: 100.0 },
-            iChannel0: { type: 't', value: noise },
-            iResolution: { type: "v2", value: new Vector2() }
-        };
 
-        tuniform.iChannel0.value.wrapS = tuniform.iChannel0.value.wrapT = MirroredRepeatWrapping;
-        tuniform.iResolution.value.x = 1; // window.innerWidth;
-        tuniform.iResolution.value.y = 1; // window.innerHeight;
-
-        const shader: Shader = {
-            uniforms: tuniform,
-            vertexShader: lavaVertexShader,
-            fragmentShader: lavaFragmentShader
-        };
-
-        return shader;
-    }
 
     prepareMaterial() {
         let that = this;
@@ -325,9 +317,7 @@ export class Rock {
             insideColor: { type: "v3", value: that.insideColor },
             tRock: { value: rock },
             iNoise: { type: 't', value: noise },
-            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
-            uvRate1: { value: new Vector2(1, 1)},
-            iResolution: { type: "v2", value: new Vector2() }
+            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight)}
         };
         const uniforms1 = {
             time: { type: "f", value: 0.0 },
@@ -337,15 +327,8 @@ export class Rock {
             insideColor: { type: "v3", value: that.insideColor },
             tRock: { value: rock },
             iNoise: { type: 't', value: noise },
-            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
-            uvRate1: { value: new Vector2(1, 1)},
-            iResolution: { type: "v2", value: new Vector2() }
+            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight)}
         };
-
-        uniforms1.iResolution.value.x =  1; // window.innerWidth;
-        uniforms1.iResolution.value.x = 1;
-        uniforms.iResolution.value.y = 1; // window.innerHeight;
-        uniforms.iResolution.value.y = 1;
 
         this.material = new ShaderMaterial({
             extensions: {
@@ -373,16 +356,11 @@ export class Rock {
 
     }
 
-    settingsReset() {
-        this.settings = {
-          progress: 0
-        };
-      }
 
     addToScene(scene: Scene) {
-        
-        // scene.add(this.coronaSprite);
-        // scene.add(this.haloSprite);
+        scene.add(this.mesh);
+        scene.add(this.coronaSprite);
+        scene.add(this.haloSprite);
     }
 
     time = 0;
@@ -391,11 +369,11 @@ export class Rock {
     render(targetMouseX: number) {
 
         this.mouseX += (targetMouseX - this.mouseX)*0.05;
-        this.settings.progress = Math.abs(this.mouseX);
+        this.progress = Math.abs(this.mouseX);
 
         this.time += 0.05;
-        this.material.uniforms.progress.value = Math.abs(this.settings.progress);
-        this.material1.uniforms.progress.value = Math.abs(this.settings.progress);
+        this.material.uniforms.progress.value = Math.abs(this.progress);
+        this.material1.uniforms.progress.value = Math.abs(this.progress);
 
         
         this.material.uniforms.time.value = this.time;
@@ -403,7 +381,7 @@ export class Rock {
 
         // console.log(this.material1.uniforms.progress.value)
         
-        // this.tuniform.iTime.value += this.clock.getDelta();
+        this.tuniform.iTime.value += this.clock.getDelta();
         // this.tuniform.iDelta.value += this.tuniform.iDelta.value < 500 ? 0.3 : 0.0;
         // console.log(this.tuniform.iDelta.value)
         this.coronaSprite.material.rotation += 0.001;
