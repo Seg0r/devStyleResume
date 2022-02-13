@@ -3,9 +3,10 @@
 // https://www.shadertoy.com/view/lslXRS
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
 // Contact the author for other licensing options
-const shader = `
+import classicNoise3D from './classicnoise3d.glsl';
 
-float hash21(in vec2 n){ return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
+const shader = classicNoise3D+`
+
 mat2 makem2(in float theta){float c = cos(theta);float s = sin(theta);return mat2(c,-s,s,c);}
 float noise( in vec2 x , sampler2D iNoise){return texture(iNoise, x*.01).x;}
 
@@ -19,16 +20,20 @@ vec2 gradn(vec2 p, sampler2D iNoise)
 
 float flow(in vec2 p, float myTime, sampler2D iNoise)
 {
+	float pi = 3.14159265359;
+	//traingle function to get rid of edge
+	p.x = 2.*(1. - abs(p.x));
 	float z=3.;
 	float rz = 0.;
 	vec2 bp = p;
+
 	for (float i= 1.;i < 7.;i++ )
 	{
 		//primary flow speed
 		p += myTime*.1;
-		
+
 		//secondary flow speed (speed of the perceived flow)
-		bp += myTime*1.9;
+		bp += myTime*0.9;
 		
 		//displacement field (try changing time multiplier)
 		vec2 gr = gradn(i*p*.34+myTime*1.,iNoise);
@@ -65,7 +70,7 @@ float Fresnel(vec3 eyeVector, vec3 worldNormal){
 vec4 lavaColor(vec2 vUv, vec3 vNormal2, vec3 eyeVector, float myTime, sampler2D iNoise)
 {	
     vec2 p = -1.0 + 2.0 *vUv;
-	// p*= 2.0;
+	p *= 2.0;
 	float rz = flow(p,myTime,iNoise);
 
 	//Fresnel

@@ -4,6 +4,8 @@ import classicNoise3D from './classicnoise3d.glsl';
 const shader = classicNoise3D+`
 uniform float progress;
 uniform float time;
+#define iTime time
+uniform float inside;
 
 attribute vec3 centroid1;
 attribute vec3 axis;
@@ -16,7 +18,6 @@ varying vec3 vReflect;
 
 //lava
 varying vec2 vUv;
-varying float noise;
 varying vec3 eyeVector;
 varying vec3 vNormal2;
 
@@ -38,18 +39,6 @@ vec3 rotate(vec3 v, vec3 axis, float angle) {
 }
 
 
-float turbulence( vec3 p ) {
-
-  float t = -.5;
-
-  for (float f = 1.0 ; f <= 10.0 ; f++ ){
-    float power = pow( 2.0, f );
-    t += abs( pnoise( vec3( power * p ), vec3( 10.0, 10.0, 10.0 ) ) / power );
-  }
-
-  return t;
-}
-
 
 void main() {
 
@@ -60,7 +49,7 @@ void main() {
 
   vec3 newposition = position;
 
-  float vTemp =  1. - (position.y*0.9 + 1.)/2.;
+  float vTemp =  1.0 - (position.y*0.5 + 1.)/2.;
 
   float tProgress = max(0.0, (progress - vTemp*0.2) /0.8);
 

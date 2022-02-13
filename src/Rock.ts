@@ -177,8 +177,8 @@ export class Rock {
                 meshInside.scale.set(scale,scale,scale);
                 meshSurface.scale.set(scale,scale,scale);
                 
-                that.scene.add(meshInside)
-                that.scene.add(meshSurface)
+                // that.scene.add(meshInside)
+                // that.scene.add(meshSurface)
                 // that.onLoad();
             },
             undefined,
@@ -262,7 +262,6 @@ export class Rock {
 
     static lavaShader(): Shader {
         const noise = new TextureLoader().load('../assets/noise1.png');
-        noise.repeat.set(2, 2);
         const tuniform = {
             iTime: { type: 'f', value: 0.0 },
             iDelta: { type: 'f', value: 100.0 },
@@ -303,11 +302,11 @@ export class Rock {
 
     prepareMaterial() {
         let that = this;
+        
         const rock = new TextureLoader().load('../assets/moons/stoneTexture.jpg');
         rock.wrapS = rock.wrapT = MirroredRepeatWrapping;
 
-        const noise = new TextureLoader().load('../assets/noise1.png');
-        noise.wrapS = noise.wrapT = MirroredRepeatWrapping;
+        const noise = new TextureLoader().load('../assets/noise3.png');
 
         const uniforms = {
             time: { type: "f", value: 0.0 },
@@ -352,15 +351,14 @@ export class Rock {
 
         // this.material1 = this.material.clone();
         this.material1.uniforms.inside.value = 1;
-        
-
     }
 
 
     addToScene(scene: Scene) {
+        this.mesh.rotateY(Math.PI/2)
         scene.add(this.mesh);
-        scene.add(this.coronaSprite);
-        scene.add(this.haloSprite);
+        // scene.add(this.coronaSprite);
+        // scene.add(this.haloSprite);
     }
 
     time = 0;
@@ -386,9 +384,11 @@ export class Rock {
         // console.log(this.tuniform.iDelta.value)
         this.coronaSprite.material.rotation += 0.001;
         this.coronaSprite.scale.addScalar(10 * Math.sin(this.time));
+        this.coronaSprite.material.color.offsetHSL(0,0,0.0003);
 
         this.haloSprite.material.rotation -= 0.001;
-        this.haloSprite.scale.addScalar(100 * Math.cos(this.time));
+        this.haloSprite.scale.addScalar(120 * Math.cos(this.time));
+        this.haloSprite.material.color.offsetHSL(0,0,0.0003);
     }
 
 }
