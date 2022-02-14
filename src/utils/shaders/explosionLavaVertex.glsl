@@ -4,7 +4,6 @@ import classicNoise3D from './classicnoise3d.glsl';
 const shader = classicNoise3D+`
 uniform float progress;
 uniform float time;
-#define iTime time
 uniform float inside;
 
 attribute vec3 centroid1;

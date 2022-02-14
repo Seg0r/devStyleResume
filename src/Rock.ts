@@ -2,7 +2,7 @@ import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWra
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import {DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-
+import * as TWEEN from '@tweenjs/tween.js';
 
 // @ts-ignore  
 import lavaFragmentShader from './utils/shaders/lavaFragment.glsl';
@@ -18,12 +18,26 @@ import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 // @ts-ignore 
 import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
+import { start } from 'repl';
 
 export interface Options {
     surface: ColorRepresentation;
     inside: ColorRepresentation;
     background?: String;
 };
+
+export interface Animation {
+    frame: number
+    sunScale: number;
+    cameraRot: number
+    explosionProgress: number
+    haloBrightness: number
+};
+
+
+const Lin = TWEEN.Easing.Linear.None;
+const Sin =  TWEEN.Easing.Sinusoidal.InOut;
+const Cub =   TWEEN.Easing.Cubic.InOut;
 
 function getRandomAxis() {
     return new Vector3(
@@ -63,6 +77,7 @@ export class Rock {
     surfaceColor: Color;
     insideColor: Color;
     mesh: Mesh<SphereBufferGeometry, ShaderMaterial>;
+    tween: TWEEN.Tween<Animation>[] = [];
 
     constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options ) {
         this.univerSize = size;
@@ -180,6 +195,8 @@ export class Rock {
                 // that.scene.add(meshInside)
                 // that.scene.add(meshSurface)
                 // that.onLoad();
+
+                that.animateExplosion();
             },
             undefined,
             function (e: any) {
@@ -266,6 +283,7 @@ export class Rock {
             iTime: { type: 'f', value: 0.0 },
             iDelta: { type: 'f', value: 100.0 },
             iNoise: { type: 't', value: noise },
+            iScale: {type: 'f', value: 1.0 },
             iResolution: { type: "v2", value: new Vector2(1,1) }
         };
 
@@ -355,15 +373,64 @@ export class Rock {
 
 
     addToScene(scene: Scene) {
-        this.mesh.rotateY(Math.PI/2)
+        this.mesh.rotateY(Math.PI/4.2)
         scene.add(this.mesh);
-        // scene.add(this.coronaSprite);
-        // scene.add(this.haloSprite);
+        scene.add(this.coronaSprite);
+        scene.add(this.haloSprite);
     }
+
+
+
+    animation:Animation[] = [
+        {frame: 0.0 ,sunScale: 1.0, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 1.0 ,sunScale: 0.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 2.0 ,sunScale: 1.4, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 3.0 ,sunScale: 0.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 4.0 ,sunScale: 1.1, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.0 ,sunScale: 0.9, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.1 ,sunScale: 1.0, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.2 ,sunScale: 1.1, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.3 ,sunScale: 1.2, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.4 ,sunScale: 1.3, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.5 ,sunScale: 1.4, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 5.6 ,sunScale: 1.5, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
+        {frame: 6.0 ,sunScale: 1.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 }
+    ]
+
+    getAnimationStep(step: number): Animation{
+        if(step>0 && step<this.animation.length)
+            return this.animation[step]
+        return this.animation[0];
+    }
+
+    tweenGroup = new TWEEN.Group();
+
+    animateExplosion(){
+    
+        for (let index = 0; index < this.animation.length-1; index++) {
+            
+            const tweenObjStart:Animation = this.animation[index];
+            const tweenObjEnd:Animation = this.animation[index+1];
+            const time = (tweenObjEnd.frame-tweenObjStart.frame)*1000;
+
+            this.tween[index] = new TWEEN.Tween(tweenObjStart,this.tweenGroup)
+            .to(tweenObjEnd, time)
+            .onUpdate((tween) => {
+                this.tuniform.iScale.value = tween.sunScale;
+            })
+            .easing(TWEEN.Easing.Linear.None);
+        }
+
+        for (let index = 0; index < this.tween.length-1; index++) {
+            this.tween[index].chain(this.tween[index+1])
+        }
+
+        this.tween[0].start();
+    }
+
 
     time = 0;
     mouseX = 0;
-
     render(targetMouseX: number) {
 
         this.mouseX += (targetMouseX - this.mouseX)*0.05;
@@ -372,14 +439,11 @@ export class Rock {
         this.time += 0.05;
         this.material.uniforms.progress.value = Math.abs(this.progress);
         this.material1.uniforms.progress.value = Math.abs(this.progress);
-
         
         this.material.uniforms.time.value = this.time;
         this.material1.uniforms.time.value = this.time;
-
-        // console.log(this.material1.uniforms.progress.value)
         
-        this.tuniform.iTime.value += this.clock.getDelta();
+        this.tuniform.iTime.value = this.time*0.2;
         // this.tuniform.iDelta.value += this.tuniform.iDelta.value < 500 ? 0.3 : 0.0;
         // console.log(this.tuniform.iDelta.value)
         this.coronaSprite.material.rotation += 0.001;
@@ -389,6 +453,7 @@ export class Rock {
         this.haloSprite.material.rotation -= 0.001;
         this.haloSprite.scale.addScalar(120 * Math.cos(this.time));
         this.haloSprite.material.color.offsetHSL(0,0,0.0003);
+        this.tweenGroup.update();
     }
 
 }

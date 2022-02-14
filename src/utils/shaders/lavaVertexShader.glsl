@@ -6,7 +6,7 @@ const shader = classicNoise3D+`
 varying vec2 vUv;
 
 uniform float iTime;
-uniform float iDelta;
+uniform float iScale;
 
 //Freshnel
 varying vec3 eyeVector;
@@ -30,14 +30,15 @@ void main() {
   
   vUv = uv;
 
-  // float f = iDelta;
   float f = 100.0;
 
   // add time to the noise parameters so it's animated
-  float noise = f *  -1.0 * turbulence( .35 * normal + f/8000.0 * iTime );
-  float b = 50.0 * pnoise( 0.005 * position + vec3( .5 * iTime ), vec3( 100.0 ) );
-  float displacement = - noise + b;
+  float noise = f * turbulence( .35 * normal + f/6000.0 * iTime );
+  float b = 20.0 * pnoise( 0.005 * position + vec3( .5 * iTime ), vec3( 100.0 ) );
+  float displacement = noise + b;
   vec3 newPosition = position + normal * displacement;
+
+  newPosition *= iScale;
 
   vec4 worldPosition = modelViewMatrix * vec4( newPosition, 1.0 );
 
