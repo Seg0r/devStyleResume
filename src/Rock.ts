@@ -1,4 +1,4 @@
-import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
+import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import {DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -27,12 +27,21 @@ export interface Options {
 };
 
 export interface Animation {
-    frame: number
-    sunScale: number;
-    cameraRot: number
-    explosionProgress: number
-    haloBrightness: number
+    t: number
+    sunS: number
+    camR: number
+    explP: number
+    haloB: number
+    corB: number
 };
+
+enum Anim {
+    SUN,
+    CAM,
+    EXPL,
+    HALO,
+    _count
+}
 
 
 const Lin = TWEEN.Easing.Linear.None;
@@ -77,7 +86,8 @@ export class Rock {
     surfaceColor: Color;
     insideColor: Color;
     mesh: Mesh<SphereBufferGeometry, ShaderMaterial>;
-    tween: TWEEN.Tween<Animation>[] = [];
+    tween: TWEEN.Tween<Record<string, any>>[][] = [];
+    
 
     constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options ) {
         this.univerSize = size;
@@ -324,7 +334,7 @@ export class Rock {
         const rock = new TextureLoader().load('../assets/moons/stoneTexture.jpg');
         rock.wrapS = rock.wrapT = MirroredRepeatWrapping;
 
-        const noise = new TextureLoader().load('../assets/noise3.png');
+        const noise = new TextureLoader().load('../assets/noise1.png');
 
         const uniforms = {
             time: { type: "f", value: 0.0 },
@@ -381,51 +391,68 @@ export class Rock {
 
 
 
-    animation:Animation[] = [
-        {frame: 0.0 ,sunScale: 1.0, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 1.0 ,sunScale: 0.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 2.0 ,sunScale: 1.4, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 3.0 ,sunScale: 0.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 4.0 ,sunScale: 1.1, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.0 ,sunScale: 0.9, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.1 ,sunScale: 1.0, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.2 ,sunScale: 1.1, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.3 ,sunScale: 1.2, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.4 ,sunScale: 1.3, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.5 ,sunScale: 1.4, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 5.6 ,sunScale: 1.5, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 },
-        {frame: 6.0 ,sunScale: 1.6, cameraRot: 0.0, explosionProgress: 0.0, haloBrightness:0.0 }
-    ]
-
-    getAnimationStep(step: number): Animation{
-        if(step>0 && step<this.animation.length)
-            return this.animation[step]
-        return this.animation[0];
-    }
+    t =    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0 ];
+    sunS=  [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.95, null,1.0,  null, 0.92,  null, 1.0,  null, 0.85,  1.0,  0.8,  0.8 ];
+    haloB= [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.55, 0.6,  0.65,  0.70,  0.75,  0.80,  0.85,  0.90,  1.0,  1.0 ];
 
     tweenGroup = new TWEEN.Group();
 
+    static getPrevIdx(arr:any[], idx:number):number{
+        let back=1;
+        while(idx-back>=0 && idx-back< arr.length && arr[idx-back]==null){
+            back++;
+        }
+        return idx-back;
+    }
+
+    getTime(idx:number, prevIdx:number):number{
+        return (this.t[idx]-this.t[prevIdx]) *1000;
+    }
+
     animateExplosion(){
+
+        let haloColor = {h: 0, s: 0, l: 0};;
+        this.haloSprite.material.color.getHSL(haloColor);
+
+        for (let t = 0; t < Anim._count; t++) {
+            this.tween[t] = new Array<TWEEN.Tween<Record<string, any>>>()
+        }
     
-        for (let index = 0; index < this.animation.length-1; index++) {
+        for (let i = 1; i < this.t.length; i++) {
             
-            const tweenObjStart:Animation = this.animation[index];
-            const tweenObjEnd:Animation = this.animation[index+1];
-            const time = (tweenObjEnd.frame-tweenObjStart.frame)*1000;
+            if(this.sunS[i]){
+                const pI = Rock.getPrevIdx(this.sunS,i);
+                const time = this.getTime(i,pI);
+                this.tween[Anim.SUN].push(new TWEEN.Tween({scale:this.sunS[pI]},this.tweenGroup)
+                .to({scale:this.sunS[i]}, time)
+                .onUpdate((tween) => {this.tuniform.iScale.value = tween.scale;})
+                .easing(TWEEN.Easing.Sinusoidal.InOut));
+            }
 
-            this.tween[index] = new TWEEN.Tween(tweenObjStart,this.tweenGroup)
-            .to(tweenObjEnd, time)
-            .onUpdate((tween) => {
-                this.tuniform.iScale.value = tween.sunScale;
-            })
-            .easing(TWEEN.Easing.Linear.None);
+            if(this.haloB[i]){
+                const pI = Rock.getPrevIdx(this.haloB,i);
+                const time = this.getTime(i,pI);
+                this.tween[Anim.HALO].push(new TWEEN.Tween({l:this.haloB[pI]},this.tweenGroup)
+                .to({l:this.haloB[i]}, time)
+                .onUpdate((tween) => {
+                    this.haloSprite.material.color.setHSL(haloColor.h,haloColor.s,tween.l);
+                    this.coronaSprite.material.color.setHSL(haloColor.h,haloColor.s,tween.l);})
+                .easing(TWEEN.Easing.Linear.None));
+            }
         }
 
-        for (let index = 0; index < this.tween.length-1; index++) {
-            this.tween[index].chain(this.tween[index+1])
+        //chain all types 
+        for (let t = 0; t < Anim._count; t++) {
+            for (let index = 0; index < this.tween[t].length-1; index++) {
+                this.tween[t][index].chain(this.tween[t][index+1]);
+            }
         }
 
-        this.tween[0].start();
+        //start all types
+        for (let t = 0; t < Anim._count; t++) {
+            if(this.tween[t][0])
+                this.tween[t][0].start();
+        }
     }
 
 
@@ -444,15 +471,11 @@ export class Rock {
         this.material1.uniforms.time.value = this.time;
         
         this.tuniform.iTime.value = this.time*0.2;
-        // this.tuniform.iDelta.value += this.tuniform.iDelta.value < 500 ? 0.3 : 0.0;
-        // console.log(this.tuniform.iDelta.value)
         this.coronaSprite.material.rotation += 0.001;
         this.coronaSprite.scale.addScalar(10 * Math.sin(this.time));
-        this.coronaSprite.material.color.offsetHSL(0,0,0.0003);
 
         this.haloSprite.material.rotation -= 0.001;
         this.haloSprite.scale.addScalar(120 * Math.cos(this.time));
-        this.haloSprite.material.color.offsetHSL(0,0,0.0003);
         this.tweenGroup.update();
     }
 
