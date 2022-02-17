@@ -9,7 +9,7 @@ uniform float iTime;
 uniform float iScale;
 
 //Freshnel
-varying vec3 eyeVector;
+varying vec3 vEyeVector;
 varying vec3 vNormal;
 varying float vNoise;
 
@@ -43,7 +43,7 @@ void main() {
   vec4 worldPosition = modelViewMatrix * vec4( newPosition, 1.0 );
 
   vNormal = normalize(normalMatrix * normal);
-  eyeVector = normalize(vec3(worldPosition));
+  vEyeVector = normalize(vec3(worldPosition));
 
   gl_Position = projectionMatrix * worldPosition;
 
