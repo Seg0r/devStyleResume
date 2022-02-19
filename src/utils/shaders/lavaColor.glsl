@@ -84,7 +84,7 @@ vec3 hsv2rgb(vec3 c)
 }
 
 
-vec4 lavaColor(vec2 vUv, vec3 vNormal2, vec3 eyeVector, float myTime, sampler2D iNoise, float iBrightness)
+vec4 lavaColor(vec2 vUv, vec3 vNormal2, vec3 eyeVector, float myTime, sampler2D iNoise, float iBrightness, float iSaturation, float iHSV)
 {	
     vec2 p = -1.0 + 2.0 *vUv;
 	p *= 2.0;
@@ -92,8 +92,12 @@ vec4 lavaColor(vec2 vUv, vec3 vNormal2, vec3 eyeVector, float myTime, sampler2D 
 
 	//Fresnel
 	float fres = Fresnel(eyeVector, vNormal2);
+
+	if(iSaturation < 0.0){
+		iSaturation = 1.0;
+	}
 	
-	vec3 col = 1.5*vec3(.13,0.07,0.01)/rz;
+	vec3 col = 1.5*vec3(.13,0.07,0.01)/(rz*iSaturation);
 	
 	col=pow(col,vec3(1.4));
 	vec4 color = vec4(col,1.0);
@@ -101,7 +105,16 @@ vec4 lavaColor(vec2 vUv, vec3 vNormal2, vec3 eyeVector, float myTime, sampler2D 
 	color.rgb += col*fres*10.0;
 	vec3 hsv = rgb2hsv(color.rgb);
 	hsv.z *= iBrightness;
-	hsv.y /= iBrightness;
+
+	if(iSaturation < 1.0){
+		hsv.y = iSaturation;
+	}
+	
+	if(iHSV > 0.0 && iHSV < 360.0){
+		hsv.y = iSaturation;
+		hsv.x = iHSV/360.;
+	}
+	
 	color.rgb = hsv2rgb(hsv);
 
 	

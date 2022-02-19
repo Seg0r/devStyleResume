@@ -1,7 +1,7 @@
-import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
+import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, Camera, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
-import {DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as TWEEN from '@tweenjs/tween.js';
 
 // @ts-ignore  
@@ -18,58 +18,19 @@ import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 // @ts-ignore 
 import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
-import { start } from 'repl';
 import GUI from 'lil-gui';
+import { assert } from 'console';
 
-export interface Options {
-    surface: ColorRepresentation;
-    inside: ColorRepresentation;
-    background?: String;
-};
-
-export interface Animation {
-    t: number
-    sunS: number
-    camR: number
-    explP: number
-    haloB: number
-    corB: number
-};
 
 enum Anim {
     SUN,
     CAM,
     EXPL,
     HALO,
+    HUE,
     _count
 }
 
-
-const Lin = TWEEN.Easing.Linear.None;
-const Sin =  TWEEN.Easing.Sinusoidal.InOut;
-const Cub =   TWEEN.Easing.Cubic.InOut;
-
-function getRandomAxis() {
-    return new Vector3(
-        Math.random() - 0.5,
-        Math.random() - 0.5,
-        Math.random() - 0.5
-    ).normalize();
-}
-
-function getCentroid(geometry: BufferGeometry) {
-    let ar = geometry.attributes.position.array;
-    let len = ar.length;
-    let x = 0,
-        y = 0,
-        z = 0;
-    for (let i = 0; i < len; i = i + 3) {
-        x += ar[i];
-        y += ar[i + 1];
-        z += ar[i + 2];
-    }
-    return { x: (3 * x) / len, y: (3 * y) / len, z: (3 * z) / len };
-}
 
 export class Rock {
 
@@ -83,26 +44,30 @@ export class Rock {
     scene: Scene;
     matSurface!: ShaderMaterial;
     loadingManager: LoadingManager;
-    progress=0;
+    progress = 0;
     surfaceColor: Color;
     insideColor: Color;
     mesh: Mesh<SphereBufferGeometry, ShaderMaterial>;
     tween: TWEEN.Tween<Record<string, any>>[][] = [];
-    haloColor: { h: number; s: number; l: number; } = {h: 0, s: 0, l: 0};
-    haloStartScale: number =0;
-    coronaStartScale: number =0;
-    
+    camera: Camera;
+    haloColor!: { h: number; s: number; l: number; };
+    haloStartScale!: number;
+    cameraStart!: Vector3;
+    coronaStartScale!: number;
+    cameraSpeed: number = 0;
 
-    constructor(size: number,scene:Scene, loadingManager: LoadingManager,options: Options ) {
+
+    constructor(size: number, scene: Scene, loadingManager: LoadingManager, camera:Camera) {
         this.univerSize = size;
-        this.loadingManager=loadingManager;
-        this.scene=scene;
+        this.loadingManager = loadingManager;
+        this.scene = scene;
         const { uniform, mesh } = this.createRock();
         this.tuniform = uniform;
         this.mesh = mesh;
         this.clock = new Clock();
-        this.surfaceColor = new Color(options.surface);
-        this.insideColor = new Color(options.inside);
+        this.surfaceColor = new Color(0xfedd1f);
+        this.insideColor = new Color(0x666666);
+        this.camera = camera;
         this.createHalo();
         this.importRock();
         this.createGUI();
@@ -132,14 +97,9 @@ export class Rock {
 
         this.haloSprite = new Sprite(haloMat);
         this.coronaSprite = new Sprite(coronaMat);
-        const scale = this.univerSize*2;
+        const scale = this.univerSize * 2;
         this.haloSprite.scale.set(scale, scale, 1)
-        this.coronaSprite.scale.set(scale*0.6, scale*0.6,1);
-
-        
-        this.haloSprite.material.color.getHSL(this.haloColor);
-        this.coronaStartScale = this.coronaSprite.scale.x;
-        this.haloStartScale = this.haloSprite.scale.x;
+        this.coronaSprite.scale.set(scale * 0.6, scale * 0.6, 1);
 
         // this.coronaSprite.position.set(-400,0,400);
 
@@ -150,7 +110,7 @@ export class Rock {
         this.loader = new GLTFLoader(this.loadingManager).setPath("../assets/");
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('../node_modules/three/examples/js/libs/draco/gltf/');
-        
+
         this.loader.setDRACOLoader(dracoLoader);
 
         this.prepareMaterial();
@@ -164,22 +124,22 @@ export class Rock {
 
         this.loader.load(
             // "/glb/ico-more.glb",
-            "/glb/sphere.glb",            
+            "/glb/sphere.glb",
             function (gltf: any) {
-                let voron:any[] = [];
+                let voron: any[] = [];
                 let geoms: any[] = [];
                 let geoms1: any[] = [];
                 gltf.scene.traverse(function (child: any) {
-                    
+
                     if (child.name === "Voronoi_Fracture") {
                         if (child.children[0].children.length > 2) {
-                            child.children.forEach((f:any) => {
-                                f.children.forEach((m:any) => {
+                            child.children.forEach((f: any) => {
+                                f.children.forEach((m: any) => {
                                     voron.push(m.clone());
                                 });
                             });
                         } else {
-                            child.children.forEach((m:any) => {
+                            child.children.forEach((m: any) => {
                                 voron.push(m.clone());
                             });
                         }
@@ -193,25 +153,25 @@ export class Rock {
                         j++;
                         let vtempo = that.processSurface(v, j);
                         geoms.push(vtempo.surface);
-                        geoms1.push(vtempo.volume); 
+                        geoms1.push(vtempo.volume);
 
                         return true;
                     }
                 });
 
-                let s = BufferGeometryUtils.mergeBufferGeometries(geoms,false);
+                let s = BufferGeometryUtils.mergeBufferGeometries(geoms, false);
 
                 const meshInside = new Mesh(s, that.matInside);
                 meshInside.frustumCulled = false;
 
-                let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1,false);
+                let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1, false);
                 const meshSurface = new Mesh(s1, that.matSurface);
                 meshSurface.frustumCulled = false;
 
-                const scale = that.univerSize/14;
-                meshInside.scale.set(scale,scale,scale);
-                meshSurface.scale.set(scale,scale,scale);
-                
+                const scale = that.univerSize / 14;
+                meshInside.scale.set(scale, scale, scale);
+                meshSurface.scale.set(scale, scale, scale);
+
                 that.scene.add(meshInside)
                 that.scene.add(meshSurface)
                 // that.onLoad();
@@ -302,8 +262,10 @@ export class Rock {
         const tuniform = {
             iTime: { type: 'f', value: 0.0 },
             iNoise: { type: 't', value: noise },
-            iScale: {type: 'f', value: 1.0 },
+            iScale: { type: 'f', value: 1.0 },
             iBrightness: { type: "f", value: 1.0 },
+            iSaturation: { type: "f", value: -1.0 },
+            iHue: { type: "f", value: -1.0 },
         };
 
         tuniform.iNoise.value.wrapS = tuniform.iNoise.value.wrapT = MirroredRepeatWrapping;
@@ -327,19 +289,19 @@ export class Rock {
             fragmentShader: shader.fragmentShader,
         });
 
-        const scale = this.univerSize/11;
+        const scale = this.univerSize / 11;
         const geo = new SphereBufferGeometry(scale, scale, 40, 40);
 
         const mesh = new Mesh(geo, mat);
 
-        return {uniform: shader.uniforms, mesh: mesh}
+        return { uniform: shader.uniforms, mesh: mesh }
     }
 
 
 
     prepareMaterial() {
         let that = this;
-        
+
         const rock = new TextureLoader().load('../assets/moons/stoneTexture.jpg');
         rock.wrapS = rock.wrapT = MirroredRepeatWrapping;
 
@@ -353,8 +315,10 @@ export class Rock {
             insideColor: { type: "v3", value: that.insideColor },
             tRock: { value: rock },
             iNoise: { type: 't', value: noise },
-            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight)},
+            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
             brightness: { type: "f", value: 1.0 },
+            saturation: { type: "f", value: 1.0 },
+            
         };
         const uniforms1 = {
             time: { type: "f", value: 0.0 },
@@ -364,8 +328,9 @@ export class Rock {
             insideColor: { type: "v3", value: that.insideColor },
             tRock: { value: rock },
             iNoise: { type: 't', value: noise },
-            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight)},
+            pixels: { type: "v2", value: new Vector2(window.innerWidth, window.innerHeight) },
             brightness: { type: "f", value: 1.0 },
+            saturation: { type: "f", value: 1.0 },
         };
 
         this.matInside = new ShaderMaterial({
@@ -394,7 +359,7 @@ export class Rock {
 
 
     addToScene(scene: Scene) {
-        this.mesh.rotateY(Math.PI/4.2)
+        this.mesh.rotateY(Math.PI / 4.2)
         scene.add(this.mesh);
         scene.add(this.coronaSprite);
         scene.add(this.haloSprite);
@@ -402,88 +367,123 @@ export class Rock {
 
 
 
-    t =    [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,  9.0,  10.0, 11.0, 12.0, 13.0, 13.5,  14.0, 14.3, 14.31, 15.0, 16.0, 17.0, 18.0, 19.0, 19.1];
-    sunS=  [1.0, 1.0, 1.0, 1.0, 1.0, null,1.05,null,0.95, null, 1.12, null, 0.93, null, 1.18,  1.15, 0.8,  0.3,   0.6 , 0.8,  null, null, 1.0,  3.5   ];
-    haloB= [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6,  0.6,  0.6,  0.62, 0.65, 0.70, null,  0.75, null, null,  0.80, 0.85, 0.90, 1.0,  1.0,  1.0 ];
-    coreB= [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.1,  1.1,  1.15, 1.2,  null,  1.3,  null, null,  1.5,  1.8,  1.9,  2.0,  2.0,  5.0 ];
-    surfB= [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.1,  1.1,  1.15, 1.2,  null,  1.25, null, null,  1.3,  1.35, 1.4,  1.4,  1.4,  1.4 ];
-    explP= [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  null,  0.0,  null, null,  0.7,  null, null, null, 1.0,  2.0 ];
+    t =     [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 13.5, 14.0, 14.21, 14.211, 14.35, 14.99, 15.0, 16.0, 17.0, 17.2, ];
+    sunS =  [1.0, 1.0, 1.0, 1.0, 1.0, null,1.05,null,0.95,null,1.12, null, 0.93, null, null, 1.15, 0.8,   0.4,    null,  null,  null, null, 1.0,  3.5,  ];
+    haloB = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6,  0.62, 0.65, 0.70, null, 0.75, null,  0.80,   0.80,  0.80,  0.80, 0.85, 0.90, 1.0,  ];
+    coreB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.3,  null,  1.4,    1.5,   1.5,   1.5,  1.8,  2.0,  3.0,  ];
+    coreS = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.0,  0.95, null, 0.75, null,  0.4,    0.4,   0.4,   0.4,  0.4,  0.3,  0.1,  ];
+    surfB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.25, null,  1.3,    1.3,   1.3,   1.3,  1.35, 1.4,  1.4,  ];    
+    coreH = [360, 360, 360, 360, 360, 360, 360, 360, 360, 360, 360,  360,  360,  360,  null, 360,  360,   209,    209,   209,   209,  209,  209,  209,  ];    
+    explP = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0,  0.0,  0.0,  null, 0.0,  null,  null,   0.3,   null,  null, null, 1.0,  2.0,  ];
+    camR  = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,  0.2,  0.2,  0.2,  null, 0.2,  null,  null,   1.0,   null,  null, null, 1.0 , 0.0,  ];
 
     tweenGroup = new TWEEN.Group();
 
-    static getPrevIdx(arr:any[], idx:number):number{
-        let back=1;
-        while(idx-back>=0 && idx-back< arr.length && arr[idx-back]==null){
+    static getPrevIdx(arr: any[], idx: number): number {
+        let back = 1;
+        while (idx - back >= 0 && idx - back < arr.length && arr[idx - back] == null) {
             back++;
         }
-        return idx-back;
+        return idx - back;
     }
 
-    getTime(idx:number, prevIdx:number):number{
-        return (this.t[idx]-this.t[prevIdx]) *1000;
+    getTime(idx: number, prevIdx: number): number {
+        return (this.t[idx] - this.t[prevIdx]) * 1000;
     }
 
-    animateExplosion(startT:number=1){
-        this.tween=[];
+    animateExplosion(startT: number = -1) {
+
+        //save start values (for GUI restarts)
+        if(startT==-1){
+            startT=1;
+            this.haloColor = { h: 0, s: 0, l: 0 };
+            this.haloSprite.material.color.getHSL(this.haloColor);
+            this.cameraStart = this.camera.position;
+            this.coronaStartScale = this.coronaSprite.scale.x;
+            this.haloStartScale = this.haloSprite.scale.x;
+            this.tuniform.iHue.value = 360;
+        }
+
+        this.tween = [];
+        
 
         for (let t = 0; t < Anim._count; t++) {
             this.tween[t] = new Array<TWEEN.Tween<Record<string, any>>>()
         }
-    
+
         for (let i = startT; i < this.t.length; i++) {
-            
-            if(this.sunS[i] != null){
-                const pI = Rock.getPrevIdx(this.sunS,i);
-                const time = this.getTime(i,pI);
-                this.tween[Anim.SUN].push(new TWEEN.Tween({scale:this.sunS[pI]},this.tweenGroup)
-                .to({scale:this.sunS[i]}, time)
-                .onUpdate((tween) => {
-                    this.tuniform.iScale.value = tween.scale;
-                    this.coronaSprite.scale.set(this.coronaStartScale*tween.scale!,this.coronaStartScale*tween.scale!,1);
-                    this.haloSprite.scale.set(this.haloStartScale*tween.scale!,this.haloStartScale*tween.scale!,1);
-                })
-                .easing(TWEEN.Easing.Sinusoidal.InOut));
+
+            if (this.sunS[i] != null) {
+                const pI = Rock.getPrevIdx(this.sunS, i);
+                const time = this.getTime(i, pI);
+                this.tween[Anim.SUN].push(new TWEEN.Tween({ scale: this.sunS[pI] }, this.tweenGroup)
+                    .to({ scale: this.sunS[i] }, time)
+                    .onUpdate((tween) => {
+                        this.tuniform.iScale.value = tween.scale;
+                        this.coronaSprite.scale.set(this.coronaStartScale * tween.scale!, this.coronaStartScale * tween.scale!, 1);
+                        this.haloSprite.scale.set(this.haloStartScale * tween.scale!, this.haloStartScale * tween.scale!, 1);
+                    })
+                    .easing(TWEEN.Easing.Sinusoidal.InOut));
             }
 
-            //case if all times set
-            if(this.haloB[i] != null && this.coreB[i] != null && this.surfB[i] != null){
-                const pI = Rock.getPrevIdx(this.haloB,i);
-                const time = this.getTime(i,pI);
-                this.tween[Anim.HALO].push(new TWEEN.Tween({haloB:this.haloB[pI],lavaB: this.coreB[pI],surfB: this.surfB[pI]},this.tweenGroup)
-                .to({haloB:this.haloB[i],lavaB: this.coreB[i],surfB: this.surfB[i]}, time)
-                .onUpdate((tween) => {
-                    this.haloSprite.material.color.setHSL(this.haloColor.h,this.haloColor.s,tween.haloB!);
-                    this.coronaSprite.material.color.setHSL(this.haloColor.h,this.haloColor.s,tween.haloB!);
-                    this.tuniform.iBrightness.value = tween.lavaB;
-                    this.matSurface.uniforms.brightness.value = tween.surfB;
-                })
-                .easing(TWEEN.Easing.Linear.None));
+            //case if all frames set
+            if (this.haloB[i] != null ) {
+                console.assert(this.coreB[i] != null && this.surfB[i] != null && this.coreS[i] != null, "synchronized parameter not set at i="+i);
+                
+                const pI = Rock.getPrevIdx(this.haloB, i);
+                const time = this.getTime(i, pI);
+                this.tween[Anim.HALO].push(new TWEEN.Tween({ 
+                    haloB: this.haloB[pI], 
+                    coreB: this.coreB[pI], 
+                    surfB: this.surfB[pI], 
+                    coreS: this.coreS[pI]
+                }, this.tweenGroup)
+                    .to({ haloB: this.haloB[i], lavaB: this.coreB[i], surfB: this.surfB[i], coreS: this.coreS[i] }, time)
+                    .onUpdate((tween) => {
+                        this.haloSprite.material.color.setHSL(this.haloColor.h, this.haloColor.s, tween.haloB!);
+                        this.coronaSprite.material.color.setHSL(this.haloColor.h, this.haloColor.s, tween.haloB!);
+                        this.tuniform.iBrightness.value = tween.coreB;
+                        this.tuniform.iSaturation.value = tween.coreS;
+                        this.matSurface.uniforms.brightness.value = tween.surfB;
+                    })
+                    .easing(TWEEN.Easing.Linear.None));
             }
 
-            if(this.explP[i] != null){
-                const pI = Rock.getPrevIdx(this.explP,i);
-                const time = this.getTime(i,pI);
-                this.tween[Anim.EXPL].push(new TWEEN.Tween({explP:this.explP[pI]},this.tweenGroup)
-                .to({explP:this.explP[i]}, time)
-                .onUpdate((tween) => {
-                    this.matInside.uniforms.progress.value = this.matSurface.uniforms.progress.value = tween.explP;
-                })
-                .easing(TWEEN.Easing.Sinusoidal.InOut));
+            if (this.coreH[i] != null) {
+                const pI = Rock.getPrevIdx(this.coreH, i);
+                const time = this.getTime(i, pI);
+                this.tween[Anim.HUE].push(new TWEEN.Tween({ 
+                    coreH: this.coreH[pI] 
+                }, this.tweenGroup)                    
+                    .to({ coreH: this.coreH[i]}, time)
+                    .onStart(   (tween)=>{this.tuniform.iHue.value =  tween.coreH;})
+                    .onComplete((tween)=>{this.tuniform.iHue.value =  tween.coreH;})
+                    );
             }
 
-
+            if (this.explP[i] != null && this.camR[i] != null) {
+                const pI = Rock.getPrevIdx(this.explP, i);
+                const time = this.getTime(i, pI);
+                this.tween[Anim.EXPL].push(new TWEEN.Tween({ explP: this.explP[pI],camR: this.camR[pI] }, this.tweenGroup)
+                    .to({ explP: this.explP[i],camR: this.camR[i] }, time)
+                    .onUpdate((tween) => {
+                        this.matInside.uniforms.progress.value = this.matSurface.uniforms.progress.value = tween.explP;
+                        this.cameraSpeed = tween.camR!;
+                    })
+                    .easing(TWEEN.Easing.Sinusoidal.InOut));
+            }
         }
 
         //chain all types 
         for (let t = 0; t < Anim._count; t++) {
-            for (let index = 0; index < this.tween[t].length-1; index++) {
-                this.tween[t][index].chain(this.tween[t][index+1]);
+            for (let index = 0; index < this.tween[t].length - 1; index++) {
+                this.tween[t][index].chain(this.tween[t][index + 1]);
             }
         }
 
         //start all types
         for (let t = 0; t < Anim._count; t++) {
-            if(this.tween[t][0])
+            if (this.tween[t][0])
                 this.tween[t][0].start();
         }
     }
@@ -491,41 +491,68 @@ export class Rock {
 
     time = 0;
     mouseX = 0;
-    render(targetMouseX: number) {
+    matrix = new Matrix4();
+    render() {
 
-        this.mouseX += (targetMouseX - this.mouseX)*0.05;
-        this.progress = Math.abs(this.mouseX);
+        // this.mouseX += (targetMouseX - this.mouseX) * 0.05;
+        // this.progress = Math.abs(this.mouseX);
 
         this.time += 0.05;
         // this.matInside.uniforms.progress.value = Math.abs(this.progress);
         // this.matSurface.uniforms.progress.value = Math.abs(this.progress);
-        
+
         this.matInside.uniforms.time.value = this.time;
         this.matSurface.uniforms.time.value = this.time;
-        
-        this.tuniform.iTime.value = this.time*0.2;
+
+        this.tuniform.iTime.value = this.time * 0.2;
         this.coronaSprite.material.rotation += 0.001;
         this.haloSprite.material.rotation -= 0.001;
         this.tweenGroup.update();
+        this.matrix.makeRotationY( this.cameraSpeed/100);
+        this.camera.position.applyMatrix4(this.matrix);
+ 
     }
-
 
     createGUI() {
 
         const _this = this;
 
-        const gui = new GUI({width: 50})
-        const buttons:any = {button: "T1"};
+        const gui = new GUI({ width: 50 })
+        const buttons: any = { button: "T1" };
 
         for (let i = 1; i < this.t.length; i++) {
 
-            buttons['T'+(i-1)] = function () {
+            buttons['T' + (i - 1)] = function () {
                 _this.tweenGroup.removeAll();
                 _this.animateExplosion(_this.t[i]);
             };
-            gui.add(buttons, 'T'+(i-1));
+            gui.add(buttons, 'T' + (i - 1));
+
         }
 
     }
 
+}
+
+
+function getRandomAxis() {
+    return new Vector3(
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        Math.random() - 0.5
+    ).normalize();
+}
+
+function getCentroid(geometry: BufferGeometry) {
+    let ar = geometry.attributes.position.array;
+    let len = ar.length;
+    let x = 0,
+        y = 0,
+        z = 0;
+    for (let i = 0; i < len; i = i + 3) {
+        x += ar[i];
+        y += ar[i + 1];
+        z += ar[i + 2];
+    }
+    return { x: (3 * x) / len, y: (3 * y) / len, z: (3 * z) / len };
 }

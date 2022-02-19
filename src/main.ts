@@ -126,7 +126,7 @@ scrollbarUtils.userIdle();
 
 
 //Rock
-const rock = new Rock(UNIVERSE_SIZE, scene, loadingManager, {inside: 0x666666, surface: MAIN_COLOR});
+const rock = new Rock(UNIVERSE_SIZE, scene, loadingManager, camera);
 
 //Universe
 const universe = new Universe(UNIVERSE_SIZE, loadingManager);
@@ -202,14 +202,14 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 
-let targetMouseX = 0;
-document.addEventListener('mousemove',(e) => {
-    targetMouseX = 2*(e.clientX - window.innerWidth/2)/window.innerWidth;
-});
+// let targetMouseX = 0;
+// document.addEventListener('mousemove',(e) => {
+//     targetMouseX = 2*(e.clientX - window.innerWidth/2)/window.innerWidth;
+// });
 
-document.addEventListener('touchmove',(e) => {
-    targetMouseX = ( e.touches[0].clientX / window.innerWidth ) * 2 - 1;
-});
+// document.addEventListener('touchmove',(e) => {
+//     targetMouseX = ( e.touches[0].clientX / window.innerWidth ) * 2 - 1;
+// });
 
 
 //Add to scene
@@ -276,7 +276,7 @@ function render() {
     stars.render();
     //magneticField.render();
     cameraUtils.render(mouse);
-    rock.render(targetMouseX);
+    rock.render();
 
     // renderer.clearDepth();
     //render rest

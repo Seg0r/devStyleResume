@@ -8,6 +8,7 @@ uniform vec3 surfaceColor;
 uniform vec3 insideColor;
 uniform sampler2D tRock;
 uniform float brightness;
+uniform float saturation;
 
 uniform float time;
 uniform sampler2D iNoise;
@@ -38,7 +39,7 @@ void main()	{
 	l += clamp(dot(light1, vNormal),0.5,1.)/2.;
 	
 	if(inside>0.5){
-		gl_FragColor = lavaColor(vUv, vNormal2, eyeVector, myTime,iNoise,brightness);
+		gl_FragColor = lavaColor(vUv, vNormal2, eyeVector, myTime,iNoise,brightness,saturation,-1.);
 	} else{
 		gl_FragColor = vec4(l,l,l,1.)*texture(tRock,p);
 	}
