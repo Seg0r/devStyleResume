@@ -285,9 +285,12 @@ export class Nebula {
     }
 
     public addToScene(scene: Scene) {
-        // scene.add(this.points);
-        // scene.add(this.cloudGroup);
+        this.pivots.visible=false;
         scene.add(this.pivots)
+    }
+
+    public toggleVisibility() {
+        this.pivots.visible = !this.pivots.visible;
     }
 
     createGUI(): GUI {

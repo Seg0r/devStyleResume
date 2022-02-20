@@ -353,7 +353,7 @@ export class SolarSystem {
         }
     }
 
-    public toggleSolarSystem() {
+    public toggleVisibility() {
         this.solarSystem.visible = !this.solarSystem.visible;
     }
 }

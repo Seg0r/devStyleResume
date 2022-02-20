@@ -7,6 +7,7 @@ varying vec2 vUv;
 
 uniform float iTime;
 uniform float iScale;
+uniform float iSaturation;
 
 //Freshnel
 varying vec3 vEyeVector;
@@ -36,7 +37,7 @@ void main() {
   float noise = f * turbulence( .35 * normal + f/6000.0 * iTime );
   float b = 20.0 * pnoise( 0.005 * position + vec3( .5 * iTime ), vec3( 100.0 ) );
   float displacement = noise + b;
-  vec3 newPosition = position + normal * displacement;
+  vec3 newPosition = position + normal * displacement * iSaturation;
 
   newPosition *= iScale;
 

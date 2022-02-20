@@ -1,4 +1,4 @@
-import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, Camera, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
+import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, Camera, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, FrontSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, NormalBlending, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -19,7 +19,6 @@ import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 // @ts-ignore 
 import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
 import GUI from 'lil-gui';
-import { assert } from 'console';
 
 
 enum Anim {
@@ -49,6 +48,7 @@ export class Rock {
     insideColor: Color;
     mesh: Mesh<SphereBufferGeometry, ShaderMaterial>;
     tween: TWEEN.Tween<Record<string, any>>[][] = [];
+    tweenEnded: Boolean[] = [];
     camera: Camera;
     haloColor!: { h: number; s: number; l: number; };
     haloStartScale!: number;
@@ -78,9 +78,6 @@ export class Rock {
 
         const halo = new TextureLoader().load('../assets/rock/halo2.png');
         const corona = new TextureLoader().load('../assets/rock/corona3.png');
-        const alphaMap = new TextureLoader().load('../assets/rock/alpha.png');
-        // alphaMap.repeat.set(0.5, 0.5);
-        // alphaMap.offset.set(0.4,0.4);
         const haloMat = new SpriteMaterial({
             map: halo,
             blending: AdditiveBlending,
@@ -172,11 +169,8 @@ export class Rock {
                 meshInside.scale.set(scale, scale, scale);
                 meshSurface.scale.set(scale, scale, scale);
 
-                that.scene.add(meshInside)
-                that.scene.add(meshSurface)
-                // that.onLoad();
-
-                that.animateExplosion();
+                that.scene.add(meshInside);
+                that.scene.add(meshSurface);
             },
             undefined,
             function (e: any) {
@@ -337,7 +331,7 @@ export class Rock {
             extensions: {
                 derivatives: true
             },
-            side: DoubleSide,
+            side: FrontSide,
             uniforms: uniforms,
             vertexShader: explosionLavaVertex,
             fragmentShader: explosionFragment
@@ -347,7 +341,7 @@ export class Rock {
             extensions: {
                 derivatives: true
             },
-            side: DoubleSide,
+            side: FrontSide,
             uniforms: uniforms1,
             vertexShader: explosionLavaVertex,
             fragmentShader: explosionFragment
@@ -365,17 +359,23 @@ export class Rock {
         scene.add(this.haloSprite);
     }
 
+    public toggleVisibility() {
+        this.mesh.visible = !this.mesh.visible;
+        this.coronaSprite.visible = !this.coronaSprite.visible;
+        this.haloSprite.visible = !this.haloSprite.visible;
+    }
+
 
 
     t =     [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 13.5, 14.0, 14.21, 14.211, 14.35, 14.99, 15.0, 16.0, 17.0, 17.2, ];
     sunS =  [1.0, 1.0, 1.0, 1.0, 1.0, null,1.05,null,0.95,null,1.12, null, 0.93, null, null, 1.15, 0.8,   0.4,    null,  null,  null, null, 1.0,  3.5,  ];
     haloB = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6,  0.62, 0.65, 0.70, null, 0.75, null,  0.80,   0.80,  0.80,  0.80, 0.85, 0.90, 1.0,  ];
-    coreB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.3,  null,  1.4,    1.5,   1.5,   1.5,  1.8,  2.0,  3.0,  ];
-    coreS = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.0,  0.95, null, 0.75, null,  0.4,    0.4,   0.4,   0.4,  0.4,  0.3,  0.1,  ];
+    coreB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.3,  null,  1.4,    1.5,   1.5,   1.5,  1.5,  1.5,  3.0,  ];
+    coreS = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.0,  0.95, null, 0.75, null,  0.35,   0.35,  0.35,  0.35, 0.35, 0.35, 0.3,  ];
     surfB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.25, null,  1.3,    1.3,   1.3,   1.3,  1.35, 1.4,  1.4,  ];    
     coreH = [360, 360, 360, 360, 360, 360, 360, 360, 360, 360, 360,  360,  360,  360,  null, 360,  360,   209,    209,   209,   209,  209,  209,  209,  ];    
     explP = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0,  0.0,  0.0,  null, 0.0,  null,  null,   0.3,   null,  null, null, 1.0,  2.0,  ];
-    camR  = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,  0.2,  0.2,  0.2,  null, 0.2,  null,  null,   1.0,   null,  null, null, 1.0 , 0.0,  ];
+    camR  = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,  0.1,  0.1,  0.1,  null, 0.1,  null,  null,   1.5,   null,  null, null, 1.5 , 0.0,  ];
 
     tweenGroup = new TWEEN.Group();
 
@@ -391,7 +391,28 @@ export class Rock {
         return (this.t[idx] - this.t[prevIdx]) * 1000;
     }
 
-    animateExplosion(startT: number = -1) {
+    private isAnimationPlaying(){
+        let isPlaying = false;
+        this.tweenGroup.getAll().forEach(tween => {
+            isPlaying = isPlaying || tween.isPlaying();
+        });
+        return isPlaying;
+    }
+
+    async startAnimation(){
+        const _this=this;
+        this.animateExplosion();
+        return new Promise<void>(function (resolve) {
+            let wait = setInterval(function() {
+                if (!_this.isAnimationPlaying()) {
+                    clearInterval(wait);
+                    resolve();
+                }
+            }, 200);  
+        });
+    }
+
+    private animateExplosion(startT: number = -1) {
 
         //save start values (for GUI restarts)
         if(startT==-1){
@@ -409,6 +430,7 @@ export class Rock {
 
         for (let t = 0; t < Anim._count; t++) {
             this.tween[t] = new Array<TWEEN.Tween<Record<string, any>>>()
+            this.tweenEnded[t] = false;
         }
 
         for (let i = startT; i < this.t.length; i++) {
@@ -483,8 +505,9 @@ export class Rock {
 
         //start all types
         for (let t = 0; t < Anim._count; t++) {
-            if (this.tween[t][0])
+            if (this.tween[t][0]){
                 this.tween[t][0].start();
+            }  
         }
     }
 
@@ -492,15 +515,15 @@ export class Rock {
     time = 0;
     mouseX = 0;
     matrix = new Matrix4();
-    render() {
+    render(targetMouseX:number) {
 
         // this.mouseX += (targetMouseX - this.mouseX) * 0.05;
         // this.progress = Math.abs(this.mouseX);
-
-        this.time += 0.05;
         // this.matInside.uniforms.progress.value = Math.abs(this.progress);
         // this.matSurface.uniforms.progress.value = Math.abs(this.progress);
 
+
+        this.time += 0.05;
         this.matInside.uniforms.time.value = this.time;
         this.matSurface.uniforms.time.value = this.time;
 

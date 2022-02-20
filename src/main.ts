@@ -66,7 +66,7 @@ renderer.shadowMap.enabled = false;
 
 const stats = new Stats();
 stats.showPanel(0);
-document.querySelector('#main')!.appendChild(stats.dom);
+main.appendChild(stats.dom);
 
 //Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -104,25 +104,14 @@ const loadingManager = new THREE.LoadingManager(() => {
         loadingScreen.classList.add('fade-out');
         loadingScreen.addEventListener('transitionend', onTransitionEnd);
     }, timeout);
+    const animationPromise =rock.startAnimation();
+    animationPromise.then();
+    
 }
 );
 
 
 
-//Scrollbar and scroll handling
-let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
-//main.addEventListener('wheel', scrollbarUtils.checkScroll, { passive: true });
-
-addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
-window.addEventListener('load', scrollbarUtils.checkScroll, false);
-window.addEventListener('scroll', scrollbarUtils.checkScroll, false);
-window.addEventListener('resize', scrollbarUtils.checkScroll, false);
-window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
-
-window.addEventListener('scroll', scrollbarUtils.fadeOutChevron, false);
-window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
-
-scrollbarUtils.userIdle();
 
 
 //Rock
@@ -155,18 +144,11 @@ scene.add(ambientLight);
 // const worldAxis = new AxesHelper(100);
 //scene.add(worldAxis);
 
+//Scrollbar
+let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
 
 
 //Callbacks
-
-// let scrolled = false;
-// function checkScroll() {
-//     if (!scrolled) {
-//         scrolled = true;
-//         setTimeout(function () { scrolled = false; }, 100);
-//     };
-// }
-// document.body.onscroll = checkScroll;;
 
 //resize callback
 function onWindowResize() {
@@ -202,10 +184,10 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 
-// let targetMouseX = 0;
-// document.addEventListener('mousemove',(e) => {
-//     targetMouseX = 2*(e.clientX - window.innerWidth/2)/window.innerWidth;
-// });
+let targetMouseX = 0;
+document.addEventListener('mousemove',(e) => {
+    targetMouseX = 2*(e.clientX - window.innerWidth/2)/window.innerWidth;
+});
 
 // document.addEventListener('touchmove',(e) => {
 //     targetMouseX = ( e.touches[0].clientX / window.innerWidth ) * 2 - 1;
@@ -213,51 +195,42 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 //Add to scene
-scrollbarUtils.addScrollbar(scene);
 rock.addToScene(scene);
 stars.addToScene(scene);
-// solarSystem.addToScene(scene);
-// solarSystem.toggleSolarSystem();
+solarSystem.addToScene(scene);
 // magneticField.addToScene(scene);
-// nebula.addToScene(scene);
-// universe.addToScene(scene);
+nebula.addToScene(scene);
+universe.addToScene(scene);
 
 
 
 //DEBUG
-if(true){
+if(false){
     main.style.visibility = "hidden";
     cameraUtils.panEnabled = false;
     minDiff = 100;
     //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
 }
 
-
-
-
-
 //prepare to animate
 controls.target.copy(SOLAR_CENTER);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
-
-
+cameraUtils.panEnabled = false;
+main.style.visibility = "hidden";
 
 
 //animate loop
 let clock = new THREE.Clock();
 let delta = 0;
+
 // 60 fps
 let interval = 1 / 60;
 animate();
 function animate() {
-
     requestAnimationFrame(animate);
     delta += clock.getDelta();
-
     if (delta > interval) {
-        // The draw or time dependent code are here
         render();
-
         delta = delta % interval;
     }
 }
@@ -276,7 +249,7 @@ function render() {
     stars.render();
     //magneticField.render();
     cameraUtils.render(mouse);
-    rock.render();
+    rock.render(targetMouseX);
 
     // renderer.clearDepth();
     //render rest
@@ -288,6 +261,27 @@ function onTransitionEnd(event: any) {
     const element = event.target;
     element.remove();
 
+}
+
+function prepareForSecondScene(){
+
+    //Scrollbar handling
+    addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
+    window.addEventListener('load', scrollbarUtils.checkScroll, false);
+    window.addEventListener('scroll', scrollbarUtils.checkScroll, false);
+    window.addEventListener('resize', scrollbarUtils.checkScroll, false);
+    window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
+
+    window.addEventListener('scroll', scrollbarUtils.fadeOutChevron, false);
+    window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
+
+    scrollbarUtils.userIdle();
+    scrollbarUtils.addScrollbar(scene);
+
+    //Scene setup
+    solarSystem.toggleVisibility();
+    nebula.toggleVisibility();
+    rock.toggleVisibility();
 }
 
 
