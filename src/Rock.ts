@@ -55,10 +55,12 @@ export class Rock {
     cameraStart!: Vector3;
     coronaStartScale!: number;
     cameraSpeed: number = 0;
+    meshInside!: Mesh<BufferGeometry, ShaderMaterial>;
+    meshSurface!: Mesh<BufferGeometry, ShaderMaterial>;
 
 
     constructor(size: number, scene: Scene, loadingManager: LoadingManager, camera:Camera) {
-        this.univerSize = size;
+        this.univerSize = size/1.2;
         this.loadingManager = loadingManager;
         this.scene = scene;
         const { uniform, mesh } = this.createRock();
@@ -158,19 +160,19 @@ export class Rock {
 
                 let s = BufferGeometryUtils.mergeBufferGeometries(geoms, false);
 
-                const meshInside = new Mesh(s, that.matInside);
-                meshInside.frustumCulled = false;
+                that.meshInside = new Mesh(s, that.matInside);
+                that.meshInside.frustumCulled = false;
 
                 let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1, false);
-                const meshSurface = new Mesh(s1, that.matSurface);
-                meshSurface.frustumCulled = false;
+                that.meshSurface = new Mesh(s1, that.matSurface);
+                that.meshSurface.frustumCulled = false;
 
                 const scale = that.univerSize / 14;
-                meshInside.scale.set(scale, scale, scale);
-                meshSurface.scale.set(scale, scale, scale);
+                that.meshInside.scale.set(scale, scale, scale);
+                that.meshSurface.scale.set(scale, scale, scale);
 
-                that.scene.add(meshInside);
-                that.scene.add(meshSurface);
+                that.scene.add(that.meshInside);
+                that.scene.add(that.meshSurface);
             },
             undefined,
             function (e: any) {
@@ -361,6 +363,8 @@ export class Rock {
 
     public toggleVisibility() {
         this.mesh.visible = !this.mesh.visible;
+        this.meshInside!.visible = !this.meshInside!.visible;
+        this.meshSurface!.visible = !this.meshSurface!.visible;
         this.coronaSprite.visible = !this.coronaSprite.visible;
         this.haloSprite.visible = !this.haloSprite.visible;
     }
@@ -368,13 +372,13 @@ export class Rock {
 
 
     t =     [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 13.5, 14.0, 14.21, 14.211, 14.35, 14.99, 15.0, 16.0, 17.0, 17.2, ];
-    sunS =  [1.0, 1.0, 1.0, 1.0, 1.0, null,1.05,null,0.95,null,1.12, null, 0.93, null, null, 1.15, 0.8,   0.4,    null,  null,  null, null, 1.0,  3.5,  ];
+    sunS =  [1.0, 1.0, 1.0, 1.0, 1.0, null,1.02,null,0.95,null,1.05, null, 0.95, null, null, 1.10, 0.8,   0.4,    null,  null,  null, null, 1.0,  4.0,  ];
     haloB = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6,  0.62, 0.65, 0.70, null, 0.75, null,  0.80,   0.80,  0.80,  0.80, 0.85, 0.90, 1.0,  ];
     coreB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.3,  null,  1.4,    1.5,   1.5,   1.5,  1.5,  1.5,  3.0,  ];
     coreS = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  1.0,  1.0,  0.95, null, 0.75, null,  0.35,   0.35,  0.35,  0.35, 0.35, 0.35, 0.3,  ];
     surfB = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1,  1.1,  1.15, 1.2,  null, 1.25, null,  1.3,    1.3,   1.3,   1.3,  1.35, 1.4,  1.4,  ];    
     coreH = [360, 360, 360, 360, 360, 360, 360, 360, 360, 360, 360,  360,  360,  360,  null, 360,  360,   209,    209,   209,   209,  209,  209,  209,  ];    
-    explP = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0,  0.0,  0.0,  null, 0.0,  null,  null,   0.3,   null,  null, null, 1.0,  2.0,  ];
+    explP = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0,  0.0,  0.0,  null, 0.0,  null,  null,   0.2,   null,  null, null, 0.7,  2.0,  ];
     camR  = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,  0.1,  0.1,  0.1,  null, 0.1,  null,  null,   1.5,   null,  null, null, 1.5 , 0.0,  ];
 
     tweenGroup = new TWEEN.Group();

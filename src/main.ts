@@ -1,8 +1,8 @@
 // CHECK index.html
 
-import './style.css';
-import './loader.css';
-import './chevron.scss';
+import './styles/style.css';
+import './styles/loader.css';
+import './styles/chevron.scss';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
@@ -39,7 +39,7 @@ const MAIN_COLOR = 0xfedd1f;
 
 
 
-//Hide scrollbar:
+//Hide default scrollbar:
 var main = document.getElementById('main')!;
 if (main)
     main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
@@ -94,7 +94,7 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 
 
 //Loading big images
-let minDiff = 10000;
+let minDiff = 5000;
 const startDate = new Date().getTime();
 const loadingManager = new THREE.LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
@@ -105,7 +105,14 @@ const loadingManager = new THREE.LoadingManager(() => {
         loadingScreen.addEventListener('transitionend', onTransitionEnd);
     }, timeout);
     const animationPromise =rock.startAnimation();
-    animationPromise.then();
+    animationPromise.then(()=>{
+        const fadeScreen = document.getElementById('loadOverlay')!;
+        fadeScreen.classList.add('fade-in-out');        
+        setTimeout(() => {
+            main.style.visibility == "visible";;
+            fadeScreen.addEventListener('animationend', onTransitionEnd);
+            prepareForSecondScene();},1000);
+    });
     
 }
 );
@@ -159,19 +166,6 @@ function onWindowResize() {
 }
 window.addEventListener('resize', onWindowResize, false);
 
-//enable OrbitControls on ctrl+y
-document.addEventListener('keydown', function (event) {
-    if (event.ctrlKey && event.key === 'y') {
-        if (main.style.visibility == "hidden") {
-            main.style.visibility = "visible";
-            cameraUtils.panEnabled = true;
-        }
-        else {
-            main.style.visibility = "hidden";
-            cameraUtils.panEnabled = false;
-        }
-    }
-});
 
 
 let mouse = new Vector2(0, 0);
@@ -217,6 +211,8 @@ controls.target.copy(SOLAR_CENTER);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
 cameraUtils.panEnabled = false;
 main.style.visibility = "hidden";
+const chev = document.getElementById('chevron')!;
+// chevron.style.visibility = "hidden";
 
 
 //animate loop
@@ -265,6 +261,10 @@ function onTransitionEnd(event: any) {
 
 function prepareForSecondScene(){
 
+    //Chevron
+    // chevron.style.visibility = "visible";
+
+
     //Scrollbar handling
     addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
     window.addEventListener('load', scrollbarUtils.checkScroll, false);
@@ -272,13 +272,30 @@ function prepareForSecondScene(){
     window.addEventListener('resize', scrollbarUtils.checkScroll, false);
     window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
 
-    window.addEventListener('scroll', scrollbarUtils.fadeOutChevron, false);
-    window.addEventListener('wheel', scrollbarUtils.fadeOutChevron, false);
-
     scrollbarUtils.userIdle();
     scrollbarUtils.addScrollbar(scene);
 
+    //enable OrbitControls on ctrl+y
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.key === 'y') {
+            if (main.style.visibility == "hidden") {
+                main.style.visibility = "visible";
+                cameraUtils.panEnabled = true;
+            }
+            else {
+                main.style.visibility = "hidden";
+                cameraUtils.panEnabled = false;
+            }
+        }
+    });
+
+
+
     //Scene setup
+    main.style.visibility = "visible";
+    cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
+    cameraUtils.panEnabled = true;    
+
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
     rock.toggleVisibility();

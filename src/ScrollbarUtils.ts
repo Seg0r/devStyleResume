@@ -104,7 +104,7 @@ export class ScrollbarUtils {
     }
 
     isLastSection():boolean{
-        return this.prevSection == this.sections.length - 2
+        return this.prevSection == this.sections.length - 2;
     }
 
     updateScrollBar(cameraSection: number) {
@@ -192,14 +192,13 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        var t:NodeJS.Timeout;
+        let t:NodeJS.Timeout;
         window.onload = resetTimer;
-        window.onmousemove = resetTimer;
         window.onmousedown = resetTimer;  // catches touchscreen presses as well      
         window.ontouchstart = resetTimer; // catches touchscreen swipes as well      
         window.ontouchmove = resetTimer;  // required by some devices 
         window.onclick = resetTimer;      // catches touchpad clicks as well
-        window.onkeydown = resetTimer;   
+        window.onkeydown = resetTimer;
         window.addEventListener('scroll', resetTimer, true); 
         window.addEventListener('wheel', resetTimer, true);
     
@@ -211,20 +210,25 @@ export class ScrollbarUtils {
                 this.chevronVisible = true;
             };
         }
+
+        const fadeOutChevron = () => {
+            if (this.chevronVisible) {
+                const chevron = document.getElementById('chevron')!;
+                chevron.classList.add('chevron-container-fade');
+                chevron.classList.remove('chevron-container-fade-in');
+                this.chevronVisible = false;
+            };
+        }
+
+        t = setTimeout(fadeInChevron, 6000);
     
         function resetTimer() {
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);  // time is in milliseconds
+            fadeOutChevron();
         }
     }
 
-    public fadeOutChevron = () => {
-    if (this.chevronVisible) {
-        const chevron = document.getElementById('chevron')!;
-        chevron.classList.add('chevron-container-fade');
-        chevron.classList.remove('chevron-container-fade-in');
-        this.chevronVisible = false;
-    };
-}
+
 
 }
