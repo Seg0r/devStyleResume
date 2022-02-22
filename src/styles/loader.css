@@ -5,7 +5,7 @@
 
 #loading-screen {
 	position: absolute;
-	z-index: 30;
+	z-index: 15;
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -149,4 +149,31 @@
     10% {opacity: 1;}
     50% {opacity: 1;}
     100% {opacity: 0;}
+}
+
+
+/* header animation */
+#header1.print  { animation: print 0.2s 0.00s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header2.print  { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
+#header3.print  { animation: print 0.2s 0.70s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header4.print  { animation: print 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header5.print  { animation: print 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header6.print  { animation: print 0.2s 1.40s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header7.print  { animation: print 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header8.print  { animation: print 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header9.print  { animation: print 0.2s 0.30s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header10.print { animation: print 0.2s 1.40s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header11.print { animation: print 0.2s 0.80s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header12.print { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header13.print { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
+#header14.print { animation: print 0.2s 0.40s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+
+@keyframes print {
+    0% {opacity:0;}
+    100% {opacity: 1;}
+}
+
+@keyframes uppercase {
+    0%{}
+    100%{text-transform:uppercase}
 }

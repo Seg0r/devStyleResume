@@ -62,7 +62,10 @@ canvas {
     font-size: 3vw;
     padding: 1vw;
     margin-top: 0;
-    
+  }
+
+  header span{
+    opacity: 0;
   }
 
 

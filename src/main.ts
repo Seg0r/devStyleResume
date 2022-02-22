@@ -18,6 +18,7 @@ import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
+import { resolve } from 'path/posix';
 
 
 const initAngles: DirectionAngles = {
@@ -95,6 +96,7 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 
 //Loading big images
 let minDiff = 5000;
+let animateRock = true;
 const startDate = new Date().getTime();
 const loadingManager = new THREE.LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
@@ -104,12 +106,21 @@ const loadingManager = new THREE.LoadingManager(() => {
         loadingScreen.classList.add('fade-out');
         loadingScreen.addEventListener('transitionend', onTransitionEnd);
     }, timeout);
-    const animationPromise =rock.startAnimation();
+    let animationPromise: Promise<void>;
+    if(animateRock){
+        animationPromise = rock.startAnimation();
+    }else{
+        animationPromise = Promise.resolve();
+    }
     animationPromise.then(()=>{
         const fadeScreen = document.getElementById('loadOverlay')!;
         fadeScreen.classList.add('fade-in-out');        
         setTimeout(() => {
-            main.style.visibility == "visible";;
+            main.style.visibility == "visible";
+            var letters = document.querySelectorAll('[id^="header"]');
+            for (var i = 0; i < letters.length; i++) {
+                letters[i].classList.add('print');
+            }
             fadeScreen.addEventListener('animationend', onTransitionEnd);
             prepareForSecondScene();},1000);
     });
@@ -189,22 +200,25 @@ document.addEventListener('mousemove',(e) => {
 
 
 //Add to scene
-rock.addToScene(scene);
+// rock.addToScene(scene);
 stars.addToScene(scene);
-solarSystem.addToScene(scene);
+// solarSystem.addToScene(scene);
 // magneticField.addToScene(scene);
-nebula.addToScene(scene);
-universe.addToScene(scene);
+// nebula.addToScene(scene);
+// universe.addToScene(scene);
 
 
 
 //DEBUG
-if(false){
-    main.style.visibility = "hidden";
+if(true){    
     cameraUtils.panEnabled = false;
+    animateRock = false;
     minDiff = 100;
     //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+    prepareForSecondScene();
 }
+
+
 
 //prepare to animate
 controls.target.copy(SOLAR_CENTER);

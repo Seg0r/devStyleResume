@@ -171,8 +171,6 @@ export class Rock {
                 that.meshInside.scale.set(scale, scale, scale);
                 that.meshSurface.scale.set(scale, scale, scale);
 
-                that.scene.add(that.meshInside);
-                that.scene.add(that.meshSurface);
             },
             undefined,
             function (e: any) {
@@ -359,12 +357,22 @@ export class Rock {
         scene.add(this.mesh);
         scene.add(this.coronaSprite);
         scene.add(this.haloSprite);
+
+
+        const _this=this;
+        let wait = setInterval(function() {
+            if (_this.meshInside && _this.meshSurface) {
+                clearInterval(wait);
+                _this.scene.add(_this.meshInside);
+                _this.scene.add(_this.meshSurface);
+            }
+        }, 500);
     }
 
     public toggleVisibility() {
         this.mesh.visible = !this.mesh.visible;
-        this.meshInside!.visible = !this.meshInside!.visible;
-        this.meshSurface!.visible = !this.meshSurface!.visible;
+        if(this.meshInside){this.meshInside.visible = !this.meshInside.visible;}
+        if(this.meshSurface){this.meshSurface.visible = !this.meshSurface.visible;}
         this.coronaSprite.visible = !this.coronaSprite.visible;
         this.haloSprite.visible = !this.haloSprite.visible;
     }
