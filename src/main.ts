@@ -3,6 +3,7 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
+import { setupTypewriter } from './utils/loader.js';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
@@ -18,7 +19,6 @@ import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
-import { resolve } from 'path/posix';
 
 
 const initAngles: DirectionAngles = {
@@ -39,6 +39,9 @@ const SOLAR_CENTER: Vector3 = new Vector3(0, 0, 0);
 const MAIN_COLOR = 0xfedd1f;
 
 
+const typer = document.getElementById('loader-text');
+const typewriter = setupTypewriter(typer);
+typewriter.type();
 
 //Hide default scrollbar:
 var main = document.getElementById('main')!;
@@ -95,7 +98,7 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 
 
 //Loading big images
-let minDiff = 5000;
+let minDiff = 10000;
 let animateRock = true;
 const startDate = new Date().getTime();
 const loadingManager = new THREE.LoadingManager(() => {
@@ -210,7 +213,7 @@ stars.addToScene(scene);
 
 
 //DEBUG
-if(true){    
+if(false){    
     cameraUtils.panEnabled = false;
     animateRock = false;
     minDiff = 100;
