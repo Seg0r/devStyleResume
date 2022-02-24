@@ -69,7 +69,7 @@ export class ScrollbarUtils {
     public sectionScrolling() {
         let cameraSection = -1;
 
-        for (let index = 0; index < this.sections.length - 1; index++) {
+        for (let index = 0; index < this.sections.length; index++) {
             if (ScrollbarUtils.isElementInViewport(this.sections[index] as HTMLElement)) {
                 // console.log("Section " + index + " in view");
                 cameraSection = index;
@@ -104,7 +104,7 @@ export class ScrollbarUtils {
     }
 
     isLastSection():boolean{
-        return this.prevSection == this.sections.length - 2;
+        return this.prevSection == this.sections.length - 1;
     }
 
     updateScrollBar(cameraSection: number) {
@@ -157,7 +157,7 @@ export class ScrollbarUtils {
 
         this.setScrollbarPosition(this.camera.aspect * 112, -200);
 
-        for (let index = 0; index < this.sections.length - 1; index++) {
+        for (let index = 0; index < this.sections.length; index++) {
             const circleMesh = new Mesh(geometry, material);
             circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
             this.scrollbar.add(circleMesh);
@@ -192,7 +192,7 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        let t:NodeJS.Timeout;
+        let t:number;
         window.onload = resetTimer;
         window.onmousedown = resetTimer;  // catches touchscreen presses as well      
         window.ontouchstart = resetTimer; // catches touchscreen swipes as well      
