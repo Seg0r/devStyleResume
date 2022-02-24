@@ -70,7 +70,7 @@ renderer.shadowMap.enabled = false;
 
 const stats = new Stats();
 stats.showPanel(0);
-main.appendChild(stats.dom);
+main.parentElement!.appendChild(stats.dom);
 
 //Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -98,38 +98,40 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 
 
 //Loading big images
-let minDiff = 10000;
+let minDiff = 11000;
 let animateRock = true;
 const startDate = new Date().getTime();
 const loadingManager = new THREE.LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
-    const timeDiff = new Date().getTime() - startDate;    
+    const timeDiff = new Date().getTime() - startDate;
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
     setTimeout(() => {
         loadingScreen.classList.add('fade-out');
         loadingScreen.addEventListener('transitionend', onTransitionEnd);
     }, timeout);
     let animationPromise: Promise<void>;
-    if(animateRock){
-        animationPromise = rock.startAnimation();
-    }else{
-        animationPromise = Promise.resolve();
-    }
-    animationPromise.then(()=>{
-        const fadeScreen = document.getElementById('loadOverlay')!;
-        fadeScreen.classList.add('fade-in-out');        
-        setTimeout(() => {
-            main.style.visibility == "visible";
-            var letters = document.querySelectorAll('[id^="header"]');
-            for (var i = 0; i < letters.length; i++) {
-                letters[i].classList.add('print');
-            }
-            fadeScreen.addEventListener('animationend', onTransitionEnd);
-            prepareForSecondScene();},1000);
-    });
-    
-}
-);
+    setTimeout(() => {
+        if (animateRock) {
+            animationPromise = rock.startAnimation();
+        } else {
+            animationPromise = Promise.resolve();
+        }
+        animationPromise.then(() => {
+            const fadeScreen = document.getElementById('loadOverlay')!;
+            fadeScreen.classList.add('fade-in-out');
+            setTimeout(() => {
+                main.style.visibility == "visible";
+                var letters = document.querySelectorAll('[id^="header"]');
+                for (var i = 0; i < letters.length; i++) {
+                    letters[i].classList.add('print');
+                }
+                fadeScreen.addEventListener('animationend', onTransitionEnd);
+                prepareForSecondScene();
+            }, 1000);
+        });
+    }, minDiff * 0.5);
+
+});
 
 
 
@@ -193,8 +195,8 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 let targetMouseX = 0;
-document.addEventListener('mousemove',(e) => {
-    targetMouseX = 2*(e.clientX - window.innerWidth/2)/window.innerWidth;
+document.addEventListener('mousemove', (e) => {
+    targetMouseX = 2 * (e.clientX - window.innerWidth / 2) / window.innerWidth;
 });
 
 // document.addEventListener('touchmove',(e) => {
@@ -203,17 +205,17 @@ document.addEventListener('mousemove',(e) => {
 
 
 //Add to scene
-// rock.addToScene(scene);
+rock.addToScene(scene);
 stars.addToScene(scene);
-// solarSystem.addToScene(scene);
+solarSystem.addToScene(scene);
 // magneticField.addToScene(scene);
-// nebula.addToScene(scene);
-// universe.addToScene(scene);
+nebula.addToScene(scene);
+universe.addToScene(scene);
 
 
 
 //DEBUG
-if(false){    
+if (false) {
     cameraUtils.panEnabled = false;
     animateRock = false;
     minDiff = 100;
@@ -276,7 +278,7 @@ function onTransitionEnd(event: any) {
 
 }
 
-function prepareForSecondScene(){
+function prepareForSecondScene() {
 
     //Chevron
     // chevron.style.visibility = "visible";
@@ -311,7 +313,7 @@ function prepareForSecondScene(){
     //Scene setup
     main.style.visibility = "visible";
     cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
-    cameraUtils.panEnabled = true;    
+    cameraUtils.panEnabled = true;
 
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();

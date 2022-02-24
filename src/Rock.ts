@@ -72,7 +72,7 @@ export class Rock {
         this.camera = camera;
         this.createHalo();
         this.importRock();
-        this.createGUI();
+        // this.createGUI();
     }
 
 

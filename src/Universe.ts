@@ -8,7 +8,6 @@ export class Universe {
     blueNebula: THREE.Mesh;
     pinkNebula: THREE.Mesh;
     yellowNebula: THREE.Mesh;
-    background: THREE.CubeTexture | undefined;
     
 
     constructor(univerSize: number, loadingManager: THREE.LoadingManager) {
@@ -58,12 +57,7 @@ export class Universe {
 
     }
 
-    public getNebulaTexture(){
-        
-    }
-
     public addToScene(scene: Scene){
-        // scene.background=this.background;
         scene.add(this.blueNebula);
         scene.add(this.pinkNebula);
         scene.add(this.yellowNebula);
