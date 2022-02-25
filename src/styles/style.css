@@ -12,7 +12,7 @@
   --spacing: 350px;
   --empty: 50000px;
 
-  font-family: Hyperion;
+  font-family: Orbitron;
   font-weight: 400;
   font-style: normal;
   overflow: hidden;
@@ -75,6 +75,7 @@ canvas {
     font-size: 1.25rem;
     line-height: 1.5;
     scroll-snap-align: start;
+    text-align: left;
   }
 
   blockquote {

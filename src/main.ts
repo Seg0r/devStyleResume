@@ -215,12 +215,12 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (false) {
+if (true) {
     cameraUtils.panEnabled = false;
     animateRock = false;
     minDiff = 100;
     //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
-    prepareForSecondScene();
+    // prepareForSecondScene();
 }
 
 
