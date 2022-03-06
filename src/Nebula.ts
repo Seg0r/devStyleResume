@@ -9,15 +9,12 @@ import { DEFAULT_UNIVERSE_SIZE } from './main';
 const spriteOpacity = 1;
 
 enum Files {
-Miriade,
-DustGoThru,
-Middle_Nebula2,
-DarkMatter,
-DarkMatter2,
-Nebula001,
-Nebula006,
-Nebula007,
-Middle_Nebula,
+StarCluster,
+BlueStars,
+PurpleCloud,
+OrangeNebula,
+OrangeNebula2,
+BlueNebula
 }
 
 export class Nebula {
@@ -90,11 +87,12 @@ export class Nebula {
 
         //Orange nebula
         const orangeAngle = THREE.MathUtils.degToRad(140);
-        placeSprite(materials[Files.DarkMatter],-2800,0.4,orangeAngle-0.1,4500,4000, -0.2);
-        placeSprite(materials[Files.DarkMatter],-2600,-0.3,orangeAngle-0.2,3000,5000, -3.4);
+        placeSprite(materials[Files.OrangeNebula],-3100,0.4,orangeAngle+0.0,3500,3500, 0.0);        
+        placeSprite(materials[Files.OrangeNebula],-3500,0.0,orangeAngle+0.3,2800,2800, -1.0);
+        placeSprite(materials[Files.StarCluster],  -4000,0.35,orangeAngle-0.15,4000,4000, -0.4);
 
-        placeSprite(materials[Files.DarkMatter2],-3000,0.2,orangeAngle+0.1,6000,6000, 0.2);
-        placeSprite(materials[Files.Miriade],    -5000,0.2,orangeAngle+0,6000,6000, 0);
+        placeSprite(materials[Files.OrangeNebula2],-3700,-0.3,orangeAngle-0.2,5000,6500, 0.2);
+        placeSprite(materials[Files.StarCluster],  -4500,-0.5,orangeAngle-0.2,3500,3500, -2.4);
 
         startAngle = orangeAngle+THREE.MathUtils.degToRad(-30);
         endAngle = orangeAngle+THREE.MathUtils.degToRad(+30);
@@ -102,49 +100,29 @@ export class Nebula {
         count = 6;
  
         for (let index = 0; index < count; index++) {
-            placeSprite(materials[Files.Nebula007],-3500+THREE.MathUtils.randFloatSpread(this.univerSize/10),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
+            // placeSprite(materials[Files.PurpleCloud],-3500+THREE.MathUtils.randFloatSpread(this.univerSize/10),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
         }
 
-
-        //green + purple nebula
-        // startAngle = THREE.MathUtils.degToRad(40);
-        // endAngle = THREE.MathUtils.degToRad(160);
-        // arc = endAngle-startAngle;
-        // count = 5;
-        
-        // count = 3;        
-        // for (let index = 0; index < count; index++) {
-        //     placeSprite(materials[Files.Middle_Nebula],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        // }
-        // count = 4;
-        // for (let index = 0; index < count; index++) {
-        //     placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        // }
-        // count = 5;
-        // for (let index = 0; index < count; index++) {
-        //     placeSprite(materials[Files.Nebula001],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        // }
-        // count = 6;
-        // for (let index = 0; index < count; index++) {
-        //     placeSprite(materials[Files.Nebula007],-2000+THREE.MathUtils.randFloatSpread(400),THREE.MathUtils.randFloatSpread(0.8),-startAngle-index*arc/count,8000,8000, THREE.MathUtils.randFloatSpread(Math.PI));
-        // }
 
         const blueAngle = THREE.MathUtils.degToRad(-60);
 
         // //blue nebula
-        placeSprite(materials[Files.Nebula006],-2400,0.3,blueAngle-0.3,5000,3000, -3.8,0.5);
-        placeSprite(materials[Files.Nebula006],-2400,0.2,blueAngle-0.2,4500,4000, -0.2,0.1);
-        placeSprite(materials[Files.Nebula006],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
-        placeSprite(materials[Files.Nebula006],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
-        placeSprite(materials[Files.Nebula006],-1800,0.4,blueAngle+0.3,2000,2000, 0.3,0.1);
-        placeSprite(materials[Files.Nebula006],-1600,0.5,blueAngle+0.4,2000,2000, 0.3,-0.3);
-        placeSprite(materials[Files.Miriade], -4000,0.2,blueAngle-0.1,3000,3000, 0,0.2);
+        placeSprite(materials[Files.BlueStars],-2400,0.3,blueAngle-0.3,5000,3000, -3.8,0.5);
+        placeSprite(materials[Files.BlueStars],-2400,0.2,blueAngle-0.2,4500,4000, -0.2,0.1);
+        // placeSprite(materials[Files.Nebula006],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
+        // placeSprite(materials[Files.Nebula006],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
+        placeSprite(materials[Files.BlueStars],-1800,0.4,blueAngle+0.3,2000,2000, 0.3,0.1);
+        placeSprite(materials[Files.BlueStars],-1600,0.5,blueAngle+0.4,2000,2000, 0.3,-0.3);
+        placeSprite(materials[Files.StarCluster], -4000,0.2,blueAngle-0.1,2500,2500, 0,0.2);
+        placeSprite(materials[Files.BlueNebula],-3500,0.2,blueAngle+0.0,3000,3000, 0.3,-0.3);
+        placeSprite(materials[Files.BlueNebula],-5000,0.0,blueAngle+0.0,10000,10000, 2.0,);
+        
 
         const middleAngle1 = blueAngle+(Math.PI/2)
         const middleAngle2 = blueAngle-(Math.PI/2)
 
-        placeSprite(materials[Files.Nebula006], -4000,-0.1, middleAngle1,10000,10000, 0.5);
-        placeSprite(materials[Files.Nebula006], -4000, 0.1, middleAngle2,10000,10000, 0.5);
+        placeSprite(materials[Files.BlueStars], -4000,-0.1, middleAngle1,10000,10000, 0.5);
+        placeSprite(materials[Files.BlueStars], -4000, 0.1, middleAngle2,10000,10000, 0.5);
  
 
         function placeSprite(material: THREE.MeshBasicMaterial, distance:number, angleZ:number, angleY: number, scaleX:number, scaleY: number, matRot: number,angleX?:number) {

@@ -126,7 +126,7 @@ const loadingManager = new THREE.LoadingManager(() => {
                     letters[i].classList.add('print');
                 }
                 fadeScreen.addEventListener('animationend', onTransitionEnd);
-                prepareForSecondScene();
+                // prepareForSecondScene();
             }, 1000);
         });
     }, minDiff * 0.5);
@@ -205,7 +205,7 @@ document.addEventListener('mousemove', (e) => {
 
 
 //Add to scene
-rock.addToScene(scene);
+// rock.addToScene(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);
 // magneticField.addToScene(scene);
@@ -218,9 +218,9 @@ universe.addToScene(scene);
 if (true) {
     cameraUtils.panEnabled = false;
     animateRock = false;
-    minDiff = 100;
+    minDiff = 10;
     //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
-    // prepareForSecondScene();
+    prepareForSecondScene();
 }
 
 

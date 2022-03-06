@@ -1,5 +1,5 @@
 const loaderTexts = [
-    "SWAPPING TIME AND SPACE...",
+    "SWAPPING TIME WITH SPACE...",
     "COOKING STARS...",
     "MESSING WITH GRAVITY...",
     "CLEANING ENDLESS UNIVERSE...",
