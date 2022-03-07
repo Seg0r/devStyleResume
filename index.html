@@ -29,10 +29,12 @@
 -->
 
 <body>
-  <div id="loadOverlay" style="background-color:rgb(0, 0, 0); position:absolute; top:0px; left:0px; width:100%; height:100%; z-index:10;"></div>
+  <div id="loadOverlay"
+    style="background-color:rgb(0, 0, 0); position:absolute; top:0px; left:0px; width:100%; height:100%; z-index:10;">
+  </div>
 
   <div id="loading-screen">
-    <pre id="loader-text" ></pre>
+    <pre id="loader-text"></pre>
     <div id="loader"></div>
   </div>
 
@@ -55,7 +57,7 @@
       <span id="header6">Y</span>
       <span id="header7">l</span>
       <span id="header8">e</span>&ensp;
-      <span id="header9">r</span>        
+      <span id="header9">r</span>
       <span id="header10">e</span>
       <span id="header11">s</span>
       <span id="header12">u</span>
@@ -67,63 +69,95 @@
     <blockquote class="left">
       <p><span>Nature never appeals to intelligence until habit and instinct are useless. There is no intelligence
           where there is no need of change.</span></p>
-      <br/>
+      <br />
       <p class="author"><span>The Time Machine - H.G Wells</span></p>
     </blockquote>
 
 
     <section class="right">
-      <h2>📜 Manifesto</h2>
+      <h2>WHY?</h2>
       <p>
         There are three main reasons why I made this page:
         <li>BECAUSE I CAN.</li>
         <li>IT WAS FUN!</li>
-        <li>I COULD LEARN SOMETHINK NEW.</li><br/>
-        Do you know what quaternions are? Maybe you do, but I did not (if you feel same, dont worry, just check 
-        links at the end). Neither did I know how four dimensional matrix can help me create this webpage! 
-        This is best in trying new things: you can expect the unexpected! So if you ever thought of something 
-        that you would like to learn, try, or just read about, just do it! Do not let your curiosity wait longer.
+        <li>I COULD LEARN SOMETHINK NEW.</li><br />
+        Do you know what quaternions are? Maybe you do, but I did not (if you feel same, dont worry, just check
+        links at the end). Neither did I know how four dimensional matrix can help me create this webpage!
+        This is best in trying new things: you can expect the unexpected! So if you ever wished to learn, try, or
+        just read about, just do it! Do not let your curiosity wait longer.
       </p>
       <p>
-        Below is short list of things that I learned about while makeing this webpage: 
-        three.js, basics of computer graphics, WebGL, shaders; 
+        Below is short list of things that I learned about while makeing this webpage:
+        three.js, basics of computer graphics, WebGL, shaders;
         typescript, javascript, css, scss;
-        vite; npm; 
+        vite; npm;
         blender;
-        rotation matrices, and of course quaternions.
-        You wonder what is the point of learning all of this? I doubt it is a good question. Main idea is to 
-        learn. If you try - you simply accomplish this objective. Attempting to solve a problem is great training even if
-        you fail. However reward for making things work as you desire - that is just addictive!
+        rotation matrices, quaternions.
+        You wonder what is the point of learning all of this? I doubt it is a good question. Main idea is to
+        learn. If you try - you simply accomplish this objective. Attempting to solve a problem is great training even
+        if you fail. However reward for making things work as you planned - that is just addictive!
       </p>
 
     </section>
 
     <section class="left">
-      <h2>👩🏽‍🚀 Who am I?</h2>
+      <h2>WHO?</h2>
 
       <p>
-        Well, it's complicated... Let me try: fullstack SQL devops. Wait, what?
+        Well, it's complicated... Let me try: fullstack SQL devops. Wait, what?<br />
 
-        It all started when I gradueded Control Engineering and Robotics studies on University of Technology in Wrocław Poland.
-        It was great time with differential equations, robots and industry controlers. Nethertheless with a good C programming 
-        background I started to work as developer. Spend few years developing and maintaning C software with embedded SQL 
-        responsible for daily replication of data change for national Social Insurance Instituton. Durring this period I 
-        advanced in fields of: SQL, databases (especially DB2 z/OS) and analitic skills: like measuring size of functional system 
-        changes for our customer. I become main developer responsible for designing new features and 24h SLA maintenance. However 
-        with high responsibilities I had not much opportunities to learn new things. 
-        Thats why for last years I work for commpany that gives me multifuntional 
-        assignments as: team leader, angular/spring developer, database engeener, system designer and devops. 
+        It all started when I gradueded Control Engineering and Robotics studies on University of Technology in Wrocław
+        Poland. It was great time with differential equations, robots and industry controlers. Nethertheless with good C
+        programming skills I started to work as developer. Spend few years developing and maintaning C software with
+        embedded SQL responsible for daily replication of data change for national Social Insurance Instituton. Durring
+        this period I advanced in fields of: SQL, databases (especially DB2 z/OS) and analitic skills. I become main
+        developer responsible for designing new features and 24h SLA maintenance. However with high responsibilities I
+        had not much opportunities to learn new things.
+        Thats why for last years I work for commpany that gives me multifuntional assignments such as: team leader,
+        angular/spring developer, database engineer, system designer and devops. Since then I worked with: Db2 zOS/DB2
+        LUW/MS SQL, Angular/Material/RxJS, Java/Spring/JSP/JSF, Apache Tomcat/Openshift, npm/gradle/Maven,
+        Jenkins/Artifactory/Nexus and more.
+        Thats a lot and I know that it is impossible to master so many topics, however this kind of versatility is
+        invaluable in many projects.
       </p>
 
-      <h2>🏆 Accomplishments</h2>
+    </section>
 
+    <section class="right">
+      <h2>WHAT?</h2>
+
+
+      <h3>Projects</h3>
+      <h4>Data change replication system</h4>
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-        est laborum.
+        Description: developement/maintanance of system designed to replicate up to few millions of selected/agregated
+        rows per day from DB2 z/OS to Informix.
+        Role: one-man team, C developer/designer/analyst, DB2 z/OS expert.
       </p>
+      <h4>Development projects worth over $5 million U.S. dollars</h4>
+      <p>
+        Description: analisis, design, development, deployment and maintanance of various functional requirements for
+        national Social Insurance Instituton.
+        Role: DB2 zOS/SQL expert, devops, Angular/Java/C/Python developer, developers team leader.
+      </p>
+      <h4>System decomposition for maintenence preparation</h4>
+      <p>
+        Description: identification of system components, requirements, procedures, schedules and monitoring nessesary
+        to prepare for 24h SLA maintanance.
+        Role: team leader, analyst, designer.
+      </p>
+      <h4>PoC: separating one of main component from monolith architecture system</h4>
+      <p>
+        Description: analisis, design, development in proof of concept project to prepare plan of migrating one of main
+        system component from z/OS to x86 architecture.
+        Role: DB2 zOS/database expert, system analyst.
+      </p>
+
+      <h3>Certificates</h3>
+      <li>IBM DB2 11 Application Developer for z/OS</li>
+      <li>IBM DB2 10.1 Fundamentals</li>
+      <li>COSMIC Software Functional Size Measurer</li>
+
 
     </section>
 
