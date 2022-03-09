@@ -4,6 +4,7 @@
 @font-face { font-family: "Ailerons"; src: url("../fonts/Ailerons/Ailerons-Regular.otf"); }
 /* @font-face { font-family: "Exan"; src: url("../fonts/Exan/Exan-Regular.ttf"); } */
 @font-face { font-family: "Hyperion"; src: url("../fonts/Hyperion/Hyperion\ Regular.woff"); }
+@font-face { font-family: "SofiaPro"; src: url("../fonts/SofiaPro/SofiaProLightAz.otf"); }
 /* @font-face { font-family: "Primal"; src: url("../fonts/Primal/Primal\ Webfont.woff"); } */
 /* @font-face { font-family: "Sarpanch"; src: url("../fonts/Sarpanch/Sarpanch-Regular.ttf"); } */
 
@@ -11,8 +12,9 @@
   --dark-bg: rgba(15, 15, 15, 0.6);
   --spacing: 350px;
   --empty: 50000px;
+  --color: white;
 
-  font-family: Orbitron;
+  font-family: SofiaPro;
   font-weight: 400;
   font-style: normal;
   overflow: hidden;
@@ -22,7 +24,7 @@
 main {
   width: 100vw;
   height: 100%;
-  color: white;
+  color: var(--color);
   z-index: 20;
   position: absolute;
   text-align: center;
@@ -111,4 +113,14 @@ canvas {
 
   .right {
     grid-column: 10 / span 10;
+  }
+
+  a:link, a:visited {
+    color: lightgray;
+    text-decoration: none;
+  }
+  
+  a:hover, a:active {
+    color: lightgray;
+    text-decoration: underline
   }

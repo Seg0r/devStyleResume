@@ -1,3 +1,8 @@
+// Adaptation of:
+// Vertex displacement with a noise function using GLSL and three.js
+// https://www.clicktorelease.com/blog/vertex-displacement-noise-3d-webgl-glsl-three-js/
+
+
 // @ts-ignore  
 import classicNoise3D from './classicnoise3d.glsl';
 

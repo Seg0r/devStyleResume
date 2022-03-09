@@ -10,11 +10,6 @@ import lavaFragmentShader from './utils/shaders/lavaFragment.glsl';
 import lavaVertexShader from './utils/shaders/lavaVertexShader.glsl';
 
 // @ts-ignore 
-// import GLTFLoader from "./lib/gltfloader";
-// @ts-ignore 
-// import DRACOLoader from "./lib/draco";
-
-// @ts-ignore 
 import explosionFragment from "./utils/shaders/explosionFragment.glsl";
 // @ts-ignore 
 import explosionLavaVertex from "./utils/shaders/explosionLavaVertex.glsl";
@@ -114,163 +109,6 @@ export class Rock {
 
         this.prepareMaterial();
         this.loadAndPrepareMeshes();
-    }
-
-
-
-    loadAndPrepareMeshes() {
-        const that = this;
-
-        this.loader.load(
-            // "/glb/ico-more.glb",
-            "/glb/sphere.glb",
-            function (gltf: any) {
-                let voron: any[] = [];
-                let geoms: any[] = [];
-                let geoms1: any[] = [];
-                gltf.scene.traverse(function (child: any) {
-
-                    if (child.name === "Voronoi_Fracture") {
-                        if (child.children[0].children.length > 2) {
-                            child.children.forEach((f: any) => {
-                                f.children.forEach((m: any) => {
-                                    voron.push(m.clone());
-                                });
-                            });
-                        } else {
-                            child.children.forEach((m: any) => {
-                                voron.push(m.clone());
-                            });
-                        }
-                    }
-                });
-
-                let j = 0;
-                voron = voron.filter(v => {
-                    if (v.isMesh) return false;
-                    else {
-                        j++;
-                        let vtempo = that.processSurface(v, j);
-                        geoms.push(vtempo.surface);
-                        geoms1.push(vtempo.volume);
-
-                        return true;
-                    }
-                });
-
-                let s = BufferGeometryUtils.mergeBufferGeometries(geoms, false);
-
-                that.meshInside = new Mesh(s, that.matInside);
-                that.meshInside.frustumCulled = false;
-
-                let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1, false);
-                that.meshSurface = new Mesh(s1, that.matSurface);
-                that.meshSurface.frustumCulled = false;
-
-                const scale = that.univerSize / 14;
-                that.meshInside.scale.set(scale, scale, scale);
-                that.meshSurface.scale.set(scale, scale, scale);
-
-            },
-            undefined,
-            function (e: any) {
-                console.error(e);
-            }
-        );
-    }
-    processSurface(v: any, j: any) {
-        let c = v.position;
-        let vtemp, vtemp1;
-        vtemp = v.children[0].geometry.clone();
-        // vtemp = vtemp.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
-        vtemp = vtemp.applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
-        vtemp1 = v.children[1].geometry;
-        // vtemp1 = vtemp1.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
-        vtemp1 = vtemp1.clone().applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
-
-        let len = v.children[0].geometry.attributes.position.array.length / 3;
-        let len1 = v.children[1].geometry.attributes.position.array.length / 3;
-        //  id
-        let offset = new Array(len).fill(j / 500);
-        vtemp.setAttribute(
-            "offset",
-            new BufferAttribute(new Float32Array(offset), 1)
-        );
-
-        let offset1 = new Array(len1).fill(j / 500);
-        vtemp1.setAttribute(
-            "offset",
-            new BufferAttribute(new Float32Array(offset1), 1)
-        );
-
-        // axis
-        let axis = getRandomAxis();
-        let axes = new Array(len * 3).fill(0);
-        let axes1 = new Array(len1 * 3).fill(0);
-        for (let i = 0; i < len * 3; i = i + 3) {
-            axes[i] = axis.x;
-            axes[i + 1] = axis.y;
-            axes[i + 2] = axis.z;
-        }
-        vtemp.setAttribute(
-            "axis",
-            new BufferAttribute(new Float32Array(axes), 3)
-        );
-        for (let i = 0; i < len1 * 3; i = i + 3) {
-            axes1[i] = axis.x;
-            axes1[i + 1] = axis.y;
-            axes1[i + 2] = axis.z;
-        }
-        vtemp1.setAttribute(
-            "axis",
-            new BufferAttribute(new Float32Array(axes1), 3)
-        );
-
-        let centroidVector = getCentroid(vtemp);
-        let centroid = new Array(len * 3).fill(0);
-        let centroid1 = new Array(len1 * 3).fill(0);
-        for (let i = 0; i < len * 3; i = i + 3) {
-            centroid[i] = centroidVector.x;
-            centroid[i + 1] = centroidVector.y;
-            centroid[i + 2] = centroidVector.z;
-        }
-        for (let i = 0; i < len1 * 3; i = i + 3) {
-            centroid1[i] = centroidVector.x;
-            centroid1[i + 1] = centroidVector.y;
-            centroid1[i + 2] = centroidVector.z;
-        }
-        vtemp.setAttribute(
-            "centroid1",
-            new BufferAttribute(new Float32Array(centroid), 3)
-        );
-        vtemp1.setAttribute(
-            "centroid1",
-            new BufferAttribute(new Float32Array(centroid1), 3)
-        );
-
-        return { surface: vtemp, volume: vtemp1 };
-    }
-
-    static lavaShader(): Shader {
-        const noise = new TextureLoader().load('../assets/noise1.png');
-        const tuniform = {
-            iTime: { type: 'f', value: 0.0 },
-            iNoise: { type: 't', value: noise },
-            iScale: { type: 'f', value: 1.0 },
-            iBrightness: { type: "f", value: 1.0 },
-            iSaturation: { type: "f", value: -1.0 },
-            iHue: { type: "f", value: -1.0 },
-        };
-
-        tuniform.iNoise.value.wrapS = tuniform.iNoise.value.wrapT = MirroredRepeatWrapping;
-
-        const shader: Shader = {
-            uniforms: tuniform,
-            vertexShader: lavaVertexShader,
-            fragmentShader: lavaFragmentShader
-        };
-
-        return shader;
     }
 
     createRock() {
@@ -567,8 +405,167 @@ export class Rock {
 
     }
 
-}
+    //////////////////////////////////////////////////////////////////////////
+    // CODE BELOW is adaptation of Yuri Artiukh algorithm:
+    // https://github.com/akella/ExplodingObjects
+    // License: https://github.com/akella/ExplodingObjects#license
+    //////////////////////////////////////////////////////////////////////////
+    loadAndPrepareMeshes() {
+        const that = this;
 
+        this.loader.load(
+            // "/glb/ico-more.glb",
+            "/glb/sphere.glb",
+            function (gltf: any) {
+                let voron: any[] = [];
+                let geoms: any[] = [];
+                let geoms1: any[] = [];
+                gltf.scene.traverse(function (child: any) {
+
+                    if (child.name === "Voronoi_Fracture") {
+                        if (child.children[0].children.length > 2) {
+                            child.children.forEach((f: any) => {
+                                f.children.forEach((m: any) => {
+                                    voron.push(m.clone());
+                                });
+                            });
+                        } else {
+                            child.children.forEach((m: any) => {
+                                voron.push(m.clone());
+                            });
+                        }
+                    }
+                });
+
+                let j = 0;
+                voron = voron.filter(v => {
+                    if (v.isMesh) return false;
+                    else {
+                        j++;
+                        let vtempo = that.processSurface(v, j);
+                        geoms.push(vtempo.surface);
+                        geoms1.push(vtempo.volume);
+
+                        return true;
+                    }
+                });
+
+                let s = BufferGeometryUtils.mergeBufferGeometries(geoms, false);
+
+                that.meshInside = new Mesh(s, that.matInside);
+                that.meshInside.frustumCulled = false;
+
+                let s1 = BufferGeometryUtils.mergeBufferGeometries(geoms1, false);
+                that.meshSurface = new Mesh(s1, that.matSurface);
+                that.meshSurface.frustumCulled = false;
+
+                const scale = that.univerSize / 14;
+                that.meshInside.scale.set(scale, scale, scale);
+                that.meshSurface.scale.set(scale, scale, scale);
+
+            },
+            undefined,
+            function (e: any) {
+                console.error(e);
+            }
+        );
+    }
+
+    processSurface(v: any, j: any) {
+        let c = v.position;
+        let vtemp, vtemp1;
+        vtemp = v.children[0].geometry.clone();
+        // vtemp = vtemp.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
+        vtemp = vtemp.applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
+        vtemp1 = v.children[1].geometry;
+        // vtemp1 = vtemp1.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2));
+        vtemp1 = vtemp1.clone().applyMatrix4(new Matrix4().makeTranslation(c.x, c.y, c.z));
+
+        let len = v.children[0].geometry.attributes.position.array.length / 3;
+        let len1 = v.children[1].geometry.attributes.position.array.length / 3;
+        //  id
+        let offset = new Array(len).fill(j / 500);
+        vtemp.setAttribute(
+            "offset",
+            new BufferAttribute(new Float32Array(offset), 1)
+        );
+
+        let offset1 = new Array(len1).fill(j / 500);
+        vtemp1.setAttribute(
+            "offset",
+            new BufferAttribute(new Float32Array(offset1), 1)
+        );
+
+        // axis
+        let axis = getRandomAxis();
+        let axes = new Array(len * 3).fill(0);
+        let axes1 = new Array(len1 * 3).fill(0);
+        for (let i = 0; i < len * 3; i = i + 3) {
+            axes[i] = axis.x;
+            axes[i + 1] = axis.y;
+            axes[i + 2] = axis.z;
+        }
+        vtemp.setAttribute(
+            "axis",
+            new BufferAttribute(new Float32Array(axes), 3)
+        );
+        for (let i = 0; i < len1 * 3; i = i + 3) {
+            axes1[i] = axis.x;
+            axes1[i + 1] = axis.y;
+            axes1[i + 2] = axis.z;
+        }
+        vtemp1.setAttribute(
+            "axis",
+            new BufferAttribute(new Float32Array(axes1), 3)
+        );
+
+        let centroidVector = getCentroid(vtemp);
+        let centroid = new Array(len * 3).fill(0);
+        let centroid1 = new Array(len1 * 3).fill(0);
+        for (let i = 0; i < len * 3; i = i + 3) {
+            centroid[i] = centroidVector.x;
+            centroid[i + 1] = centroidVector.y;
+            centroid[i + 2] = centroidVector.z;
+        }
+        for (let i = 0; i < len1 * 3; i = i + 3) {
+            centroid1[i] = centroidVector.x;
+            centroid1[i + 1] = centroidVector.y;
+            centroid1[i + 2] = centroidVector.z;
+        }
+        vtemp.setAttribute(
+            "centroid1",
+            new BufferAttribute(new Float32Array(centroid), 3)
+        );
+        vtemp1.setAttribute(
+            "centroid1",
+            new BufferAttribute(new Float32Array(centroid1), 3)
+        );
+
+        return { surface: vtemp, volume: vtemp1 };
+    }
+
+    static lavaShader(): Shader {
+        const noise = new TextureLoader().load('../assets/noise1.png');
+        const tuniform = {
+            iTime: { type: 'f', value: 0.0 },
+            iNoise: { type: 't', value: noise },
+            iScale: { type: 'f', value: 1.0 },
+            iBrightness: { type: "f", value: 1.0 },
+            iSaturation: { type: "f", value: -1.0 },
+            iHue: { type: "f", value: -1.0 },
+        };
+
+        tuniform.iNoise.value.wrapS = tuniform.iNoise.value.wrapT = MirroredRepeatWrapping;
+
+        const shader: Shader = {
+            uniforms: tuniform,
+            vertexShader: lavaVertexShader,
+            fragmentShader: lavaFragmentShader
+        };
+
+        return shader;
+    }
+}
 
 function getRandomAxis() {
     return new Vector3(

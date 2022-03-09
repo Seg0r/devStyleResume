@@ -1,3 +1,7 @@
+// Adaptation of Yuri Artiukh algorithm:
+// https://github.com/akella/ExplodingObjects
+// License: https://github.com/akella/ExplodingObjects#license
+
 // @ts-ignore  
 import lavaColor from './lavaColor.glsl';
 
