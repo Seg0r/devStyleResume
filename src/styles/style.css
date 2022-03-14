@@ -10,16 +10,18 @@
 
 :root {
   --dark-bg: rgba(15, 15, 15, 0.6);
-  --spacing: 350px;
+  --spacing: 50vh;
   --empty: 50000px;
   --color: white;
 
+  font-size: calc(12px + 0.2vw);
   font-family: SofiaPro;
   font-weight: 400;
   font-style: normal;
   overflow: hidden;
   cursor: url('../assets/hud/cursor.png'), pointer;
 }
+
 
 main {
   width: 100vw;
@@ -29,7 +31,7 @@ main {
   position: absolute;
   text-align: center;
   margin: 0px auto;
-  padding: 120px 0px;
+  padding: 15vh 0px;
   overflow-y: scroll;
   
   display: grid;
@@ -60,10 +62,11 @@ canvas {
 header {
   /* background: var(--dark-bg); */
   font-family: Hyperion;
-  grid-column: 5 / span 12;
-  font-size: 3vw;
+  grid-column: 2 / span 18;
+  font-size: min(42px,6vw);
   padding: 1vw;
   margin-top: 0;
+  white-space: nowrap;
 }
 
 header span{
