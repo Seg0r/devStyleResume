@@ -45,14 +45,14 @@ typewriter.type();
 
 //Hide default scrollbar:
 var main = document.getElementById('main')!;
-if (main)
-    main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
+main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
+var exploreTooltip = document.getElementById('exploreTooltip')!;
+exploreTooltip.style.visibility = "hidden";
 
 //Scene
 const scene: Scene = new Scene();
 // scene.background = new THREE.Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, UNIVERSE_SIZE * 4);
-
 
 //Renderer
 const renderer = new WebGLRenderer({
@@ -78,6 +78,7 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.enabled = true;
 controls.rotateSpeed = 0.2;
+controls.enableRotate = false;
 // controls.autoRotate=true;
 
 
@@ -120,13 +121,17 @@ const loadingManager = new THREE.LoadingManager(() => {
             const fadeScreen = document.getElementById('loadOverlay')!;
             fadeScreen.classList.add('fade-in-out');
             setTimeout(() => {
+                var exploreLink = document.getElementById("exploreLink");
+                exploreLink!.onclick = toggleExplore;
+                var unExploreLink = document.getElementById("unExploreLink");
+                unExploreLink!.onclick = toggleExplore;
                 main.style.visibility == "visible";
                 var letters = document.querySelectorAll('[id^="header"]');
                 for (var i = 0; i < letters.length; i++) {
                     letters[i].classList.add('print');
                 }
                 fadeScreen.addEventListener('animationend', onTransitionEnd);
-                // prepareForSecondScene();
+                prepareForSecondScene();
             }, 1000);
         });
     }, minDiff * 0.5);
@@ -153,7 +158,7 @@ const stars = new Stars(UNIVERSE_SIZE, UNIVERSE_SIZE * 0.7, cameraUtils);
 const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager);
 
 //Magnetic field
-const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
+// const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
 
 
 //Lights
@@ -178,10 +183,10 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    scrollbarUtils.setScrollbarPosition(camera.aspect * 112, -200);
+    scrollbarUtils.updateScrollbarPosition();
 }
 window.addEventListener('resize', onWindowResize, false);
-
+window.addEventListener('orientationchange', onWindowResize, false);
 
 
 let mouse = new Vector2(0, 0);
@@ -205,7 +210,7 @@ document.addEventListener('mousemove', (e) => {
 
 
 //Add to scene
-// rock.addToScene(scene);
+rock.addToScene(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);
 // magneticField.addToScene(scene);
@@ -220,7 +225,6 @@ if (true) {
     animateRock = false;
     minDiff = 10;
     //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
-    prepareForSecondScene();
 }
 
 
@@ -265,10 +269,13 @@ function render() {
     //magneticField.render();
     cameraUtils.render(mouse);
     rock.render(targetMouseX);
+    
 
     // renderer.clearDepth();
     //render rest
     renderer.render(scene, camera);
+    renderer.clearDepth();
+    scrollbarUtils.render(renderer);
 }
 
 function onTransitionEnd(event: any) {
@@ -290,21 +297,15 @@ function prepareForSecondScene() {
     window.addEventListener('scroll', scrollbarUtils.checkScroll, false);
     window.addEventListener('resize', scrollbarUtils.checkScroll, false);
     window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
+    window.addEventListener('touchmove', scrollbarUtils.checkScroll, false);
 
     scrollbarUtils.userIdle();
-    scrollbarUtils.addScrollbar(scene);
+    scrollbarUtils.addScrollbar();
 
     //enable OrbitControls on ctrl+y
     document.addEventListener('keydown', function (event) {
         if (event.ctrlKey && event.key === 'y') {
-            if (main.style.visibility == "hidden") {
-                main.style.visibility = "visible";
-                cameraUtils.panEnabled = true;
-            }
-            else {
-                main.style.visibility = "hidden";
-                cameraUtils.panEnabled = false;
-            }
+            toggleExplore();
         }
     });
 
@@ -314,10 +315,25 @@ function prepareForSecondScene() {
     main.style.visibility = "visible";
     cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
     cameraUtils.panEnabled = true;
+    controls.enableRotate = true;
 
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
-    rock.toggleVisibility();
+    rock.toggleVisibility();    
+}
+
+function toggleExplore(){
+    if (main.style.visibility == "hidden") {
+        main.style.visibility = "visible";
+        cameraUtils.panEnabled = true;
+        exploreTooltip.style.visibility = "hidden";
+    }
+    else {
+        main.style.visibility = "hidden";
+        cameraUtils.panEnabled = false;
+        exploreTooltip.style.visibility = "visible";
+    }
+    return false;
 }
 
 

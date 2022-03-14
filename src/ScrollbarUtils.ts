@@ -1,6 +1,6 @@
 
 import * as TWEEN from '@tweenjs/tween.js';
-import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, PerspectiveCamera, Camera, MathUtils, ColorRepresentation } from 'three';
+import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, PerspectiveCamera, Camera, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
 import { CameraUtils } from './CameraUtils';
 
 const LEAN_LEFT = 30;
@@ -14,7 +14,6 @@ export class ScrollbarUtils {
 
     sections: HTMLCollection;
     main: HTMLElement;
-    camera: PerspectiveCamera;
     currentSection = 0;
     scrollUp = 0;
     scrollDown = 0;
@@ -29,13 +28,21 @@ export class ScrollbarUtils {
     sectionChecked: boolean = false;
     chevronVisible = false;
     color: ColorRepresentation;
+    cameraOrtho: any;
+    sceneOrtho: Scene;
 
     constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
         this.main = main;
         this.sections = main.children
         this.cameraUtils = cameraUtils;
-        this.camera = cameraUtils.camera;
         this.color = color;
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.cameraOrtho = new OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
+        this.cameraOrtho.position.z = 10;
+        this.sceneOrtho = new Scene();
     }
 
     private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
@@ -116,6 +123,17 @@ export class ScrollbarUtils {
         }
     }
 
+    updateOrthoCamera(){
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.cameraOrtho.left = - width / 2;
+        this.cameraOrtho.right = width / 2;
+        this.cameraOrtho.top = height / 2;
+        this.cameraOrtho.bottom = - height / 2;
+        this.cameraOrtho.updateProjectionMatrix();
+    }
+
     private startNewScrollBarTween(cameraSection: number) {
         let part = { t: this.lastScrollbarSection };
 
@@ -135,12 +153,16 @@ export class ScrollbarUtils {
             }).start()
     }
 
-    public addScrollbar(scene: Scene) {
+    public addScrollbar() {
 
-        if (!this.scrollBarMark) {
-            scene.add(this.camera)
+        if (!this.scrollbar) {            
             this.createScrollbar();
+            this.sceneOrtho.add(this.scrollbar!)
         }
+    }
+
+    public render(renderer : WebGLRenderer){
+        renderer.render( this.sceneOrtho, this.cameraOrtho );
     }
 
     createScrollbar() {
@@ -152,16 +174,14 @@ export class ScrollbarUtils {
             transparent: true
         });
         this.scrollbar = new Group();
-        //add scrollbar to camera to fix position
-        this.camera.add(this.scrollbar);
 
-        this.setScrollbarPosition(this.camera.aspect * 112, -200);
-
+        this.updateScrollbarPosition();
+        
         for (let index = 0; index < this.sections.length; index++) {
             const circleMesh = new Mesh(geometry, material);
             circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
             this.scrollbar.add(circleMesh);
-            this.scrollbar.position.setY(index * 5)
+            this.scrollbar.position.setY(index * 15)
         }
 
         const markGeo = new CircleBufferGeometry(1.2, 20);
@@ -170,12 +190,17 @@ export class ScrollbarUtils {
 
         this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
-
+        this.scrollbar.scale.set(3,3,1);
+        this.scrollbar.position.setZ( 1);
     }
 
-    public setScrollbarPosition(x: number, z: number) {
-        this.scrollbar?.position.setX(x);
-        this.scrollbar?.position.setZ(z);
+
+    public updateScrollbarPosition() {
+
+        this.updateOrthoCamera();
+        const width = window.innerWidth / 2.05;
+
+        this.scrollbar?.position.setX(width);
     }
 
     static isElementInViewport(el: HTMLElement) {

@@ -26,9 +26,10 @@ export class CameraUtils {
     yAxis = new Vector3(0, 1, 0);
     startPosition: number = 0;
 
-    prevSplinePoint = 0
     cameraSplineVectors: number[] = [];
     cameraSpline: CatmullRomCurve3;
+
+    prevSection = 0;
 
     //camera pan variables
     cameraCenter = new Vector3();
@@ -51,10 +52,7 @@ export class CameraUtils {
     horizontalAngle: number = 0;
     verticalAngle: number = 0;
     universeFactor: number;
-
-
-
-
+    currPosOnSpline: number = 0;
 
     public get cameraLookAt() {
         return this._cameraLookAt;
@@ -216,8 +214,13 @@ export class CameraUtils {
 
     public moveCameraAlongSplineAndLean(section: number, time: number, leanAngle: number) {
 
+        if (section >= this.cameraSplineVectors.length)
+            return;
 
-        let splinePoint = this.cameraSplineVectors[section]
+        const currSection = this.getSectionFromPosition(this.currPosOnSpline);
+        //2.5 is arbitrary factor that gives acceptable tween duration on multisection tween
+        let diff = Math.max(1, Math.abs(currSection - section)/2.5);
+        let splinePoint = this.cameraSplineVectors[section];
 
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
@@ -232,6 +235,7 @@ export class CameraUtils {
 
         const newTween = new TWEEN.Tween(part)
             .onStart((tween) => {
+                this.prevSection=section;
                 startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
                 startPos = this.startPosition;
                 posDirection = splinePoint - this.startPosition;
@@ -240,16 +244,19 @@ export class CameraUtils {
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
                 endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera, this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
             })
-            .to({ t: 1, pos: splinePoint }, time)
+            .to({ t: 1, pos: splinePoint }, time * diff)
             .onUpdate((tween) => {
-                let destPos = startPos + tween.t * posDirection;
-                destPos = destPos < 0 ? 0 : (destPos > 1 ? 1 : destPos);
-                currentVector.lerp(this.cameraSpline.getPoint(destPos), tween.t);
+                this.currPosOnSpline = startPos + tween.t * posDirection;
+                this.currPosOnSpline = this.currPosOnSpline < 0 ? 0 : (this.currPosOnSpline > 1 ? 1 : this.currPosOnSpline);
+                currentVector.lerp(this.cameraSpline.getPoint(this.currPosOnSpline), tween.t);
                 this.camera.position.copy(currentVector);
                 currentTarget.lerp(endTarget, tween.t);
                 this.orbitControls.target.copy(currentTarget);
                 // calcQuat.slerpQuaternions(startQuat, endQuaternion, tween.t)
                 // this.camera.quaternion.copy(calcQuat);
+            })
+            .onComplete(() => {
+                // this.prevSection = section;
             })
             .easing(TWEEN.Easing.Cubic.InOut);
 
@@ -257,6 +264,19 @@ export class CameraUtils {
             this.setPanCameraConstants();
         });
 
+    }
+
+    getSectionFromPosition(goal: number): number {
+        let sectionIndex = 0;
+        this.cameraSplineVectors.reduce(function (prev: number, curr: number, index: number) {
+            if(Math.abs(curr - goal) < Math.abs(prev - goal)){
+                sectionIndex = index;
+                return curr;
+            } else{
+                return prev;
+            }
+        });
+        return sectionIndex;
     }
 
 

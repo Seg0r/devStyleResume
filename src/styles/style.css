@@ -57,70 +57,80 @@ canvas {
 }
 
 
-  header {
-    /* background: var(--dark-bg); */
-    font-family: Hyperion;
-    grid-column: 5 / span 12;
-    font-size: 3vw;
-    padding: 1vw;
-    margin-top: 0;
-  }
+header {
+  /* background: var(--dark-bg); */
+  font-family: Hyperion;
+  grid-column: 5 / span 12;
+  font-size: 3vw;
+  padding: 1vw;
+  margin-top: 0;
+}
 
-  header span{
-    opacity: 0;
-  }
+header span{
+  opacity: 0;
+}
 
 
-  section{
-    padding: 1rem;
-    background-color: var(--dark-bg);
-    font-size: 1.25rem;
-    line-height: 1.5;
-    scroll-snap-align: start;
-    text-align: left;
-  }
+section{
+  padding: 1rem;
+  background-color: var(--dark-bg);
+  font-size: 1.25rem;
+  line-height: 1.5;
+  scroll-snap-align: start;
+  text-align: left;
+}
 
-  blockquote {
-    font-family: Ailerons;
-    padding: 0;
-    display:grid;
-    scroll-snap-align: center;
-  }
+blockquote {
+  font-family: Ailerons;
+  padding: 0;
+  display:grid;
+  scroll-snap-align: center;
+}
 
-  blockquote p {
-    color: rgb(255, 255, 255);    
-    font-size: 1.5rem;
-    line-height: 1;
-    margin: 0;
-    text-align: left;
-  }
+blockquote p {
+  color: rgb(255, 255, 255);    
+  font-size: 1.5rem;
+  line-height: 1;
+  margin: 0;
+  text-align: left;
+}
 
-  blockquote p span{
-    background-color: var(--dark-bg);
-  }
+blockquote p span{
+  background-color: var(--dark-bg);
+}
 
-  blockquote p.author {
-    text-align: right;
-  }
+blockquote p.author {
+  text-align: right;
+}
 
-  .center {
-    grid-column: 6 / span 10;
-  }
+.center {
+  grid-column: 6 / span 10;
+}
 
-  .left {
-    grid-column: 2 / span 10;
-  }
+.left {
+  grid-column: 2 / span 10;
+}
 
-  .right {
-    grid-column: 10 / span 10;
-  }
+.right {
+  grid-column: 10 / span 10;
+}
 
-  a:link, a:visited {
-    color: lightgray;
-    text-decoration: none;
-  }
-  
-  a:hover, a:active {
-    color: lightgray;
-    text-decoration: underline
-  }
+a:link, a:visited {
+  color: lightgray;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  color: lightgray;
+  text-decoration: underline
+}
+
+exploreTooltip {
+  color: var(--color);
+  position: fixed; 
+  top: 0; 
+  right: 0; 
+  padding: 1vw;
+  background-color: var(--dark-bg);
+  text-align: right;
+}

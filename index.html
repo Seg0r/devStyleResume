@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="core.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, minimum-scale=1" />
   <meta name="description" content="Resume made with three.js." />
   <meta name="keywords" content="resume, webgl, 3d, exploding, threejs , animation, javascript" />
   <meta name="author" content="Maciej Piaseczny" />
@@ -23,9 +23,7 @@
     \::/  /       \:\__\        \:\__\    \:\__\        \::/  /        /:/  /       \:\__\    
      \/__/         \/__/         \/__/     \/__/         \/__/         \/__/         \/__/    
                                                                                               
-     You found it! :)
-
-     Now just press: CTRL + Y and enjoy!
+     
 -->
 
 <body>
@@ -101,7 +99,7 @@
     </section>
 
     <section class="left">
-      <h2>Mindfulness - WHO?</h2>
+      <h2>Entity - WHO?</h2>
 
       <p>
         Well, it is complicated... Let me try: fullstack SQL devops. Wait, what?<br />
@@ -203,11 +201,15 @@
 
     <blockquote>
       <p>Thanks for watching!</p>
-      <p>If you want to explore more press CTRL + Y.</p>
-      <p>For bonus: 🔍 the 📋</p>
+      <p><a id="exploreLink" title="Click to 🔍" href="#" >Click</a> to explore more!</p>
+      <!-- <p>For bonus: 🔍 the 📋</p> -->
     </blockquote>
 
   </main>
+
+  <exploreTooltip id="exploreTooltip">
+    <p>Use mouse to explore!<br><a id="unExploreLink" title="Click to stop exploring" href="#" >Click</a> to exit.</p>
+  </exploreTooltip>
 
   <script type="module" src="/src/main.ts"></script>
 </body>
