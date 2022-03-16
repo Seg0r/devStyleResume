@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+
 import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'

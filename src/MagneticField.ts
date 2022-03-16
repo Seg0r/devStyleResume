@@ -1,5 +1,4 @@
 
-import * as THREE from 'three';
 import {AdditiveBlending, Camera, CatmullRomCurve3, EllipseCurve, Mesh, MeshBasicMaterial, NormalBlending, Scene, Sprite, SpriteMaterial, TextureLoader, TubeBufferGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { DirectionAngles } from './SolarSystem';
 import { gaussianRandom } from './utils/math';
