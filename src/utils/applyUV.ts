@@ -1,5 +1,4 @@
-import { Box3, BufferGeometry, Matrix4, Vector3 } from "three";
-import * as THREE from 'three';
+import { Box3, BufferGeometry, Float32BufferAttribute, Matrix4, Vector2, Vector3 } from "three";
 
 function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3, bbox_max_size: number) {
 
@@ -8,7 +7,7 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
 
     // geom.removeAttribute('uv');
     if (geom.attributes.uv === undefined) {
-        geom.setAttribute('uv', new THREE.Float32BufferAttribute(coords, 2));
+        geom.setAttribute('uv', new Float32BufferAttribute(coords, 2));
     }
 
     //maps 3 verts of 1 face on the better side of the cube
@@ -21,16 +20,16 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
         v2.applyMatrix4(transformMatrix);
 
         //get normal of the face, to know into which cube side it maps better
-        let n = new THREE.Vector3();
+        let n = new Vector3();
         n.crossVectors(v1.clone().sub(v0), v1.clone().sub(v2)).normalize();
 
         n.x = Math.abs(n.x);
         n.y = Math.abs(n.y);
         n.z = Math.abs(n.z);
 
-        let uv0 = new THREE.Vector2();
-        let uv1 = new THREE.Vector2();
-        let uv2 = new THREE.Vector2();
+        let uv0 = new Vector2();
+        let uv1 = new Vector2();
+        let uv2 = new Vector2();
         // xz mapping
         if (n.y > n.x && n.y > n.z) {
             uv0.x = (v0.x - bbox.min.x) / bbox_max_size;
@@ -88,9 +87,9 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
             let vy2 = geom.attributes.position.array[3 * idx2 + 1];
             let vz2 = geom.attributes.position.array[3 * idx2 + 2];
 
-            let v0 = new THREE.Vector3(vx0, vy0, vz0);
-            let v1 = new THREE.Vector3(vx1, vy1, vz1);
-            let v2 = new THREE.Vector3(vx2, vy2, vz2);
+            let v0 = new Vector3(vx0, vy0, vz0);
+            let v1 = new Vector3(vx1, vy1, vz1);
+            let v2 = new Vector3(vx2, vy2, vz2);
 
             let uvs = makeUVs(v0, v1, v2);
 
@@ -117,9 +116,9 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
             let vy2 = geom.attributes.position.array[vi + 7];
             let vz2 = geom.attributes.position.array[vi + 8];
 
-            let v0 = new THREE.Vector3(vx0, vy0, vz0);
-            let v1 = new THREE.Vector3(vx1, vy1, vz1);
-            let v2 = new THREE.Vector3(vx2, vy2, vz2);
+            let v0 = new Vector3(vx0, vy0, vz0);
+            let v1 = new Vector3(vx1, vy1, vz1);
+            let v2 = new Vector3(vx2, vy2, vz2);
 
             let uvs = makeUVs(v0, v1, v2);
 
@@ -138,13 +137,13 @@ function _applyBoxUV(geom: BufferGeometry, transformMatrix: Matrix4, bbox: Box3,
         }
     }
 
-    geom.setAttribute("uv",new THREE.Float32BufferAttribute(coords,2));
+    geom.setAttribute("uv",new Float32BufferAttribute(coords,2));
 }
 
-function applyBoxUV(bufferGeometry: BufferGeometry, transformMatrix: THREE.Matrix4, boxSize: number) {
+function applyBoxUV(bufferGeometry: BufferGeometry, transformMatrix: Matrix4, boxSize: number) {
 
     if (transformMatrix === undefined) {
-        transformMatrix = new THREE.Matrix4();
+        transformMatrix = new Matrix4();
     }
 
     if (boxSize === undefined) {
@@ -160,7 +159,7 @@ function applyBoxUV(bufferGeometry: BufferGeometry, transformMatrix: THREE.Matri
         }
     }
 
-    let uvBbox = new THREE.Box3(new THREE.Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2), new THREE.Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+    let uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2), new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
 
     _applyBoxUV(bufferGeometry, transformMatrix, uvBbox, boxSize);
 

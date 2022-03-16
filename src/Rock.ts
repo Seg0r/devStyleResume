@@ -1,4 +1,4 @@
-import { AdditiveBlending, Box3, BufferAttribute, BufferGeometry, Camera, ClampToEdgeWrapping, Clock, Color, ColorRepresentation, CubeTextureLoader, DoubleSide, FrontSide, HSL, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, NormalBlending, Raycaster, RepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, WrapAroundEnding } from 'three';
+import { AdditiveBlending, BufferAttribute, BufferGeometry, Camera, Clock, Color, FrontSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -363,15 +363,8 @@ export class Rock {
 
 
     time = 0;
-    mouseX = 0;
     matrix = new Matrix4();
-    render(targetMouseX:number) {
-
-        // this.mouseX += (targetMouseX - this.mouseX) * 0.05;
-        // this.progress = Math.abs(this.mouseX);
-        // this.matInside.uniforms.progress.value = Math.abs(this.progress);
-        // this.matSurface.uniforms.progress.value = Math.abs(this.progress);
-
+    render() {
 
         this.time += 0.05;
         this.matInside.uniforms.time.value = this.time;

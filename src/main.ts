@@ -3,19 +3,19 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
+// @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
-import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, Vector2 } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, Vector2, AmbientLight, Clock, LoadingManager } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
 
 import { Universe } from './Universe';
 import { Stars } from './Stars';
-import { MagneticField } from './MagneticField';
+// import { MagneticField } from './MagneticField';
 import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
@@ -51,7 +51,7 @@ exploreTooltip.style.visibility = "hidden";
 
 //Scene
 const scene: Scene = new Scene();
-// scene.background = new THREE.Color( 0x666666 );
+// scene.background = new Color( 0x666666 );
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, UNIVERSE_SIZE * 4);
 
 //Renderer
@@ -84,15 +84,15 @@ controls.enableRotate = false;
 
 //CameraUtils - tweens, camera path
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
-    { vector: new THREE.Vector3(-1000, 250, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(400, 200, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(800, 200, -500).multiplyScalar(UNIVERSE_FACTOR), mark: false },
-    { vector: new THREE.Vector3(0, 200, -800).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(-800, 400, 10).multiplyScalar(UNIVERSE_FACTOR), mark: false },
-    { vector: new THREE.Vector3(-400, 600, 600).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(-1000, 100, 0).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(100, 600, 500).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new THREE.Vector3(1000, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
+    { vector: new Vector3(-1000, 250, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(400, 200, 900).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(800, 200, -500).multiplyScalar(UNIVERSE_FACTOR), mark: false },
+    { vector: new Vector3(0, 200, -800).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(-800, 400, 10).multiplyScalar(UNIVERSE_FACTOR), mark: false },
+    { vector: new Vector3(-400, 600, 600).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(-1000, 100, 0).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(100, 600, 500).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(1000, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
 ];
 
 let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition);
@@ -102,7 +102,7 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 let minDiff = 11000;
 let animateRock = true;
 const startDate = new Date().getTime();
-const loadingManager = new THREE.LoadingManager(() => {
+const loadingManager = new LoadingManager(() => {
     const loadingScreen = document.getElementById('loading-screen')!;
     const timeDiff = new Date().getTime() - startDate;
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
@@ -162,7 +162,7 @@ const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, l
 
 
 //Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const ambientLight = new AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
 //Helpers
@@ -199,16 +199,6 @@ document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 
 
-let targetMouseX = 0;
-document.addEventListener('mousemove', (e) => {
-    targetMouseX = 2 * (e.clientX - window.innerWidth / 2) / window.innerWidth;
-});
-
-// document.addEventListener('touchmove',(e) => {
-//     targetMouseX = ( e.touches[0].clientX / window.innerWidth ) * 2 - 1;
-// });
-
-
 //Add to scene
 rock.addToScene(scene);
 stars.addToScene(scene);
@@ -224,7 +214,7 @@ if (true) {
     cameraUtils.panEnabled = false;
     animateRock = false;
     minDiff = 10;
-    //scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: "green" });
+    //scene.overrideMaterial = new MeshBasicMaterial({ color: "green" });
 }
 
 
@@ -234,12 +224,10 @@ controls.target.copy(SOLAR_CENTER);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
 cameraUtils.panEnabled = false;
 main.style.visibility = "hidden";
-const chev = document.getElementById('chevron')!;
-// chevron.style.visibility = "hidden";
 
 
 //animate loop
-let clock = new THREE.Clock();
+let clock = new Clock();
 let delta = 0;
 
 // 60 fps
@@ -268,7 +256,7 @@ function render() {
     stars.render();
     //magneticField.render();
     cameraUtils.render(mouse);
-    rock.render(targetMouseX);
+    rock.render();
     
 
     // renderer.clearDepth();

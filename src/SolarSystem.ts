@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Group, Mesh, MeshToonMaterial, Object3D, PointLight, Scene, SphereBufferGeometry, TextureLoader, Vector3 } from "three";
+import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3 } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'lil-gui';
@@ -54,7 +54,7 @@ export class SolarSystem {
     private sunLightStrength: number = sunLightStrength;
     private sunLightDecay: number = sunLightDecay;
     visible: Boolean = false;
-    private lensflare: Lensflare;
+    // private lensflare: Lensflare;
     vector3: Vector3;
 
     //postprocessing
@@ -69,16 +69,16 @@ export class SolarSystem {
         roughness: roughness
     }
     customUniforms!: {
-        baseTexture: { type: string; value: THREE.Texture; };
+        baseTexture: { type: string; value: Texture; };
         baseSpeed: { type: string; value: number; };
-        noiseTexture: { type: string; value: THREE.Texture; };
+        noiseTexture: { type: string; value: Texture; };
         noiseScale: { type: string; value: number; };
         alpha: { type: string; value: number; };
         time: { type: string; value: number; };
     };
-    loadingManager: THREE.LoadingManager;
+    loadingManager: LoadingManager;
 
-    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: THREE.LoadingManager) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
@@ -90,7 +90,7 @@ export class SolarSystem {
         this.sunLight.position.copy(center);
         this.sunLight.castShadow = false;
 
-        this.lensflare = this.createLensflare(size);
+        // this.lensflare = this.createLensflare(size);
 
         this.bornMoons(count, center, size, this.options, initAngles.alpha1, initAngles.alpha2, alphaDist);
         this.bornMoons(count * 1.2, center, size, this.options, initAngles.beta1, initAngles.beta2, betaDist);
@@ -155,7 +155,7 @@ export class SolarSystem {
         gui.close();
     }
 
-    public reBornMoons(count: number, center: THREE.Vector3, size: number, options: Options) {
+    public reBornMoons(count: number, center: Vector3, size: number, options: Options) {
 
         this.moonSpeeds = [];
         this.moonPivots = [];
@@ -168,15 +168,15 @@ export class SolarSystem {
         this.bornMoons(count, center, size, options, options.beta1, options.beta2, betaDist);
     }
 
-    public bornMoons(count: number, center: THREE.Vector3, size: number, options: Options, alphaRot: number, betaRot: number, distance: number) {
+    public bornMoons(count: number, center: Vector3, size: number, options: Options, alphaRot: number, betaRot: number, distance: number) {
 
         let geometry: ConvexGeometry;
 
-        const stoneTexture = new THREE.TextureLoader(this.loadingManager).load('assets/moons/stoneTexture.jpg');
-        stoneTexture.wrapS = THREE.RepeatWrapping;
-        stoneTexture.wrapT = THREE.RepeatWrapping;
-        const stoneNormalMap = new THREE.TextureLoader(this.loadingManager).load('assets/moons/stoneNormalMap.jpg');
-        const material = new THREE.MeshStandardMaterial({
+        const stoneTexture = new TextureLoader(this.loadingManager).load('assets/moons/stoneTexture.jpg');
+        stoneTexture.wrapS = RepeatWrapping;
+        stoneTexture.wrapT = RepeatWrapping;
+        const stoneNormalMap = new TextureLoader(this.loadingManager).load('assets/moons/stoneNormalMap.jpg');
+        const material = new MeshStandardMaterial({
             map: stoneTexture,
             normalMap: stoneNormalMap,
             roughness: options.roughness,
@@ -185,11 +185,11 @@ export class SolarSystem {
 
 
 
-        // var noiseTexture = new THREE.TextureLoader().load('assets/moons/cloud.png' );
-        // noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping; 
+        // var noiseTexture = new TextureLoader().load('assets/moons/cloud.png' );
+        // noiseTexture.wrapS = noiseTexture.wrapT = RepeatWrapping; 
 
-        // var lavaTexture = new THREE.TextureLoader().load('assets/moons/lava.jpg' );
-        // lavaTexture.wrapS = lavaTexture.wrapT = THREE.RepeatWrapping; 
+        // var lavaTexture = new TextureLoader().load('assets/moons/lava.jpg' );
+        // lavaTexture.wrapS = lavaTexture.wrapT = RepeatWrapping; 
 
         // // use "this." to create global object
         // this.customUniforms = {
@@ -203,7 +203,7 @@ export class SolarSystem {
 
         // // create custom material from the shader code above
         // // that is within specially labeled script tags
-        // var customMaterial = new THREE.ShaderMaterial( 
+        // var customMaterial = new ShaderMaterial( 
         // {
         //     uniforms: this.customUniforms,
         //     vertexShader,
@@ -219,16 +219,16 @@ export class SolarSystem {
                 geometry.boundingBox.getSize(bboxSize);
                 let uvMapSize = Math.min(bboxSize.x, bboxSize.y, bboxSize.z);
 
-                let boxGeometry = new THREE.BoxBufferGeometry(uvMapSize, uvMapSize, uvMapSize);
-                let cube = new THREE.Mesh(boxGeometry, material);
+                let boxGeometry = new BoxBufferGeometry(uvMapSize, uvMapSize, uvMapSize);
+                let cube = new Mesh(boxGeometry, material);
 
                 //calculate UV coordinates, if uv attribute is not present, it will be added
                 UTILS.applyBoxUV(geometry, cube.matrix.invert(), uvMapSize);
 
             }
-            //let three.js know
+            //let js know
             geometry.attributes.uv.needsUpdate = true;
-            const moon = new THREE.Mesh(geometry, material)
+            const moon = new Mesh(geometry, material)
 
             const pivot = new Object3D();
             pivot.position.copy(center);
@@ -257,7 +257,7 @@ export class SolarSystem {
         const points: Vector3[] = [];
         const pointsNumber = 5 + Math.random() * 5
         for (let i = 0; i < pointsNumber; i++) {
-            points.push(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+            points.push(new Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
                 .normalize()
                 .multiplyScalar(size * (1 + Math.random())));
         }
@@ -266,12 +266,14 @@ export class SolarSystem {
         return geometry;
     }
 
+    // Effect is not suitable for this solution
+    // @ts-ignore
     private createLensflare(size: number): Lensflare {
         //const textureFlare0 = textureLoader.load('assets/lensflare0.png');
         const textureFlare3 = new TextureLoader(this.loadingManager).load('assets/lensflare3.png');
 
         const lensflare = new Lensflare();
-        //lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new THREE.Color(0xfe9b14)));
+        //lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new Color(0xfe9b14)));
         lensflare.addElement(new LensflareElement(textureFlare3, 60, 1));
         lensflare.addElement(new LensflareElement(textureFlare3, 70, 1.4));
         lensflare.addElement(new LensflareElement(textureFlare3, 120, 1.6));
@@ -280,7 +282,7 @@ export class SolarSystem {
         return lensflare;
     }
 
-    private bornOrbiters(count: number, center: THREE.Vector3, size: number) {
+    private bornOrbiters(count: number, center: Vector3, size: number) {
 
         const geometry = new SphereBufferGeometry(size / 1000, 8, 5);
         const material = new MeshToonMaterial({ color: 0xfedd1f });
@@ -332,7 +334,7 @@ export class SolarSystem {
         if (this.solarSystem.visible) {
 
             let pivot: Object3D;
-            let moon: THREE.Mesh;
+            let moon: Mesh;
 
             for (let i = 0, il = this.orbiterPivots.length; i < il; i++) {
                 pivot = this.orbiterPivots[i];

@@ -1,10 +1,10 @@
-import * as THREE from 'three';
-import { Group, Scene, Vector2, Vector3 } from 'three';
+
+import { Group, MathUtils, Mesh, MeshBasicMaterial, Scene, SphereBufferGeometry, Vector2, Vector3 } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 
 interface MeshState {
-    mesh: THREE.Mesh;
+    mesh: Mesh;
     startRotation: number;
     distance: number;
 }
@@ -14,7 +14,7 @@ const factorDelta = 0.0004;
 export class Stars {
 
     univerSize: number;
-    starsGroup: THREE.Group = new Group();
+    starsGroup: Group = new Group();
     stars: MeshState[] = [];
     camera: CameraUtils;
     center: Vector3;
@@ -29,20 +29,20 @@ export class Stars {
         this.univerSize = universSize * 2;
         this.camera = camera;
 
-        const geometry2 = new THREE.SphereBufferGeometry(universSize / 4000);
-        const material2 = new THREE.MeshBasicMaterial({ color: 0xe0e0e0 });
+        const geometry2 = new SphereBufferGeometry(universSize / 4000);
+        const material2 = new MeshBasicMaterial({ color: 0xe0e0e0 });
         this.center = this.camera.cameraLookAt;
         const meshScaleFactor = universSize /1.5;
 
         for (let i = 0; i < starsCount; i++) {
             let x, y, z;
 
-            x = THREE.MathUtils.randFloatSpread(this.univerSize);
-            y = THREE.MathUtils.randFloatSpread(this.univerSize);
-            z = THREE.MathUtils.randFloatSpread(this.univerSize);
+            x = MathUtils.randFloatSpread(this.univerSize);
+            y = MathUtils.randFloatSpread(this.univerSize);
+            z = MathUtils.randFloatSpread(this.univerSize);
 
             //TODO: try InstancedMesh
-            const mesh = new THREE.Mesh(geometry2, material2)
+            const mesh = new Mesh(geometry2, material2)
             mesh.position.set(x, y, z);
             const distanceX = new Vector2(x, z).distanceTo(new Vector2(this.center.x, this.center.z));
             const distance = mesh.position.distanceTo(this.center);

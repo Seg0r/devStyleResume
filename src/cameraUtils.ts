@@ -145,6 +145,8 @@ export class CameraUtils {
         });
     }
 
+    // For future use
+    // @ts-ignore
     private async cameraTweenAlongCurve(curve: Readonly<Curve<Vector3>>, position: number, time: number) {
 
         const _this = this;
@@ -165,7 +167,8 @@ export class CameraUtils {
     }
 
 
-
+    // For future use
+    // @ts-ignore
     private cameraTweenLook(viewFromPoint: Readonly<Vector3>,
         lookAtPoint: Readonly<Vector3>, time: number,
         easingFun: (amount: number) => number) {
@@ -174,6 +177,8 @@ export class CameraUtils {
         this.tweenCameraQuaternion(time, endQuaternion, easingFun);
     }
 
+    // For future use
+    // @ts-ignore
     private tweenCameraRotation(angle: number, axis: Vector3, time: number, easingFun: (amount: number) => number) {
 
         const endQuaternion = CameraUtils.calcCameraQuaternionRotateOnAxis(this.camera, axis, angle)
@@ -224,9 +229,9 @@ export class CameraUtils {
 
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
-        let startQuat: Quaternion;
-        let calcQuat = new Quaternion();
-        let endQuaternion = new Quaternion();
+        // let startQuat: Quaternion;
+        // let calcQuat = new Quaternion();
+        // let endQuaternion = new Quaternion();
         let posDirection: number;
         let startPos: number;
         let currentVector = new Vector3();
@@ -234,9 +239,9 @@ export class CameraUtils {
         let endTarget = new Vector3();
 
         const newTween = new TWEEN.Tween(part)
-            .onStart((tween) => {
+            .onStart(() => {
                 this.prevSection=section;
-                startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
+                // startQuat = new Quaternion().copy(this.camera.quaternion);// src quaternion
                 startPos = this.startPosition;
                 posDirection = splinePoint - this.startPosition;
                 currentVector.copy(this.camera.position);
@@ -331,7 +336,7 @@ export class CameraUtils {
         const grain = 1000;
 
         //initialize points
-        marks.forEach(element => {
+        marks.forEach(() => {
             points.push(0);
             distance.push(Number.MAX_VALUE)
         });
@@ -349,7 +354,7 @@ export class CameraUtils {
             }
         }
 
-        const cameraSplineVectors = points.filter((val, idx) => {
+        const cameraSplineVectors = points.filter((_, idx) => {
             return marks[idx];
         });
 

@@ -1,9 +1,8 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import * as THREE from 'three';
-import { Scene } from 'three';
+import { BoxGeometry, EdgesGeometry, LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, Quaternion, Scene, TextureLoader, Vector3 } from 'three';
 
 export class GreetingBox {
-    private greetingBox:THREE.Mesh;
+    private greetingBox:Mesh;
  
     readonly boxZeroX = 0;
     readonly boxZeroY = 0;
@@ -19,43 +18,43 @@ export class GreetingBox {
     }
     
     private currRotateState: number = -1;
-    private startRot : THREE.Quaternion;
+    private startRot : Quaternion;
 
-    private q1 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 1, 0),-(this.deg90));
-    private q2 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(0, 0, 1), this.deg90);
-    private q3 = new THREE.Quaternion().setFromAxisAngle ( new THREE.Vector3(1, 0, 0),-(this.deg90));
+    private q1 = new Quaternion().setFromAxisAngle ( new Vector3(0, 1, 0),-(this.deg90));
+    private q2 = new Quaternion().setFromAxisAngle ( new Vector3(0, 0, 1), this.deg90);
+    private q3 = new Quaternion().setFromAxisAngle ( new Vector3(1, 0, 0),-(this.deg90));
 
-    private pos1 : THREE.Quaternion;
-    private pos2 : THREE.Quaternion;
-    private pos3 : THREE.Quaternion;
+    private pos1 : Quaternion;
+    private pos2 : Quaternion;
+    private pos3 : Quaternion;
 
 
 	constructor(){
 
-        let loader = new THREE.TextureLoader();
+        let loader = new TextureLoader();
         loader.setPath('/assets/box/');
         let materialArray = [
-            new THREE.MeshBasicMaterial( { map: loader.load("2.png") } ),
-            new THREE.MeshBasicMaterial( { map: loader.load("empty.png") } ),
-            new THREE.MeshBasicMaterial( { map: loader.load("empty.png") } ),
-            new THREE.MeshBasicMaterial( { map: loader.load("3.png") } ),
-            new THREE.MeshBasicMaterial( { map: loader.load("1.png") } ),
-            new THREE.MeshBasicMaterial( { map: loader.load("4.png") } )];
+            new MeshBasicMaterial( { map: loader.load("2.png") } ),
+            new MeshBasicMaterial( { map: loader.load("empty.png") } ),
+            new MeshBasicMaterial( { map: loader.load("empty.png") } ),
+            new MeshBasicMaterial( { map: loader.load("3.png") } ),
+            new MeshBasicMaterial( { map: loader.load("1.png") } ),
+            new MeshBasicMaterial( { map: loader.load("4.png") } )];
 
-        var geometry = new THREE.BoxGeometry(10, 10, 10);
+        var geometry = new BoxGeometry(10, 10, 10);
 
-        this.greetingBox = new THREE.Mesh(geometry,materialArray);
+        this.greetingBox = new Mesh(geometry,materialArray);
 
-        const edges = new THREE.EdgesGeometry( geometry );
-        const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xFF2D00 } ) );
+        const edges = new EdgesGeometry( geometry );
+        const line = new LineSegments( edges, new LineBasicMaterial( { color: 0xFF2D00 } ) );
         this.greetingBox.add( line );
 
 
         this.startRot = this.greetingBox.quaternion.clone();
 
-        this.pos1 = new THREE.Quaternion().multiplyQuaternions(this.startRot,this.q1);
-        this.pos2 = new THREE.Quaternion().multiplyQuaternions(this.pos1,this.q2);
-        this.pos3 = new THREE.Quaternion().multiplyQuaternions(this.pos2,this.q3);
+        this.pos1 = new Quaternion().multiplyQuaternions(this.startRot,this.q1);
+        this.pos2 = new Quaternion().multiplyQuaternions(this.pos1,this.q2);
+        this.pos3 = new Quaternion().multiplyQuaternions(this.pos2,this.q3);
 
         this.rotateToPos(this.startRot);
 	}
@@ -94,7 +93,7 @@ export class GreetingBox {
         
     }
 
-    rotateToPos(destquat:THREE.Quaternion){
+    rotateToPos(destquat:Quaternion){
         let time = {t: 0};
     
         new TWEEN.Tween(time)

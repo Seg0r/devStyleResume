@@ -1,6 +1,6 @@
 
 import * as THREE from 'three';
-import {Camera, CatmullRomCurve3, MeshBasicMaterial, NormalBlending, Scene, Sprite, TubeBufferGeometry, Vector3 } from 'three';
+import {AdditiveBlending, Camera, CatmullRomCurve3, EllipseCurve, Mesh, MeshBasicMaterial, NormalBlending, Scene, Sprite, SpriteMaterial, TextureLoader, TubeBufferGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { DirectionAngles } from './SolarSystem';
 import { gaussianRandom } from './utils/math';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -30,7 +30,7 @@ export class MagneticField {
     bloomComposer: EffectComposer;
     scene: Scene;
     camera: Camera;
-    renderer: THREE.WebGLRenderer;
+    renderer: WebGLRenderer;
     spriteScale: number;
     t:number =0;
 
@@ -39,7 +39,7 @@ export class MagneticField {
     finalComposer: EffectComposer;
 
     public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles,
-         renderer: THREE.WebGLRenderer, camera: THREE.Camera) {
+         renderer: WebGLRenderer, camera: Camera) {
 
         this.renderer=renderer;
         this.camera=camera;
@@ -64,7 +64,7 @@ export class MagneticField {
         this.bloomComposer.renderToScreen = false;
         this.bloomComposer.addPass(renderPass);
 
-        var effectBloom = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ),
+        var effectBloom = new UnrealBloomPass( new Vector2( window.innerWidth, window.innerHeight ),
         this.uBloomParam.strength, this.uBloomParam.radius, this.uBloomParam.threshold );
 
 
@@ -115,13 +115,13 @@ export class MagneticField {
 
     }
 
-    private bornField(count: number, center: THREE.Vector3, size: number,initAngles: DirectionAngles) {
+    private bornField(count: number, center: Vector3, size: number,initAngles: DirectionAngles) {
 
         const MAX_POINTS = 200;       
         const material = new MeshBasicMaterial({ color: 0x0099ff , transparent: true,opacity: fieldOpacity, blending: NormalBlending});
 
-        const particleTexture = new THREE.TextureLoader().load( 'assets/spark.png' );
-        const spriteMaterial = new THREE.SpriteMaterial({ 
+        const particleTexture = new TextureLoader().load( 'assets/spark.png' );
+        const spriteMaterial = new SpriteMaterial({ 
             map: particleTexture, 
             depthTest: false,
             transparent: true,
@@ -130,9 +130,9 @@ export class MagneticField {
         
         for ( let i = 0; i < count; i ++ ) {
 
-            var sprite = new THREE.Sprite( spriteMaterial );
+            var sprite = new Sprite( spriteMaterial );
             sprite.scale.set( this.spriteScale, this.spriteScale, 1.0 );
-            sprite.material.blending = THREE.AdditiveBlending;
+            sprite.material.blending = AdditiveBlending;
             //sprite.layers.enable(Layers.MARKERS);
             this.markers.push(sprite);
             var sprite2 = sprite.clone();
@@ -140,7 +140,7 @@ export class MagneticField {
 
             const xRadius = gaussianRandom(size*2,size*3);
             
-            const curve2 = new THREE.EllipseCurve(
+            const curve2 = new EllipseCurve(
                 center.x+xRadius,  center.y,            // ax, aY
                 xRadius, xRadius*0.8,           // xRadius, yRadius
                 0,  2 * Math.PI,  // aStartAngle, aEndAngle
@@ -160,7 +160,7 @@ export class MagneticField {
 
             const curve = new CatmullRomCurve3(points3,true);
             const geometry = new TubeBufferGeometry(curve,64,size/20,10,true);
-            const fieldLines =  new THREE.Mesh( geometry, material );
+            const fieldLines =  new Mesh( geometry, material );
             fieldLines.layers.enable(Layers.FIELD);
             fieldLines.add(sprite);
             fieldLines.add(sprite2);
@@ -181,9 +181,9 @@ export class MagneticField {
         }
 
         for ( let i = 0; i < count; i ++ ) {
-            var sprite = new THREE.Sprite( spriteMaterial );
+            var sprite = new Sprite( spriteMaterial );
             sprite.scale.set( this.spriteScale, this.spriteScale, 1.0 );
-            sprite.material.blending = THREE.AdditiveBlending; 
+            sprite.material.blending = AdditiveBlending; 
             sprite.layers.enable(Layers.MARKERS);
             this.markers.push(sprite);
             var sprite2 = sprite.clone();
@@ -191,7 +191,7 @@ export class MagneticField {
 
             const xRadius = gaussianRandom(size*250,size*300);
             const ax = xRadius ;
-            const curve2 = new THREE.EllipseCurve(
+            const curve2 = new EllipseCurve(
                 center.x+ax,  center.y,            // ax, aY
                 xRadius, xRadius*0.25,           // xRadius, yRadius
                 Math.PI/1.08,   -Math.PI/1.08,  // aStartAngle, aEndAngle
@@ -207,7 +207,7 @@ export class MagneticField {
 
             const curve = new CatmullRomCurve3(points3,false);
             const geometry = new TubeBufferGeometry(curve,64,size/20,10,false);
-            const fieldLines =  new THREE.Mesh( geometry, material );
+            const fieldLines =  new Mesh( geometry, material );
             fieldLines.layers.enable(Layers.FIELD);
             fieldLines.add(sprite);
             fieldLines.add(sprite2);

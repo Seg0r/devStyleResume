@@ -1,53 +1,52 @@
-import * as THREE from 'three';
-import { Scene } from 'three';
+import { AdditiveBlending, BackSide, BoxBufferGeometry, LoadingManager, Mesh, MeshBasicMaterial, Scene, TextureLoader } from 'three';
 
 const TRANSPARENT = false;
 
 export class Universe {
 
-    blueNebula: THREE.Mesh;
-    pinkNebula: THREE.Mesh;
-    yellowNebula: THREE.Mesh;
+    blueNebula: Mesh;
+    pinkNebula: Mesh;
+    yellowNebula: Mesh;
     
 
-    constructor(univerSize: number, loadingManager: THREE.LoadingManager) {
+    constructor(univerSize: number, loadingManager: LoadingManager) {
 
         const fileFormat = ".webp";
 
-        const loader = new THREE.TextureLoader(loadingManager);
+        const loader = new TextureLoader(loadingManager);
         loader.setPath('/assets/universe/');
         let materialArray = [
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_right1' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_left2' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_top3' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_bottom4' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_front5' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.3, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_back6' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_right1' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_left2' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_top3' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_bottom4' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_front5' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.3, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('blue_back6' + fileFormat) }),
         ];
-        let geometry = new THREE.BoxBufferGeometry(univerSize*1.8, univerSize*1.8, univerSize*1.8);
-        this.blueNebula = new THREE.Mesh(geometry, materialArray);
+        let geometry = new BoxBufferGeometry(univerSize*1.8, univerSize*1.8, univerSize*1.8);
+        this.blueNebula = new Mesh(geometry, materialArray);
 
         materialArray = [
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_right1' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_left2' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_top3' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_bottom4' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_front5' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.65, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_back6' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_right1' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_left2' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_top3' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_bottom4' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_front5' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.65, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('pink_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxBufferGeometry(univerSize*2, univerSize*2, univerSize*2);
-        this.pinkNebula = new THREE.Mesh(geometry, materialArray);
+        geometry = new BoxBufferGeometry(univerSize*2, univerSize*2, univerSize*2);
+        this.pinkNebula = new Mesh(geometry, materialArray);
 
         materialArray = [
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_right1' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_left2' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_top3' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_bottom4' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_front5' + fileFormat) }),
-            new THREE.MeshBasicMaterial({ depthTest: true, depthWrite: false, side: THREE.BackSide, opacity: 0.8, blending: THREE.AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_back6' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_right1' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_left2' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_top3' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_bottom4' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_front5' + fileFormat) }),
+            new MeshBasicMaterial({ depthTest: true, depthWrite: false, side: BackSide, opacity: 0.8, blending: AdditiveBlending, transparent: TRANSPARENT, map: loader.load('yellow_back6' + fileFormat) }),
         ];
-        geometry = new THREE.BoxBufferGeometry(univerSize*2.2, univerSize*2.2, univerSize*2.2);
-        this.yellowNebula = new THREE.Mesh(geometry, materialArray);
+        geometry = new BoxBufferGeometry(univerSize*2.2, univerSize*2.2, univerSize*2.2);
+        this.yellowNebula = new Mesh(geometry, materialArray);
 
         this.blueNebula.matrixAutoUpdate = false;
         this.yellowNebula.matrixAutoUpdate = false;

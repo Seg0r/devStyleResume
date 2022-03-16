@@ -1,6 +1,5 @@
 import { GUI } from 'lil-gui';
-import * as THREE from 'three';
-import { AdditiveBlending, Group, Object3D, Scene, Vector3 } from 'three';
+import { AdditiveBlending, BufferGeometry, Group, LoadingManager, MathUtils, Mesh, MeshBasicMaterial, Object3D, PlaneBufferGeometry, Points, PointsMaterial, Scene, Sprite, SpriteMaterial, Texture, TextureLoader, Vector3 } from 'three';
 import { saveAs } from 'file-saver';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 // import CLOUDS from '../assets/dataCloud.json'
@@ -21,15 +20,15 @@ export class Nebula {
 
     univerSize: number;
     univerFactor: number;
-    cloudGroup: THREE.Group = new Group();
-    points: THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
+    cloudGroup: Group = new Group();
+    points: Points<BufferGeometry, PointsMaterial>;
     range: number;
-    scene: THREE.Scene;
+    scene: Scene;
     resetFactor: number;
     spriteScale: number;
     distanceFactor: number = 0.2;
-    textures:THREE.Texture[] = [];
-    pivots: THREE.Group = new THREE.Group();
+    textures:Texture[] = [];
+    pivots: Group = new Group();
     borders = {
         b0:0,
         b1:0.05,
@@ -42,11 +41,11 @@ export class Nebula {
     };
     bordersOld = Object.assign({}, this.borders);
 
-    constructor(universSize: number, scene :Scene , loadingManager: THREE.LoadingManager) {
+    constructor(universSize: number, scene :Scene , loadingManager: LoadingManager) {
 
         this.univerSize=universSize;
         this.univerFactor=this.univerSize/DEFAULT_UNIVERSE_SIZE;
-        this.points = new THREE.Points();
+        this.points = new Points();
         this.range=50;
        
         this.resetFactor=0.99;
@@ -55,7 +54,7 @@ export class Nebula {
         
         for (let file in Files) {
             if (isNaN(Number(file))){
-                this.textures.push ( new THREE.TextureLoader(loadingManager).load( 'assets/nebula/'+file+'.webp' ));      
+                this.textures.push ( new TextureLoader(loadingManager).load( 'assets/nebula/'+file+'.webp' ));      
             }
         }
 
@@ -67,17 +66,13 @@ export class Nebula {
 
 
     //metod that sets textures in strict positions
-    private setPositions(range: number){
+    private setPositions(_range: number){
         const _this = this;
-        const materials: THREE.MeshBasicMaterial[] = [];
-        let startAngle = THREE.MathUtils.degToRad(40);
-        let endAngle = THREE.MathUtils.degToRad(160);
-        let arc = endAngle-startAngle;
-        let count = 5;
+        const materials: MeshBasicMaterial[] = [];
 
         for (let file in Files) {
             if (!isNaN(Number(file))){
-                materials.push (new THREE.MeshBasicMaterial( { 
+                materials.push (new MeshBasicMaterial( { 
                     map: _this.textures[file],
                     depthTest: false,
                     depthWrite: false,
@@ -86,7 +81,7 @@ export class Nebula {
         }
 
         //Orange nebula
-        const orangeAngle = THREE.MathUtils.degToRad(140);
+        const orangeAngle = MathUtils.degToRad(140);
         placeSprite(materials[Files.OrangeNebula],-3100,0.4,orangeAngle+0.0,3500,3500, 0.0);        
         placeSprite(materials[Files.OrangeNebula],-3500,0.0,orangeAngle+0.3,2800,2800, -1.0);
         placeSprite(materials[Files.StarCluster],  -4000,0.35,orangeAngle-0.15,4000,4000, -0.4);
@@ -94,23 +89,23 @@ export class Nebula {
         placeSprite(materials[Files.OrangeNebula2],-3700,-0.3,orangeAngle-0.2,5000,6500, 0.2);
         placeSprite(materials[Files.StarCluster],  -4500,-0.5,orangeAngle-0.2,3500,3500, -2.4);
 
-        startAngle = orangeAngle+THREE.MathUtils.degToRad(-30);
-        endAngle = orangeAngle+THREE.MathUtils.degToRad(+30);
-        arc = endAngle-startAngle;
-        count = 6;
- 
-        for (let index = 0; index < count; index++) {
-            // placeSprite(materials[Files.PurpleCloud],-3500+THREE.MathUtils.randFloatSpread(this.univerSize/10),THREE.MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, THREE.MathUtils.randFloatSpread(Math.PI));
-        }
+        
+        // let startAngle = orangeAngle+MathUtils.degToRad(-30);
+        // let endAngle = orangeAngle+MathUtils.degToRad(+30);
+        // let count = 6;
+        // let arc = endAngle-startAngle;
+        // for (let index = 0; index < count; index++) {
+        //     placeSprite(materials[Files.PurpleCloud],-3500+MathUtils.randFloatSpread(this.univerSize/10),MathUtils.randFloatSpread(2),startAngle+index*arc/count,10000,10000, MathUtils.randFloatSpread(Math.PI));
+        // }
 
 
-        const blueAngle = THREE.MathUtils.degToRad(-60);
+        const blueAngle = MathUtils.degToRad(-60);
 
         // //blue nebula
         placeSprite(materials[Files.BlueStars],-2400,0.3,blueAngle-0.3,5000,3000, -3.8,0.5);
         placeSprite(materials[Files.BlueStars],-2400,0.2,blueAngle-0.2,4500,4000, -0.2,0.1);
-        // placeSprite(materials[Files.Nebula006],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
-        // placeSprite(materials[Files.Nebula006],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
+        // placeSprite(materials[Files.BlueStars],-2400,0.1,blueAngle-0.2,5000,3000, -3.8,-0.4);
+        // placeSprite(materials[Files.BlueStars],-2400,-0.1,blueAngle+0.3,4000,5000, 0.3,-0.5);
         placeSprite(materials[Files.BlueStars],-1800,0.4,blueAngle+0.3,2000,2000, 0.3,0.1);
         placeSprite(materials[Files.BlueStars],-1600,0.5,blueAngle+0.4,2000,2000, 0.3,-0.3);
         placeSprite(materials[Files.StarCluster], -4000,0.2,blueAngle-0.1,2500,2500, 0,0.2);
@@ -125,15 +120,15 @@ export class Nebula {
         placeSprite(materials[Files.BlueStars], -4000, 0.1, middleAngle2,10000,10000, 0.5);
  
 
-        function placeSprite(material: THREE.MeshBasicMaterial, distance:number, angleZ:number, angleY: number, scaleX:number, scaleY: number, matRot: number,angleX?:number) {
+        function placeSprite(material: MeshBasicMaterial, distance:number, angleZ:number, angleY: number, scaleX:number, scaleY: number, matRot: number,angleX?:number) {
 
             const pivot = new Object3D();        
-            const geometry = new THREE.PlaneBufferGeometry() ;
+            const geometry = new PlaneBufferGeometry() ;
             distance *= _this.univerFactor;
             scaleX *= _this.univerFactor;
             scaleY *= _this.univerFactor;
     
-            const mesh = new THREE.Mesh( geometry, material );
+            const mesh = new Mesh( geometry, material );
 
             pivot.position.copy(mesh.position);
 
@@ -185,14 +180,16 @@ export class Nebula {
             _this.borders.b6=0.1;
             _this.borders.b7=1;
 
-            const x = THREE.MathUtils.randFloatSpread(range);
-            const y = THREE.MathUtils.randFloatSpread(range);
-            const z = THREE.MathUtils.randFloatSpread(range);
+            const x = MathUtils.randFloatSpread(range);
+            const y = MathUtils.randFloatSpread(range);
+            const z = MathUtils.randFloatSpread(range);
             oldX += x;
             oldY += y;
             oldZ += z;
         }
 
+        // For future use
+        // @ts-ignore
         function middleNebula() {
             _this.borders.b0=0
             _this.borders.b1=0;
@@ -206,9 +203,9 @@ export class Nebula {
             _this.distanceFactor=0.3;
             _this.spriteScale=range;
 
-            const arc = THREE.MathUtils.randFloat(0,20);
-            const y = THREE.MathUtils.randFloatSpread(range);
-            const x = THREE.MathUtils.randFloatSpread(range/4);
+            const arc = MathUtils.randFloat(0,20);
+            const y = MathUtils.randFloatSpread(range);
+            const x = MathUtils.randFloatSpread(range/4);
 
             oldArc +=arc
             oldX = Math.cos(oldArc)*(range+x);
@@ -222,7 +219,7 @@ export class Nebula {
 
         const material =  this.getMaterial();
         
-        const spriteMaterial = new THREE.SpriteMaterial({ 
+        const spriteMaterial = new SpriteMaterial({ 
             map: material, 
             depthTest: false,
             transparent: false,
@@ -238,15 +235,15 @@ export class Nebula {
                 return;
             }
         };
-        const sprite = new THREE.Sprite(spriteMaterial);
+        const sprite = new Sprite(spriteMaterial);
         sprite.position.set(oldX, oldY, oldZ);
         sprite.scale.set(this.spriteScale, this.spriteScale, 1.0);
-        sprite.material.rotation = THREE.MathUtils.randInt(0, 90);
+        sprite.material.rotation = MathUtils.randInt(0, 90);
         
         this.cloudGroup.add(sprite);
     }
 
-    getMaterial(): THREE.Texture {
+    getMaterial(): Texture {
 
         const rand =  Math.random();
 
@@ -332,7 +329,7 @@ export class Nebula {
         
 
         var genNew = { button:function(){ 
-            const oldPoints = new THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>().copy(_this.points);
+            const oldPoints = new Points<BufferGeometry, PointsMaterial>().copy(_this.points);
             _this.generatePoints(_this.range);
             var merged = mergeBufferGeometries([oldPoints.geometry, _this.points.geometry]);
             _this.points.geometry=merged;
@@ -343,9 +340,9 @@ export class Nebula {
         
         var load = { button:function(){
             
-            // _this.points.copy(new THREE.ObjectLoader().parse( STARS ));
+            // _this.points.copy(new ObjectLoader().parse( STARS ));
             _this.cloudGroup.clear();
-            // _this.cloudGroup.copy(new THREE.ObjectLoader().parse( CLOUDS ));
+            // _this.cloudGroup.copy(new ObjectLoader().parse( CLOUDS ));
 
             }
         };

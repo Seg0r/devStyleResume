@@ -1,6 +1,6 @@
 
 import * as TWEEN from '@tweenjs/tween.js';
-import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, PerspectiveCamera, Camera, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
+import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
 import { CameraUtils } from './CameraUtils';
 
 const LEAN_LEFT = 30;
@@ -47,7 +47,7 @@ export class ScrollbarUtils {
 
     private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
 
-    public checkScroll = (ev: any) => {
+    public checkScroll = () => {
         const _this = this;
         if (!this.sectionChecked) {
             this.sectionChecked = true;
@@ -217,7 +217,6 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        let t:number;
         window.onload = resetTimer;
         window.onmousedown = resetTimer;  // catches touchscreen presses as well      
         window.ontouchstart = resetTimer; // catches touchscreen swipes as well      
@@ -245,7 +244,7 @@ export class ScrollbarUtils {
             };
         }
 
-        t = setTimeout(fadeInChevron, 6000);
+        let t = setTimeout(fadeInChevron, 6000);
     
         function resetTimer() {
             clearTimeout(t);
