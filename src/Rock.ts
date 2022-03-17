@@ -1,7 +1,9 @@
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Camera, Clock, Color, FrontSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+// @ts-ignore 
+import { DRACOLoader } from './libs/loaders/DRACOLoader.js';
+// @ts-ignore 
+import { GLTFLoader } from './libs/loaders/GLTFLoader.js';
 import * as TWEEN from '@tweenjs/tween.js';
 
 // @ts-ignore  
@@ -103,7 +105,7 @@ export class Rock {
 
         this.loader = new GLTFLoader(this.loadingManager).setPath("../assets/");
         const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('../node_modules/three/examples/js/libs/draco/gltf/');
+        dracoLoader.setDecoderPath("/libs/draco/gltf/");
 
         this.loader.setDRACOLoader(dracoLoader);
 

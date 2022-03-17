@@ -5,7 +5,7 @@ import './styles/loader.css';
 import './styles/chevron.scss';
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
-import * as TWEEN from '@tweenjs/tween.js';
+import {update as tweenUpdate} from '@tweenjs/tween.js';
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -70,7 +70,7 @@ renderer.shadowMap.enabled = false;
 
 const stats = new Stats();
 stats.showPanel(0);
-main.parentElement!.appendChild(stats.dom);
+// main.parentElement!.appendChild(stats.dom);
 
 //Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -210,7 +210,7 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (true) {
+if (false) {
     cameraUtils.panEnabled = false;
     animateRock = false;
     minDiff = 10;
@@ -244,8 +244,8 @@ function animate() {
 
 
 function render() {
-    TWEEN.update();
-    stats.update();
+    tweenUpdate();
+    // stats.update();
     if (controls.enabled) {
         controls.update();
     }

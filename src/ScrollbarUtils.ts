@@ -1,5 +1,5 @@
 
-import * as TWEEN from '@tweenjs/tween.js';
+import { Easing, Tween } from '@tweenjs/tween.js';
 import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
 import { CameraUtils } from './CameraUtils';
 
@@ -21,7 +21,7 @@ export class ScrollbarUtils {
     scrollBarMark: Object3D | undefined;
     lastScrollbarSection: number = 0;
     scrollbar: Group | undefined;
-    lastScrollTween: TWEEN.Tween<UnknownProps> | undefined;
+    lastScrollTween: Tween<UnknownProps> | undefined;
     newScrollbarSection: number = 0;
     prevSection: number = 0;
     cameraUtils: CameraUtils;
@@ -137,13 +137,13 @@ export class ScrollbarUtils {
     private startNewScrollBarTween(cameraSection: number) {
         let part = { t: this.lastScrollbarSection };
 
-        return new TWEEN.Tween(part)
+        return new Tween(part)
             .to({ t: cameraSection }, 1000)
             .onUpdate((tween: any) => {
                 const pos = tween.t * SCROLL_BAR_DISTANCE;
                 this.scrollBarMark?.position.set(0, pos, 0)
             })
-            .easing(TWEEN.Easing.Cubic.InOut)
+            .easing(Easing.Cubic.InOut)
             .onComplete((tween) => {
                 // console.log("end:" + tween.t + " this.newCameraSection:" + this.newCameraSection)
                 this.lastScrollbarSection = tween.t;

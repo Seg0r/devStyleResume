@@ -5,3 +5,5 @@ package-lock.json
 makingOf
 temp
 .firebaserc
+firebase-debug.*
+.firebase
