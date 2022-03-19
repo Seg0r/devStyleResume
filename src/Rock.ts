@@ -1,4 +1,4 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Camera, Clock, Color, FrontSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3 } from 'three';
+import {AudioListener, Audio, AdditiveBlending, BufferAttribute, BufferGeometry, Camera, Clock, Color, FrontSide, IUniform, LoadingManager, Matrix4, Mesh, MirroredRepeatWrapping, Scene, Shader, ShaderMaterial, SphereBufferGeometry, Sprite, SpriteMaterial, TextureLoader, Vector2, Vector3, AudioLoader } from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils';
 // @ts-ignore 
 import { DRACOLoader } from './libs/loaders/DRACOLoader.js';
@@ -54,6 +54,7 @@ export class Rock {
     cameraSpeed: number = 0;
     meshInside!: Mesh<BufferGeometry, ShaderMaterial>;
     meshSurface!: Mesh<BufferGeometry, ShaderMaterial>;
+    listener: AudioListener;
 
 
     constructor(size: number, scene: Scene, loadingManager: LoadingManager, camera:Camera) {
@@ -67,6 +68,8 @@ export class Rock {
         this.surfaceColor = new Color(0xfedd1f);
         this.insideColor = new Color(0x666666);
         this.camera = camera;
+        this.listener = new AudioListener();
+        this.camera.add( this.listener );
         this.createHalo();
         this.importRock();
         // this.createGUI();
@@ -258,6 +261,7 @@ export class Rock {
             let wait = setInterval(function() {
                 if (!_this.isAnimationPlaying()) {
                     clearInterval(wait);
+                    _this.audioFadeOut(_this.listener,1);
                     resolve();
                 }
             }, 200);  
@@ -360,7 +364,40 @@ export class Rock {
             if (this.tween[t][0]){
                 this.tween[t][0].start();
             }  
-        }
+        }        
+
+        this.playSound(this.listener, 'sounds/lava.wav',0,6,10,17);
+        this.playSound(this.listener, 'sounds/explosion.wav',12,0,0,undefined);
+        // this.playSound(listener, 'sounds/explosion2.wav',13.7,0,4);        
+        this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,0,2);
+    }
+
+    playSound(listener:AudioListener,soundName: string, delay:number,offset: number, fadeInTime: number, duration:number|undefined){
+
+        const sound = new Audio( listener );
+        const _this=this;
+        const audioLoader = new AudioLoader();
+        audioLoader.load(soundName, function( buffer ) {
+            sound.setBuffer( buffer );
+            sound.duration = duration;
+            sound.offset  = offset;
+            listener.gain.gain.value = 0;
+            setTimeout(function () { sound.play(); _this.audioFadeIn(listener,fadeInTime)}, delay*1000);            
+        });
+    }
+
+    audioFadeIn(listener:AudioListener, duration:number){        
+
+        new TWEEN.Tween(listener.gain.gain)
+        .to({value: 1},duration*1000)
+        .start()
+    }
+
+    audioFadeOut(listener:any, duration:number){        
+
+        new TWEEN.Tween(listener.gain.gain)
+        .to({value: 0},duration*1000)
+        .start()
     }
 
 
