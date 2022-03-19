@@ -77,6 +77,7 @@ export class SolarSystem {
         time: { type: string; value: number; };
     };
     loadingManager: LoadingManager;
+    sound: PositionalAudio;
 
     public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, camera: Camera) {
 
@@ -101,23 +102,22 @@ export class SolarSystem {
         camera.add(listener) 
 
         // create the PositionalAudio object (passing in the listener)
-        const sound = new PositionalAudio( listener );
-
+        this.sound = new PositionalAudio( listener );
+        const _this=this;
         // load a sound and set it as the PositionalAudio object's buffer
         const audioLoader = new AudioLoader();
         audioLoader.load( 'sounds/sun.wav', function( buffer ) {
-            sound.setBuffer( buffer );
+            _this.sound.setBuffer( buffer );
             // sound.setRefDistance( size/10 );
             // sound.setRolloffFactor(size/750);
             // sound.setDistanceModel('linear');
-            sound.setLoop( true );
-            sound.setDistanceModel('exponential');
-            sound.setRefDistance( size*2.5 );
-            sound.setRolloffFactor(size/50);
-            sound.play();
+            _this.sound.setLoop( true );
+            _this.sound.setDistanceModel('exponential');
+            _this.sound.setRefDistance( size*2.5 );
+            _this.sound.setRolloffFactor(size/50);
         }); 
 
-        this.sunLight.add( sound ); 
+        this.sunLight.add( this.sound ); 
 
         //this.createGUI(center, size, count);
     }
@@ -381,6 +381,11 @@ export class SolarSystem {
 
     public toggleVisibility() {
         this.solarSystem.visible = !this.solarSystem.visible;
+        if(this.solarSystem.visible){            
+            this.sound.play();
+        } else{
+            this.sound.stop();
+        }        
     }
 }
 

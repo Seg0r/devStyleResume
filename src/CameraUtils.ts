@@ -239,20 +239,7 @@ export class CameraUtils {
         let currentTarget = new Vector3();
         let endTarget = new Vector3();
 
-        const listener = new AudioListener();
-        this.camera.add( listener );
-
-        // create a global audio source
-        const sound = new Audio( listener );
-
-        // load a sound and set it as the Audio object's buffer
-        const audioLoader = new AudioLoader();
-        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
-            sound.setBuffer( buffer ); 
-            sound.duration = duration/1000.0;     
-            setTimeout(function () { sound.play(); }, 100);
-            
-        });
+        
 
         const newTween = new TWEEN.Tween(part)
             .onStart(() => {
@@ -264,6 +251,7 @@ export class CameraUtils {
                 currentTarget.copy(this.orbitControls.target);
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
                 endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera, this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
+                this.playScrollEffect(duration);
             })
             .to({ t: 1, pos: splinePoint }, duration)
             .onUpdate((tween) => {
@@ -285,6 +273,21 @@ export class CameraUtils {
             this.setPanCameraConstants();
         });
 
+    }
+
+    playScrollEffect(duration:number){
+        const listener = new AudioListener();
+        this.camera.add( listener );
+
+        const sound = new Audio( listener );
+
+        const audioLoader = new AudioLoader();
+        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
+            sound.setBuffer( buffer ); 
+            sound.duration = duration/1000.0;     
+            setTimeout(function () { sound.play(); }, 100);
+            
+        });
     }
 
     getSectionFromPosition(goal: number): number {

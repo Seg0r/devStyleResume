@@ -1,6 +1,7 @@
-:root {
-    --size: 30vmin;
+#loading-screen > * {
+    --size: 15vw;
     --margin: calc(-1*var(--size)/2);
+    font-size: calc(12px + 0.5vw);
 }
 
 #loading-screen {
@@ -16,8 +17,12 @@
  	transition: 2s opacity;
 }
 
-#loading-screen.fade-out {
-    opacity: 0;
+.fade-out {
+    opacity: 0 !important;
+}
+
+.fade-in {
+    opacity: 1 !important;
 }
 
 #loader {    
@@ -73,37 +78,80 @@
 }
 
 #loader-text {
-    /* display: grid; */
     font-family: "Orbitron";
     font-weight: lighter ;
     font-style: normal;
-    font-size: 20px;
+    /* font-size: 20px; */
     color: #fedd1f;
     white-space: pre-wrap;
     position: absolute;
-    top: 43%;
+    top: 48%;
     left: 65%;
-    /* animation: slide 9s linear 1 forwards; */
+    transform: translate(0%, -50%);
 }
 
 #loader-text:after{
       content: "|";
-      animation: blink 500ms linear infinite alternate;
+      animation: fadein 500ms linear infinite alternate;
 }
 
-
-@keyframes blink{
-  0%{opacity: 0;}
-  100%{opacity: 1;}
-}
 
 #loader-text > *{
     line-height: 1;
     margin: 0;
 }
 
+#loader-prompt{
+    position: absolute;
+    top:80vh;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;   
+    flex-direction: column;      
+}
 
-#f1 {
+#loader-prompt > pre{
+    font-family: "Orbitron";
+    font-weight: lighter ;
+    font-style: normal;
+    /* font-size: 20px; */
+    color: #fedd1f;
+    text-align: center;
+    margin: 4px;
+    opacity: 0;
+}
+
+
+.blink {   
+    animation: fadein 1.5s 0s 1 linear both, blinking 3s 1.5s linear infinite;
+}
+
+.fadein {   
+    animation: fadein 1.5s 0s 1 linear both;
+}
+
+.fadeout {   
+    animation: fadeout 1.5s 0s 1 linear both;
+}
+
+@keyframes fadein {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+@keyframes fadeout {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+}
+
+@keyframes blinking {
+    0% {opacity: 1;}
+    50% {opacity: 0.2;}
+    100% {opacity: 1;}
+}
+
+
+/* #f1 {
     animation: fade 0.7s 0s 1 linear both, blinking 1.5s 0.8s 1 linear forwards;
 }
 
@@ -116,11 +164,6 @@
 }
 
 
-@keyframes fade {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-}
-
 @keyframes slide {
     0%   {-webkit-transform: translate(0%, 0%);  -ms-transform:translate(0%, 0%);  transform: translate(0%, 0%);}
     31%  {-webkit-transform: translate(0%, 0%);  -ms-transform:translate(0%, 0%);  transform: translate(0%, 0%);}
@@ -128,13 +171,8 @@
     64%  {-webkit-transform: translate(0%, -30%);-ms-transform:translate(0%, -30%);transform: translate(0%, -30%);}
     68%  {-webkit-transform: translate(0%, -60%);-ms-transform:translate(0%, -60%);transform: translate(0%, -60%);}
     100% {-webkit-transform: translate(0%, -60%);-ms-transform:translate(0%, -60%);transform: translate(0%, -60%);}
-}
+} */
 
-@keyframes blinking {
-    0% {opacity: 1;}
-    50% {opacity: 0.2;}
-    100% {opacity: 1;}
-}
 
 /* show page */
 #loadOverlay{
@@ -155,25 +193,21 @@
 
 
 /* header animation */
-#header1.print  { animation: print 0.2s 0.00s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
-#header2.print  { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
-#header3.print  { animation: print 0.2s 0.70s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
-#header4.print  { animation: print 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
-#header5.print  { animation: print 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
-#header6.print  { animation: print 0.2s 1.40s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
-#header7.print  { animation: print 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
-#header8.print  { animation: print 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
-#header9.print  { animation: print 0.2s 0.30s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
-#header10.print { animation: print 0.2s 1.40s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
-#header11.print { animation: print 0.2s 0.80s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
-#header12.print { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
-#header13.print { animation: print 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
-#header14.print { animation: print 0.2s 0.40s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header1.print  { animation: fadein 0.2s 0.00s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header2.print  { animation: fadein 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
+#header3.print  { animation: fadein 0.2s 0.70s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header4.print  { animation: fadein 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header5.print  { animation: fadein 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header6.print  { animation: fadein 0.2s 1.40s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header7.print  { animation: fadein 0.2s 1.60s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header8.print  { animation: fadein 0.2s 0.90s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header9.print  { animation: fadein 0.2s 0.30s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header10.print { animation: fadein 0.2s 1.40s 1 linear both,  uppercase 0.2s 2.5s 1 linear both;}
+#header11.print { animation: fadein 0.2s 0.80s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
+#header12.print { animation: fadein 0.2s 1.15s 1 linear both,  uppercase 0.2s 2s 1 linear both;}
+#header13.print { animation: fadein 0.2s 1.15s 1 linear both,  uppercase 0.2s 2.75s 1 linear both;}
+#header14.print { animation: fadein 0.2s 0.40s 1 linear both,  uppercase 0.2s 2.25s 1 linear both;}
 
-@keyframes print {
-    0% {opacity:0;}
-    100% {opacity: 1;}
-}
 
 @keyframes uppercase {
     0%{}

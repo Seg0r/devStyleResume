@@ -28,6 +28,7 @@ const initAngles: DirectionAngles = {
     beta2: -0.8
 }
 
+
 //dont change!
 export const DEFAULT_UNIVERSE_SIZE = 4000;
 
@@ -38,16 +39,20 @@ const SOLAR_SIZE = UNIVERSE_SIZE / 20;
 const SOLAR_CENTER: Vector3 = new Vector3(0, 0, 0);
 const MAIN_COLOR = 0xfedd1f;
 
-
-const typer = document.getElementById('loader-text');
-const typewriter = setupTypewriter(typer);
-typewriter.type();
-
+/////////////////////////////////////
+// 
+/////////////////////////////////////
 //Hide default scrollbar:
 var main = document.getElementById('main')!;
 main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
 var exploreTooltip = document.getElementById('exploreTooltip')!;
 exploreTooltip.style.visibility = "hidden";
+
+
+//Loading screen
+const typer = document.getElementById('loader-text');
+const typewriter = setupTypewriter(typer);
+typewriter.type();
 
 //Scene
 const scene: Scene = new Scene();
@@ -100,47 +105,26 @@ let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE,
 
 //Loading big images
 let minDiff = 11000;
-let animateRock = true;
+let skipAnimateRock = false;
 const startDate = new Date().getTime();
 const loadingManager = new LoadingManager(() => {
-    const loadingScreen = document.getElementById('loading-screen')!;
     const timeDiff = new Date().getTime() - startDate;
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
     setTimeout(() => {
-        loadingScreen.classList.add('fade-out');
-        loadingScreen.addEventListener('transitionend', onTransitionEnd);
+        const continueButton = document.getElementById('loader-start')!;
+        continueButton.classList.add('blink');
     }, timeout);
-    let animationPromise: Promise<void>;
-    setTimeout(() => {
-        if (animateRock) {
-            animationPromise = rock.startAnimation();
-        } else {
-            animationPromise = Promise.resolve();
-        }
-        animationPromise.then(() => {
-            const fadeScreen = document.getElementById('loadOverlay')!;
-            fadeScreen.classList.add('fade-in-out');
-            setTimeout(() => {
-                var exploreLink = document.getElementById("exploreLink");
-                exploreLink!.onclick = toggleExplore;
-                var unExploreLink = document.getElementById("unExploreLink");
-                unExploreLink!.onclick = toggleExplore;
-                main.style.visibility == "visible";
-                var letters = document.querySelectorAll('[id^="header"]');
-                for (var i = 0; i < letters.length; i++) {
-                    letters[i].classList.add('print');
-                }
-                fadeScreen.addEventListener('animationend', onTransitionEnd);
-                prepareForSecondScene();
-            }, 1000);
-        });
-    }, minDiff * 0.5);
+
+    return;
+    
+    
 
 });
 
 
-
-
+/////////////////////////////////////
+// OBJECTS
+/////////////////////////////////////
 
 //Rock
 const rock = new Rock(UNIVERSE_SIZE, scene, loadingManager, camera);
@@ -176,18 +160,19 @@ scene.add(ambientLight);
 let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
 
 
-//Callbacks
-
+/////////////////////////////////////
+// CALLBACKS
+/////////////////////////////////////
 //resize callback
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     scrollbarUtils.updateScrollbarPosition();
+    landscapePrompt();
 }
 window.addEventListener('resize', onWindowResize, false);
 window.addEventListener('orientationchange', onWindowResize, false);
-
 
 let mouse = new Vector2(0, 0);
 function onDocumentMouseMove(event: any) {
@@ -197,9 +182,14 @@ function onDocumentMouseMove(event: any) {
 }
 document.addEventListener('mousemove', onDocumentMouseMove, false);
 
+const loaderStart = document.getElementById("loader-start");
+loaderStart!.onclick = animateRock;
 
+landscapePrompt();
 
-//Add to scene
+/////////////////////////////////////
+//SCENE
+/////////////////////////////////////
 rock.addToScene(scene);
 stars.addToScene(scene);
 solarSystem.addToScene(scene);
@@ -208,15 +198,13 @@ nebula.addToScene(scene);
 universe.addToScene(scene);
 
 
-
 //DEBUG
 if (false) {
     cameraUtils.panEnabled = false;
-    animateRock = false;
+    skipAnimateRock = true;
     minDiff = 10;
     //scene.overrideMaterial = new MeshBasicMaterial({ color: "green" });
 }
-
 
 
 //prepare to animate
@@ -275,10 +263,6 @@ function onTransitionEnd(event: any) {
 
 function prepareForSecondScene() {
 
-    //Chevron
-    // chevron.style.visibility = "visible";
-
-
     //Scrollbar handling
     addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
     window.addEventListener('load', scrollbarUtils.checkScroll, false);
@@ -297,7 +281,11 @@ function prepareForSecondScene() {
         }
     });
 
-
+    //exlore links from end of page
+    const exploreLink = document.getElementById("exploreLink");
+    exploreLink!.onclick = toggleExplore;
+    const unExploreLink = document.getElementById("unExploreLink");
+    unExploreLink!.onclick = toggleExplore;
 
     //Scene setup
     main.style.visibility = "visible";
@@ -312,11 +300,7 @@ function prepareForSecondScene() {
     //Sound
     const listener = new AudioListener();
     camera.add( listener );
-
-    // create a global audio source
     const sound = new Audio( listener );
-
-    // load a sound and set it as the Audio object's buffer
     const audioLoader = new AudioLoader();
     audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
         sound.setBuffer( buffer );
@@ -341,3 +325,43 @@ function toggleExplore(){
 }
 
 
+function animateRock(){
+    const loadingScreen = document.getElementById('loading-screen')!;
+    loadingScreen.classList.add('fade-out');
+    loadingScreen.addEventListener('transitionend', onTransitionEnd);
+    let animationPromise: Promise<void>;    
+    if (!skipAnimateRock) {
+        animationPromise = rock.startAnimation();
+    } else {
+        animationPromise = Promise.resolve();
+    }
+    animationPromise.then(() => {
+        const fadeScreen = document.getElementById('loadOverlay')!;
+        fadeScreen.classList.add('fade-in-out');
+        setTimeout(() => {                
+            main.style.visibility == "visible";
+            var letters = document.querySelectorAll('[id^="header"]');
+            for (var i = 0; i < letters.length; i++) {
+                letters[i].classList.add('print');
+            }
+            fadeScreen.addEventListener('animationend', onTransitionEnd);
+            prepareForSecondScene();
+        }, 1000);
+    });
+
+    return false;
+}
+
+function landscapePrompt(){
+    const loaderLandscape = document.getElementById("loader-landscape");
+    if(window.innerWidth<window.innerHeight){
+        loaderLandscape?.classList.add('fadein');
+        loaderLandscape?.classList.remove('fadeout');
+    } else{
+        //no initial fadeout
+        if(loaderLandscape?.classList.contains('fadein')){
+            loaderLandscape?.classList.add('fadeout');
+            loaderLandscape?.classList.remove('fadein');
+        }
+    }
+}
