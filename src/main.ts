@@ -9,7 +9,7 @@ import {update as tweenUpdate} from '@tweenjs/tween.js';
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, Vector2, AmbientLight, Clock, LoadingManager } from 'three';
+import { Vector3, Scene, PerspectiveCamera, WebGLRenderer, Vector2, AmbientLight, Clock, LoadingManager, AudioListener, Audio, AudioLoader } from 'three';
 import { CameraUtils } from './CameraUtils';
 import { DirectionAngles, SolarSystem } from './SolarSystem';
 
@@ -155,7 +155,7 @@ const nebula = new Nebula(UNIVERSE_SIZE, scene, loadingManager);
 const stars = new Stars(UNIVERSE_SIZE, UNIVERSE_SIZE * 0.7, cameraUtils);
 
 //SolarSystem
-const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager);
+const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager, camera);
 
 //Magnetic field
 // const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
@@ -308,6 +308,22 @@ function prepareForSecondScene() {
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
     rock.toggleVisibility();    
+
+    //Sound
+    const listener = new AudioListener();
+    camera.add( listener );
+
+    // create a global audio source
+    const sound = new Audio( listener );
+
+    // load a sound and set it as the Audio object's buffer
+    const audioLoader = new AudioLoader();
+    audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( true );  
+        sound.setVolume(0.2);
+        sound.play();
+    });
 }
 
 function toggleExplore(){

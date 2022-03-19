@@ -1,5 +1,5 @@
 import * as TWEEN from '@tweenjs/tween.js';
-import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, ArrowHelper } from 'three';
+import { Vector3, Quaternion, PerspectiveCamera, Camera, Curve, CatmullRomCurve3, Vector2, ArrowHelper, AudioListener, Audio, AudioLoader } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DEFAULT_UNIVERSE_SIZE } from './main';
 
@@ -224,8 +224,9 @@ export class CameraUtils {
 
         const currSection = this.getSectionFromPosition(this.currPosOnSpline);
         //2.5 is arbitrary factor that gives acceptable tween duration on multisection tween
-        let diff = Math.max(1, Math.abs(currSection - section)/2.5);
-        let splinePoint = this.cameraSplineVectors[section];
+        const diff = Math.max(1, Math.abs(currSection - section)/2.5);
+        const splinePoint = this.cameraSplineVectors[section];
+        const duration =  time * diff;
 
         // Tween
         let part: TweenObject = { t: 0, pos: 0 };
@@ -238,6 +239,21 @@ export class CameraUtils {
         let currentTarget = new Vector3();
         let endTarget = new Vector3();
 
+        const listener = new AudioListener();
+        this.camera.add( listener );
+
+        // create a global audio source
+        const sound = new Audio( listener );
+
+        // load a sound and set it as the Audio object's buffer
+        const audioLoader = new AudioLoader();
+        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
+            sound.setBuffer( buffer ); 
+            sound.duration = duration/1000.0;     
+            setTimeout(function () { sound.play(); }, 100);
+            
+        });
+
         const newTween = new TWEEN.Tween(part)
             .onStart(() => {
                 this.prevSection=section;
@@ -249,7 +265,7 @@ export class CameraUtils {
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
                 endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera, this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
             })
-            .to({ t: 1, pos: splinePoint }, time * diff)
+            .to({ t: 1, pos: splinePoint }, duration)
             .onUpdate((tween) => {
                 this.currPosOnSpline = startPos + tween.t * posDirection;
                 this.currPosOnSpline = this.currPosOnSpline < 0 ? 0 : (this.currPosOnSpline > 1 ? 1 : this.currPosOnSpline);

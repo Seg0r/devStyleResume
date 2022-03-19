@@ -1,5 +1,5 @@
 
-import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3 } from "three";
+import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight,AudioListener, PositionalAudio, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3, AudioLoader, Camera } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'lil-gui';
@@ -78,7 +78,7 @@ export class SolarSystem {
     };
     loadingManager: LoadingManager;
 
-    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, camera: Camera) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
@@ -94,6 +94,30 @@ export class SolarSystem {
 
         this.bornMoons(count, center, size, this.options, initAngles.alpha1, initAngles.alpha2, alphaDist);
         this.bornMoons(count * 1.2, center, size, this.options, initAngles.beta1, initAngles.beta2, betaDist);
+
+
+        // create an AudioListener and add it to the camera
+        const listener = new AudioListener();       
+        camera.add(listener) 
+
+        // create the PositionalAudio object (passing in the listener)
+        const sound = new PositionalAudio( listener );
+
+        // load a sound and set it as the PositionalAudio object's buffer
+        const audioLoader = new AudioLoader();
+        audioLoader.load( 'sounds/sun.wav', function( buffer ) {
+            sound.setBuffer( buffer );
+            // sound.setRefDistance( size/10 );
+            // sound.setRolloffFactor(size/750);
+            // sound.setDistanceModel('linear');
+            sound.setLoop( true );
+            sound.setDistanceModel('exponential');
+            sound.setRefDistance( size*2.5 );
+            sound.setRolloffFactor(size/50);
+            sound.play();
+        }); 
+
+        this.sunLight.add( sound ); 
 
         //this.createGUI(center, size, count);
     }
