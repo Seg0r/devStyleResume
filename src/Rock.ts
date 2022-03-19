@@ -366,8 +366,8 @@ export class Rock {
             }  
         }        
 
-        this.playSound(this.listener, 'sounds/lava.wav',0,6,4,0.3,17);
-        this.playSound(this.listener, 'sounds/explosion.wav',13.3,1.3,1.5,0.7,undefined);   
+        this.playSound(this.listener, 'sounds/lava.wav',0,6,8,0.3,17);
+        this.playSound(this.listener, 'sounds/explosion.wav',13.0,1.3,1.8,0.7,undefined);   
         this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,1,1,2);
     }
 
