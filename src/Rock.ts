@@ -366,13 +366,12 @@ export class Rock {
             }  
         }        
 
-        this.playSound(this.listener, 'sounds/lava.wav',0,6,10,17);
-        this.playSound(this.listener, 'sounds/explosion.wav',12,0,0,undefined);
-        // this.playSound(listener, 'sounds/explosion2.wav',13.7,0,4);        
-        this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,0,2);
+        this.playSound(this.listener, 'sounds/lava.wav',0,6,4,0.3,17);
+        this.playSound(this.listener, 'sounds/explosion.wav',13.3,1.3,1.5,0.7,undefined);   
+        this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,1,1,2);
     }
 
-    playSound(listener:AudioListener,soundName: string, delay:number,offset: number, fadeInTime: number, duration:number|undefined){
+    playSound(listener:AudioListener,soundName: string, delay:number,offset: number, fadeInTime: number, rate:number, duration:number|undefined){
 
         const sound = new Audio( listener );
         const _this=this;
@@ -381,14 +380,15 @@ export class Rock {
             sound.setBuffer( buffer );
             sound.duration = duration;
             sound.offset  = offset;
-            listener.gain.gain.value = 0;
-            setTimeout(function () { sound.play(); _this.audioFadeIn(listener,fadeInTime)}, delay*1000);            
+            sound.playbackRate = rate;
+            sound.gain.gain.value = 0;
+            setTimeout(function () { sound.play(); _this.audioFadeIn(sound,fadeInTime)}, delay*1000);            
         });
     }
 
-    audioFadeIn(listener:AudioListener, duration:number){        
+    audioFadeIn(sound:Audio, duration:number){        
 
-        new TWEEN.Tween(listener.gain.gain)
+        new TWEEN.Tween(sound.gain.gain)
         .to({value: 1},duration*1000)
         .start()
     }
