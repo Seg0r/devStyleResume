@@ -370,12 +370,12 @@ export class Rock {
             }  
         }        
 
-        this.playSound(this.listener, 'sounds/lava.wav',0,6,8,0.3,17);
-        this.playSound(this.listener, 'sounds/explosion.wav',13.2,1.3,1.8,0.7,undefined);   
-        this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,1,1,2);
+        this.playSound('sounds/lava.wav',0,6,8,0.3,17);
+        this.playSound('sounds/explosion.wav',13.2,1.3,1.8,0.7,undefined);   
+        this.playSound('sounds/explosion2.wav',16.5,0,1,1,2);
     }
 
-    playSound(listener:AudioListener,soundName: string, delay:number,offset: number, fadeInTime: number, rate:number, duration:number|undefined){
+    playSound(soundName: string, delay:number,offset: number, fadeInTime: number, rate:number, duration:number|undefined){
 
         const _this=this;
         const sound = this.sounds.get(soundName);
@@ -391,7 +391,6 @@ export class Rock {
 
     loadSound(listener:AudioListener,soundName: string){
         const sound = new Audio( listener );
-        const _this=this;
         const audioLoader = new AudioLoader(this.loadingManager);
         audioLoader.load(soundName, function( buffer ) {
             sound.setBuffer( buffer );
