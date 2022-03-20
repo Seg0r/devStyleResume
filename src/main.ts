@@ -159,6 +159,18 @@ scene.add(ambientLight);
 //Scrollbar
 let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
 
+//Sounds
+//Sound
+const listener = new AudioListener();
+camera.add( listener );
+const ambienceSound = new Audio( listener );
+const audioLoader = new AudioLoader(loadingManager);
+audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
+    ambienceSound.setBuffer( buffer );
+    ambienceSound.setLoop( true );  
+    ambienceSound.setVolume(0.2);    
+});
+
 
 /////////////////////////////////////
 // CALLBACKS
@@ -298,16 +310,7 @@ function prepareForSecondScene() {
     rock.toggleVisibility();    
 
     //Sound
-    const listener = new AudioListener();
-    camera.add( listener );
-    const sound = new Audio( listener );
-    const audioLoader = new AudioLoader();
-    audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
-        sound.setBuffer( buffer );
-        sound.setLoop( true );  
-        sound.setVolume(0.2);
-        sound.play();
-    });
+    ambienceSound.play();
 }
 
 function toggleExplore(){

@@ -55,6 +55,7 @@ export class Rock {
     meshInside!: Mesh<BufferGeometry, ShaderMaterial>;
     meshSurface!: Mesh<BufferGeometry, ShaderMaterial>;
     listener: AudioListener;
+    sounds: Map<string, Audio> = new Map();
 
 
     constructor(size: number, scene: Scene, loadingManager: LoadingManager, camera:Camera) {
@@ -72,6 +73,9 @@ export class Rock {
         this.camera.add( this.listener );
         this.createHalo();
         this.importRock();
+        this.loadSound(this.listener, 'sounds/lava.wav');
+        this.loadSound(this.listener, 'sounds/explosion.wav');   
+        this.loadSound(this.listener, 'sounds/explosion2.wav');
         // this.createGUI();
     }
 
@@ -367,23 +371,33 @@ export class Rock {
         }        
 
         this.playSound(this.listener, 'sounds/lava.wav',0,6,8,0.3,17);
-        this.playSound(this.listener, 'sounds/explosion.wav',13.0,1.3,1.8,0.7,undefined);   
+        this.playSound(this.listener, 'sounds/explosion.wav',13.2,1.3,1.8,0.7,undefined);   
         this.playSound(this.listener, 'sounds/explosion2.wav',16.5,0,1,1,2);
     }
 
     playSound(listener:AudioListener,soundName: string, delay:number,offset: number, fadeInTime: number, rate:number, duration:number|undefined){
 
-        const sound = new Audio( listener );
         const _this=this;
-        const audioLoader = new AudioLoader();
-        audioLoader.load(soundName, function( buffer ) {
-            sound.setBuffer( buffer );
+        const sound = this.sounds.get(soundName);
+        if(sound){
             sound.duration = duration;
             sound.offset  = offset;
             sound.playbackRate = rate;
             sound.gain.gain.value = 0;
-            setTimeout(function () { sound.play(); _this.audioFadeIn(sound,fadeInTime)}, delay*1000);            
+            setTimeout(function () { sound.play(); _this.audioFadeIn(sound,fadeInTime)}, delay*1000);     
+        }       
+        
+    }
+
+    loadSound(listener:AudioListener,soundName: string){
+        const sound = new Audio( listener );
+        const _this=this;
+        const audioLoader = new AudioLoader(this.loadingManager);
+        audioLoader.load(soundName, function( buffer ) {
+            sound.setBuffer( buffer );
+            sound.gain.gain.value = 0;        
         });
+        this.sounds.set(soundName,sound);
     }
 
     audioFadeIn(sound:Audio, duration:number){        

@@ -53,6 +53,7 @@ export class CameraUtils {
     verticalAngle: number = 0;
     universeFactor: number;
     currPosOnSpline: number = 0;
+    scrollSound: Audio<GainNode>;
 
     public get cameraLookAt() {
         return this._cameraLookAt;
@@ -93,6 +94,16 @@ export class CameraUtils {
         const calcSpline = this.calcSplinePoints(cameraSplineDefinition);
         this.cameraSpline = calcSpline.curve;
         this.cameraSplineVectors = calcSpline.vectors;
+        const listener = new AudioListener();
+        this.camera.add( listener );
+
+        this.scrollSound = new Audio( listener );
+
+        const _this=this;
+        const audioLoader = new AudioLoader();
+        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
+            _this.scrollSound.setBuffer( buffer );
+        });
     }
 
 
@@ -276,18 +287,11 @@ export class CameraUtils {
     }
 
     playScrollEffect(duration:number){
-        const listener = new AudioListener();
-        this.camera.add( listener );
 
-        const sound = new Audio( listener );
-
-        const audioLoader = new AudioLoader();
-        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
-            sound.setBuffer( buffer ); 
-            sound.duration = duration/1000.0;     
-            setTimeout(function () { sound.play(); }, 100);
-            
-        });
+        const _this=this;
+        this.scrollSound.duration = duration/1000.0;     
+        setTimeout(function () { _this.scrollSound.play(); }, 100);            
+    
     }
 
     getSectionFromPosition(goal: number): number {

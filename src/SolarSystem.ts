@@ -105,7 +105,7 @@ export class SolarSystem {
         this.sound = new PositionalAudio( listener );
         const _this=this;
         // load a sound and set it as the PositionalAudio object's buffer
-        const audioLoader = new AudioLoader();
+        const audioLoader = new AudioLoader(this.loadingManager);
         audioLoader.load( 'sounds/sun.wav', function( buffer ) {
             _this.sound.setBuffer( buffer );
             // sound.setRefDistance( size/10 );
