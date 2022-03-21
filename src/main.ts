@@ -3,6 +3,7 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
+import './styles/popup.css';
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
 import {update as tweenUpdate} from '@tweenjs/tween.js';
@@ -86,6 +87,34 @@ controls.rotateSpeed = 0.2;
 controls.enableRotate = false;
 // controls.autoRotate=true;
 
+//Loading big images
+let minDiff = 11000;
+let skipAnimateRock = false;
+const startDate = new Date().getTime();
+const loadingManager = new LoadingManager(() => {
+    const timeDiff = new Date().getTime() - startDate;
+    const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
+    setTimeout(() => {
+        const continueButton = document.getElementById('loader-start')!;
+        continueButton.classList.add('blink');
+    }, timeout);
+
+    return;
+});
+
+////////////////////////////
+//Sounds
+///////////////////////////
+const listener = new AudioListener();
+camera.add( listener );
+const ambienceSound = new Audio( listener );
+const audioLoader = new AudioLoader(loadingManager);
+audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
+    ambienceSound.setBuffer( buffer );
+    ambienceSound.setLoop( true );  
+    ambienceSound.setVolume(0.2);    
+});
+
 
 //CameraUtils - tweens, camera path
 const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
@@ -100,27 +129,7 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new Vector3(1000, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
 ];
 
-let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition);
-
-
-//Loading big images
-let minDiff = 11000;
-let skipAnimateRock = false;
-const startDate = new Date().getTime();
-const loadingManager = new LoadingManager(() => {
-    const timeDiff = new Date().getTime() - startDate;
-    const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
-    setTimeout(() => {
-        const continueButton = document.getElementById('loader-start')!;
-        continueButton.classList.add('blink');
-    }, timeout);
-
-    return;
-    
-    
-
-});
-
+let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition, listener);
 
 /////////////////////////////////////
 // OBJECTS
@@ -139,7 +148,7 @@ const nebula = new Nebula(UNIVERSE_SIZE, scene, loadingManager);
 const stars = new Stars(UNIVERSE_SIZE, UNIVERSE_SIZE * 0.7, cameraUtils);
 
 //SolarSystem
-const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager, camera);
+const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager, camera, listener);
 
 //Magnetic field
 // const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);
@@ -159,17 +168,6 @@ scene.add(ambientLight);
 //Scrollbar
 let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
 
-//Sounds
-//Sound
-const listener = new AudioListener();
-camera.add( listener );
-const ambienceSound = new Audio( listener );
-const audioLoader = new AudioLoader(loadingManager);
-audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
-    ambienceSound.setBuffer( buffer );
-    ambienceSound.setLoop( true );  
-    ambienceSound.setVolume(0.2);    
-});
 
 
 /////////////////////////////////////
@@ -211,10 +209,11 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (false) {
+if (true) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
     minDiff = 10;
+    listener.gain.gain.value = 0;
     //scene.overrideMaterial = new MeshBasicMaterial({ color: "green" });
 }
 

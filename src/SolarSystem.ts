@@ -79,7 +79,7 @@ export class SolarSystem {
     loadingManager: LoadingManager;
     sound: PositionalAudio;
 
-    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, camera: Camera) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, camera: Camera, listener: AudioListener) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();
@@ -95,11 +95,6 @@ export class SolarSystem {
 
         this.bornMoons(count, center, size, this.options, initAngles.alpha1, initAngles.alpha2, alphaDist);
         this.bornMoons(count * 1.2, center, size, this.options, initAngles.beta1, initAngles.beta2, betaDist);
-
-
-        // create an AudioListener and add it to the camera
-        const listener = new AudioListener();       
-        camera.add(listener) 
 
         // create the PositionalAudio object (passing in the listener)
         this.sound = new PositionalAudio( listener );

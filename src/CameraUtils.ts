@@ -82,7 +82,7 @@ export class CameraUtils {
     }
 
 
-    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, universeSize: number, cameraSplineDefinition: SplineDef) {
+    constructor(camera: PerspectiveCamera, origin: Vector3, controls: OrbitControls, universeSize: number, cameraSplineDefinition: SplineDef, listener: AudioListener) {
         this.camera = camera;
         this.origin = origin;
         this.camera.lookAt(origin);
@@ -94,8 +94,6 @@ export class CameraUtils {
         const calcSpline = this.calcSplinePoints(cameraSplineDefinition);
         this.cameraSpline = calcSpline.curve;
         this.cameraSplineVectors = calcSpline.vectors;
-        const listener = new AudioListener();
-        this.camera.add( listener );
 
         this.scrollSound = new Audio( listener );
 
