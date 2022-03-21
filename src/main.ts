@@ -3,7 +3,8 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
-import './styles/popup.css';
+import './styles/popup.scss';
+
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
 import {update as tweenUpdate} from '@tweenjs/tween.js';

@@ -1,0 +1,117 @@
+/// Border only in corners
+/// @author Jiří Thiemel
+/// @link https://codepen.io/ThiemelJiri/post/3-css-border-in-corners-techniques
+
+
+///////////////////
+//   Libraries   //
+///////////////////
+
+@function strip-unit($value) {
+    @return $value / ($value * 0 + 1);
+  }
+  
+  
+  // I had to make few modifications (!MARKED! below) to make the SASS function work properly, so I included this npm package here
+  // https://github.com/waldemarfm/sass-svg-uri
+  
+  /// A small function allowing skipping base64 encoding
+  /// and simply pasting the SVG markup right in the CSS.
+  /// @author Jakob Eriksen
+  /// @link http://codepen.io/jakob-e/pen/doMoML
+  /// @param {String} $svg - SVG image to encode
+  /// @return {String} - Encoded SVG data uri
+  @function svg-uri($svg) {
+      $encoded: '';
+      $slice: 2000;
+      $index: 0;
+      $loops: ceil(str-length($svg) / $slice);
+  
+      // !ADDED! auto xmlns as per the original codepen https://codepen.io/jakob-e/pen/doMoML
+      @if not str-index($svg,xmlns) {
+          $svg: str-replace($svg, '<svg', '<svg xmlns="http://www.w3.org/2000/svg"');   
+      }
+    
+      @for $i from 1 through $loops {
+          $chunk: str-slice($svg, $index, $index + $slice - 1);
+          $chunk: str-replace($chunk, '"', "%22"); // !MODIFIED!
+          $chunk: str-replace($chunk, "'", "%27"); // !ADDED!
+          $chunk: str-replace($chunk, "/", "%2F"); // !ADDED!
+          $chunk: str-replace($chunk, '<', '%3C');
+          $chunk: str-replace($chunk, '>', '%3E');
+          $chunk: str-replace($chunk, '&', '%26');
+          $chunk: str-replace($chunk, '#', '%23');
+          $encoded: #{$encoded}#{$chunk};
+          $index: $index + $slice;
+      }
+  
+      @return url("data:image/svg+xml;charset=utf8,#{$encoded}");
+  }
+  
+  /// Replace `$search` with `$replace` in `$string`
+  /// @author Hugo Giraudel
+  /// @link http://sassmeister.com/gist/1b4f2da5527830088e4d
+  /// @param {String} $string - Initial string
+  /// @param {String} $search - Substring to replace
+  /// @param {String} $replace ('') - New value
+  /// @return {String} - Updated string
+  @function str-replace($string, $search, $replace: '') {
+      $index: str-index($string, $search);
+  
+      @if $index {
+          @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+      }
+  
+      @return $string;
+  }
+  
+  
+  
+  ///////////////////////////////
+  //   The actual mixin:       //
+  //   CORNER BORDER BUILDER   //
+  ///////////////////////////////
+  
+  @mixin buildCorners ($cornerColor: #000, $cornerSize: 20, $cornerThickness: 5, $contentFontSize: 16) {
+    // Params:
+    //   - $cornerColor - because the SVG is not inline SVG but background image it cannot inherit the currentColor,
+    //                    therefore the color has to be specified explicitly
+    //   - $cornerSize - just a number in pixels without unit or wit any unit you want 
+    //                 - when just a number is provided relative mode i used (will be vconverted into em)
+    //                 - when number with unit is absolute mode is turned on (the unit will remain)
+    //   - $cornerThickness - just a number in px without unit
+    //                      - when just a number is provided relative mode i used (will be vconverted into em)
+    //                      - when number with unit is absolute mode is turned on (the unit will remain)
+    //   - [$contentFontSize] - used only in relative mode to recalculate previous dimensions into ems for background size
+    //                        - just a number in pixels without unit
+  
+    $svgCornerSize: strip-unit($cornerSize);
+    $svgCornerThickness: strip-unit($cornerThickness);
+    $svgViewBox: $svgCornerSize * 2;
+    $svgRectStart: $svgCornerThickness / 2;
+    $svgRectSize: $svgCornerSize * 2 - $svgCornerThickness;
+  
+    // absolute mode
+    $borderWidth: $svgCornerThickness * 1px;
+    $borderImageWidth: $svgCornerSize * 1px;
+    
+    // relative mode
+    @if unit($cornerSize) == '' or unit($cornerThickness) == '' {
+      $borderWidth: $svgCornerThickness/$contentFontSize * 1em;
+      $borderImageWidth: $svgCornerSize/$contentFontSize * 1em;
+    }
+  
+    border-style: solid;
+    border-width: $borderWidth;
+    border-image-source: svg-uri('<svg viewBox="0 0 #{$svgViewBox} #{$svgViewBox}"><rect x="#{$svgRectStart}" y="#{$svgRectStart}" width="#{$svgRectSize}" height="#{$svgRectSize}" fill="transparent" stroke="#{$cornerColor}" stroke-width="#{$svgCornerThickness}" /></svg>');
+    border-image-slice: 50%;
+    border-image-width: $borderImageWidth;
+  }
+  
+  
+  ///////////////
+  //   USAGE   //
+  ///////////////
+  .corner-border {
+    @include buildCorners(#000, 40, 8, 32);
+  }
