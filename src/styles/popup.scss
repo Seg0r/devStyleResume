@@ -30,44 +30,40 @@
 .modal-btn:checked + label,
 .modal-btn:not(:checked) + label{
   position: relative;
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 2;
-  height: 50px;
+  // font-weight: 500;
+  // font-size: 15px;
+  // line-height: 2;
+  // height: 50px;
   transition: all 200ms linear;
-  border-radius: 4px;
-  width: 240px;
-  letter-spacing: 1px;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -moz-align-items: center;
-  -ms-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  -moz-justify-content: center;
-  -ms-justify-content: center;
-  justify-content: center;
-  -ms-flex-pack: center;
-  text-align: center;
-    -ms-flex-item-align: center;
-    align-self: center;
+  // border-radius: 4px;
+  // width: 240px;
+  // letter-spacing: 1px;
+  // display: -webkit-inline-flex;
+  // display: -ms-inline-flexbox;
+  // display: inline-flex;
+  // -webkit-align-items: center;
+  // -moz-align-items: center;
+  // -ms-align-items: center;
+  // align-items: center;
+  // -webkit-justify-content: center;
+  // -moz-justify-content: center;
+  // -ms-justify-content: center;
+  // justify-content: center;
+  // -ms-flex-pack: center;
+  // text-align: center;
+    // -ms-flex-item-align: center;
+    // align-self: center;
   border: none;
   cursor: pointer;
-  background-color: #102770;
-  color: #ffeba7;
+  // background-color: #102770;
+  // color: #ffeba7;
   box-shadow: 0 12px 35px 0 rgba(16,39,112,.25);
 }
 .modal-btn:not(:checked) + label:hover{
   background-color: #ffeba7;
-  color: #102770;
+  font-size: 20px;
 }
-.modal-btn:checked + label .uil,
-.modal-btn:not(:checked) + label .uil{
-	margin-left: 10px;
-	font-size: 18px;
-}
+
 .modal-btn:checked + label:after,
 .modal-btn:not(:checked) + label:after{
   position: fixed;
@@ -136,7 +132,7 @@
   -ms-flex-item-align: center;
   align-self: center;
   opacity: 0;
-  transform: scale(0.95,0.05);
+  transform: scale(0.95,0.01);
   transition: opacity 250ms 450ms ease, transform 150ms 250ms ease;
 }
 
