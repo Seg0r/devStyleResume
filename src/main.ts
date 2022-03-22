@@ -3,7 +3,7 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
-import './styles/popup.scss';
+
 
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
@@ -21,6 +21,8 @@ import { Stars } from './Stars';
 import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
+
+import { ScifiPopup } from './utils/ScifiPopup';
 
 
 const initAngles: DirectionAngles = {
@@ -55,6 +57,18 @@ exploreTooltip.style.visibility = "hidden";
 const typer = document.getElementById('loader-text');
 const typewriter = setupTypewriter(typer);
 typewriter.type();
+
+//Define popups
+customElements.define('scifi-popup', ScifiPopup);
+const popups:NodeListOf<ScifiPopup> = document.querySelectorAll('scifi-popup');
+for (let index = 0; index < popups.length; index++) {
+    const element:ScifiPopup = popups[index];  
+    const button = document.getElementById(element.opener!);
+    button?.addEventListener('click', () => {
+        element.open = true;
+    })
+}
+
 
 //Scene
 const scene: Scene = new Scene();
