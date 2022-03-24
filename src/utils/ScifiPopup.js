@@ -30,15 +30,15 @@ export class ScifiPopup extends HTMLElement {
 
   connectedCallback() {
     const { shadowRoot } = this;
-    shadowRoot.innerHTML = `
-      <style> `+ STYLE + `</style>
+    shadowRoot.innerHTML = `<style> `+ STYLE + `</style>
       <div class="modal">
+      <div class="overlay"></div>
         <div class="modal-corners">
-          <div class="modal-wrap">
+          <div class="modal-dialog" role="dialog" aria-labelledby="title" aria-describedby="content">
+            <button class="close" aria-label="Close">✖️</button>
             <div class="modal-content">
             <slot></slot>
-            </div>
-            <button class="close" aria-label="Close">✖️</button>
+            </div>            
           </div>
           <span class='ui-corner'></span>
           <span class='ui-corner'></span>
