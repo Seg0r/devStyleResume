@@ -32,8 +32,8 @@ export class ScifiPopup extends HTMLElement {
     const { shadowRoot } = this;
     shadowRoot.innerHTML = `<style> `+ STYLE + `</style>
       <div class="modal">
-        <div class="modal-dialog" role="dialog" aria-labelledby="title" aria-describedby="content">
-          <button class="close" aria-label="Close">✖️</button>
+      <button class="close" aria-label="Close">✖️</button>
+        <div class="modal-dialog" role="dialog" aria-labelledby="title" aria-describedby="content">          
           <div class="modal-content">
           <slot></slot>
           </div>            

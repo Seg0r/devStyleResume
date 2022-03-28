@@ -108,9 +108,10 @@
     background-color: rgba(31, 32, 41, 0.897);
     -ms-flex-item-align: center;
     align-self: center;
-    box-shadow: 0 12px 25px 0 rgba(199,175,189,.25);
+    box-shadow: 0 12px 25px 0 rgba(199,175,189,.25);    
     max-width: 80vw;
     max-height: 80%;
+    text-align: left;
 }
 
 .modal-content{    
@@ -145,6 +146,7 @@
 }
 
 button {
+  position: fixed;
   all: unset;
   cursor: pointer;
   font-size: 1.25rem;
@@ -152,6 +154,34 @@ button {
   top: 1rem;
   right: 1rem;
 }
+
 button:hover {
   border: 2px solid #fedd1f;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Track */
+.modal ::-webkit-scrollbar-track {
+  background: #000000; 
+  border-radius: 2px;
+}
+ 
+/* Handle */
+.modal ::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom, 
+    rgba(0, 0, 0, 0),
+    #fedd1f, 
+    rgba(0, 0, 0, 0)
+  ) 1% 100%;
+}
+
+/* Handle on hover */
+.modal ::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }
