@@ -23,13 +23,18 @@ export class ScrollbarUtils {
     scrollbar: Group | undefined;
     lastScrollTween: Tween<UnknownProps> | undefined;
     newScrollbarSection: number = 0;
-    prevSection: number = 0;
     cameraUtils: CameraUtils;
-    sectionChecked: boolean = false;
+    scrollChecked: boolean = false;
     chevronVisible = false;
     color: ColorRepresentation;
     cameraOrtho: any;
     sceneOrtho: Scene;
+    ticking = false;
+    scrollSensitivitySetting = 30;
+    slideDurationSetting = 600;
+    currentSlideNumber = 0;
+    swipeStart!: Touch;
+    swipeDir: number = 0;
 
     constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
         this.main = main;
@@ -40,53 +45,67 @@ export class ScrollbarUtils {
         const width = window.innerWidth;
         const height = window.innerHeight;
 
-        this.cameraOrtho = new OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
+        this.cameraOrtho = new OrthographicCamera(- width / 2, width / 2, height / 2, - height / 2, 1, 10);
         this.cameraOrtho.position.z = 10;
         this.sceneOrtho = new Scene();
     }
 
-    private scrollDirection = (e: any) => e.wheelDelta ? e.wheelDelta : -1 * e.deltaY;
-
-    public checkScroll = () => {
+    prepareListeners() {
         const _this = this;
-        if (!this.sectionChecked) {
-            this.sectionChecked = true;
-            this.sectionScrolling();
-            setTimeout(function () { _this.sectionChecked = false; }, 100);
-        };
+        window.addEventListener('touchstart', function (e) {
+            _this.swipeStart = e.changedTouches[0];
+            if (e.cancelable)
+                e.preventDefault();
+        },{ passive: false });
+
+        window.addEventListener('scroll', this.checkScroll, { passive: false });
+        window.addEventListener('wheel', this.checkScroll, { passive: false });
+        window.addEventListener('touchend', this.checkScroll, { passive: false });
+
+        this.userIdle();
     }
+
+
+
+    private scrollDirection = (ev: any) => {
+        if (ev.type === 'wheel')
+            return ev.wheelDelta ? ev.wheelDelta : -1 * ev.deltaY
+        if (ev.type === 'touchend') {
+            let end = ev.changedTouches[0];
+            return end.screenY - this.swipeStart.screenY
+        };
+    };
+
+    public checkScroll = (ev: Event) => {
+        const _this = this;
+        if (!this.scrollChecked) {
+            this.scrollChecked = true;
+            this.sectionScrolling2(ev);
+            setTimeout(function () { _this.scrollChecked = false; }, 500);
+        };
+        if (ev.cancelable)
+            ev.preventDefault();
+        return false;
+    }
+
 
     public sectionScrolling2 = (e: Event) => {
         if (this.scrollDirection(e) > 0) {
-            if (++this.scrollUp % 2) {
-                if (this.currentSection > 0) {
-                    this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                }
+            if (this.currentSection > 0) {
+                this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+                this.cameraScrolling();
             }
         } else {
-            if (++this.scrollDown % 2) {
-                if (this.currentSection < this.sections.length) {
-                    this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                }
+            if (this.currentSection < this.sections.length - 1) {
+                this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+                this.cameraScrolling();
             }
         }
     }
 
 
-    public sectionScrolling() {
-        let cameraSection = -1;
-
-        for (let index = 0; index < this.sections.length; index++) {
-            if (ScrollbarUtils.isElementInViewport(this.sections[index] as HTMLElement)) {
-                // console.log("Section " + index + " in view");
-                cameraSection = index;
-            }
-        }
-
-        if (cameraSection == -1) {
-            //non of section is in viewport
-            cameraSection=this.prevSection
-        }
+    public cameraScrolling() {
+        let cameraSection = this.currentSection;
 
         let leanAngle = 0;
         if (this.sections[cameraSection].classList.contains("left")) {
@@ -95,23 +114,18 @@ export class ScrollbarUtils {
             leanAngle = LEAN_RIGHT;
         }
 
-        //  const deltaSection = Math.sign(cameraSection - this.prevSection);
+        //move camera
+        this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 3000, MathUtils.degToRad(leanAngle));
 
-        if (cameraSection != this.prevSection) {
+        //update scrollbar
+        this.updateScrollBar(cameraSection);
+        //if last section - turn OrbitControls autorotate
+        this.cameraUtils.setAutoRotate(this.isLastSection());
 
-            //move camera
-            this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 3000, MathUtils.degToRad(leanAngle));
-            this.prevSection = cameraSection;
-            
-            //update scrollbar
-            this.updateScrollBar(cameraSection);
-            //if last section - turn OrbitControls autorotate
-            this.cameraUtils.setAutoRotate(this.isLastSection());
-        }
     }
 
-    isLastSection():boolean{
-        return this.prevSection == this.sections.length - 1;
+    isLastSection(): boolean {
+        return this.currentSection == this.sections.length - 1;
     }
 
     updateScrollBar(cameraSection: number) {
@@ -123,7 +137,7 @@ export class ScrollbarUtils {
         }
     }
 
-    updateOrthoCamera(){
+    updateOrthoCamera() {
         const width = window.innerWidth;
         const height = window.innerHeight;
 
@@ -155,14 +169,14 @@ export class ScrollbarUtils {
 
     public addScrollbar() {
 
-        if (!this.scrollbar) {            
+        if (!this.scrollbar) {
             this.createScrollbar();
             this.sceneOrtho.add(this.scrollbar!)
         }
     }
 
-    public render(renderer : WebGLRenderer){
-        renderer.render( this.sceneOrtho, this.cameraOrtho );
+    public render(renderer: WebGLRenderer) {
+        renderer.render(this.sceneOrtho, this.cameraOrtho);
     }
 
     createScrollbar() {
@@ -176,7 +190,7 @@ export class ScrollbarUtils {
         this.scrollbar = new Group();
 
         this.updateScrollbarPosition();
-        
+
         for (let index = 0; index < this.sections.length; index++) {
             const circleMesh = new Mesh(geometry, material);
             circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
@@ -190,8 +204,8 @@ export class ScrollbarUtils {
 
         this.scrollBarMark.renderOrder = 1;
         this.scrollbar.add(this.scrollBarMark);
-        this.scrollbar.scale.set(3,3,1);
-        this.scrollbar.position.setZ( 1);
+        this.scrollbar.scale.set(3, 3, 1);
+        this.scrollbar.position.setZ(1);
     }
 
 
@@ -207,11 +221,6 @@ export class ScrollbarUtils {
         var rect = el.getBoundingClientRect();
         var elemTop = rect.top;
         var elemBottom = rect.bottom;
-        // console.log(elemTop,elemBottom,window.innerHeight)
-
-        // Only completely visible elements return true:
-        // return (elemTop >= 0) && (elemBottom <= window.innerHeight);
-        // Partially visible elements return true:
         return elemTop < window.innerHeight && elemBottom >= 0;
     }
 
@@ -223,9 +232,9 @@ export class ScrollbarUtils {
         window.ontouchmove = resetTimer;  // required by some devices 
         window.onclick = resetTimer;      // catches touchpad clicks as well
         window.onkeydown = resetTimer;
-        window.addEventListener('scroll', resetTimer, true); 
+        window.addEventListener('scroll', resetTimer, true);
         window.addEventListener('wheel', resetTimer, true);
-    
+
         const fadeInChevron = () => {
             if (!this.chevronVisible && !this.isLastSection()) {
                 const chevron = document.getElementById('chevron')!;
@@ -245,14 +254,12 @@ export class ScrollbarUtils {
         }
 
         let t = setTimeout(fadeInChevron, 6000);
-    
+
         function resetTimer() {
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);  // time is in milliseconds
             fadeOutChevron();
         }
     }
-
-
 
 }

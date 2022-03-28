@@ -23,6 +23,7 @@ import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
 
 import { ScifiPopup } from './utils/ScifiPopup';
+import { throttle } from './utils/utils';
 
 
 const initAngles: DirectionAngles = {
@@ -196,7 +197,7 @@ function onWindowResize() {
     scrollbarUtils.updateScrollbarPosition();
     landscapePrompt();
 }
-window.addEventListener('resize', onWindowResize, false);
+window.addEventListener('resize', throttle(onWindowResize,50), false);
 window.addEventListener('orientationchange', onWindowResize, false);
 
 let mouse = new Vector2(0, 0);
@@ -205,7 +206,7 @@ function onDocumentMouseMove(event: any) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
-document.addEventListener('mousemove', onDocumentMouseMove, false);
+document.addEventListener('mousemove', throttle(onDocumentMouseMove,50), false);
 
 const loaderStart = document.getElementById("loader-start");
 loaderStart!.onclick = animateRock;
@@ -290,14 +291,7 @@ function onTransitionEnd(event: any) {
 function prepareForSecondScene() {
 
     //Scrollbar handling
-    addEventListener('DOMContentLoaded', scrollbarUtils.checkScroll, false);
-    window.addEventListener('load', scrollbarUtils.checkScroll, false);
-    window.addEventListener('scroll', scrollbarUtils.checkScroll, false);
-    window.addEventListener('resize', scrollbarUtils.checkScroll, false);
-    window.addEventListener('wheel', scrollbarUtils.checkScroll, false);
-    window.addEventListener('touchmove', scrollbarUtils.checkScroll, false);
-
-    scrollbarUtils.userIdle();
+    scrollbarUtils.prepareListeners();
     scrollbarUtils.addScrollbar();
 
     //enable OrbitControls on ctrl+y
