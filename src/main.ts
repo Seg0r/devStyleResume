@@ -47,9 +47,7 @@ const MAIN_COLOR = 0xfedd1f;
 /////////////////////////////////////
 // 
 /////////////////////////////////////
-//Hide default scrollbar:
-var main = document.getElementById('main')!;
-main.style.paddingRight = main.offsetWidth - main.clientWidth + "px";
+const main = document.getElementById('main')!;
 var exploreTooltip = document.getElementById('exploreTooltip')!;
 exploreTooltip.style.visibility = "hidden";
 
@@ -61,14 +59,7 @@ typewriter.type();
 
 //Define popups
 customElements.define('scifi-popup', ScifiPopup);
-const popups:NodeListOf<ScifiPopup> = document.querySelectorAll('scifi-popup');
-for (let index = 0; index < popups.length; index++) {
-    const element:ScifiPopup = popups[index];  
-    const button = document.getElementById(element.opener!);
-    button?.addEventListener('click', () => {
-        element.open = true;
-    })
-}
+ScifiPopup.registerOpeners();
 
 
 //Scene

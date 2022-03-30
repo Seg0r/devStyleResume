@@ -87,13 +87,16 @@
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 50;
   overflow-x: hidden;
   background-color: rgba(31, 32, 41, 0.5);
   opacity: 0;
+  pointer-events:none;
   transition: visibility 0s, opacity 0.25s ease;
 }
 
 .modal-dialog {
+    pointer-events:auto;
     position: relative;
     border-radius: 0px;
     border: 2px solid;
@@ -112,9 +115,10 @@
     max-width: 80vw;
     max-height: 80%;
     text-align: left;
+    z-index: 10;
 }
 
-.modal-content{    
+.modal-content{
   margin: 20px;
   transition: opacity 250ms 0ms ease;
 }
@@ -145,18 +149,20 @@
 	}
 }
 
-button {
+button.close {
   position: fixed;
   all: unset;
   cursor: pointer;
   font-size: 1.25rem;
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  right: 1rem;  
+  color: #b89f15;
+  z-index: 20;
 }
 
-button:hover {
-  border: 2px solid #fedd1f;
+button.close:hover {
+  color: #7e6d10;
 }
 
 /* width */

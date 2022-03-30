@@ -53,10 +53,12 @@ export class ScrollbarUtils {
     prepareListeners() {
         const _this = this;
         window.addEventListener('touchstart', function (e) {
-            _this.swipeStart = e.changedTouches[0];
-            if (e.cancelable)
-                e.preventDefault();
-        },{ passive: false });
+            if (_this.main.parentElement === document.activeElement) {
+                _this.swipeStart = e.changedTouches[0];
+                if (e.cancelable)
+                    e.preventDefault();
+            }
+        }, { passive: false });
 
         window.addEventListener('scroll', this.checkScroll, { passive: false });
         window.addEventListener('wheel', this.checkScroll, { passive: false });
@@ -72,19 +74,30 @@ export class ScrollbarUtils {
             return ev.wheelDelta ? ev.wheelDelta : -1 * ev.deltaY
         if (ev.type === 'touchend') {
             let end = ev.changedTouches[0];
-            return end.screenY - this.swipeStart.screenY
+            const diff = end.screenY - this.swipeStart.screenY;
+            console.log(diff)
+            if (Math.abs(diff) < 10)
+                return 0;
+            else
+                return diff;
         };
     };
 
     public checkScroll = (ev: Event) => {
         const _this = this;
-        if (!this.scrollChecked) {
-            this.scrollChecked = true;
-            this.sectionScrolling2(ev);
-            setTimeout(function () { _this.scrollChecked = false; }, 500);
-        };
-        if (ev.cancelable)
-            ev.preventDefault();
+        //enable only on body
+        if (this.main === ev.target) {
+            if (this.main.parentElement === document.activeElement) {
+                if (!this.scrollChecked) {
+                    this.scrollChecked = true;
+                    this.sectionScrolling2(ev);
+                    setTimeout(function () { _this.scrollChecked = false; }, 500);
+                };
+            }
+            if (ev.cancelable)
+                ev.preventDefault();
+        }
+
         return false;
     }
 
@@ -94,8 +107,9 @@ export class ScrollbarUtils {
             if (this.currentSection > 0) {
                 this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
                 this.cameraScrolling();
+
             }
-        } else {
+        } else if (this.scrollDirection(e) < 0) {
             if (this.currentSection < this.sections.length - 1) {
                 this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
                 this.cameraScrolling();
@@ -226,14 +240,14 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        window.onload = resetTimer;
-        window.onmousedown = resetTimer;  // catches touchscreen presses as well      
-        window.ontouchstart = resetTimer; // catches touchscreen swipes as well      
-        window.ontouchmove = resetTimer;  // required by some devices 
-        window.onclick = resetTimer;      // catches touchpad clicks as well
-        window.onkeydown = resetTimer;
-        window.addEventListener('scroll', resetTimer, true);
-        window.addEventListener('wheel', resetTimer, true);
+        window.addEventListener('load',resetTimer,{ passive: true });
+        window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
+        window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
+        window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
+        window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
+        window.addEventListener('keydown', resetTimer,{ passive: true });
+        window.addEventListener('scroll', resetTimer, { passive: true });
+        window.addEventListener('wheel', resetTimer, { passive: true });
 
         const fadeInChevron = () => {
             if (!this.chevronVisible && !this.isLastSection()) {
