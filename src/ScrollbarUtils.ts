@@ -35,6 +35,17 @@ export class ScrollbarUtils {
     currentSlideNumber = 0;
     swipeStart!: Touch;
     swipeDir: number = 0;
+    private _checkScrollDisabled: boolean = false;
+
+    public set checkScrollDisabled(value: boolean) {
+        this._checkScrollDisabled = value;
+    }
+    
+    public get checkScrollDisabled(): boolean {
+        return this._checkScrollDisabled;
+    }
+
+    
 
     constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
         this.main = main;
@@ -53,11 +64,13 @@ export class ScrollbarUtils {
     prepareListeners() {
         const _this = this;
         window.addEventListener('touchstart', function (e) {
-            if (_this.main.parentElement === document.activeElement) {
-                _this.swipeStart = e.changedTouches[0];
-                if (e.cancelable)
-                    e.preventDefault();
+            if (_this.checkScrollDisabled)
+                return;
+            _this.swipeStart = e.changedTouches[0];
+            if (_this.main.parentElement === document.activeElement && e.cancelable) {
+                e.preventDefault();
             }
+            e.stopPropagation()
         }, { passive: false });
 
         window.addEventListener('scroll', this.checkScroll, { passive: false });
@@ -73,46 +86,62 @@ export class ScrollbarUtils {
         if (ev.type === 'wheel')
             return ev.wheelDelta ? ev.wheelDelta : -1 * ev.deltaY
         if (ev.type === 'touchend') {
-            let end = ev.changedTouches[0];
+            return this.calcTouchDist(ev);
+        };
+    };
+
+    private calcTouchDist(ev: TouchEvent){
+        let end = ev.changedTouches[0];
             const diff = end.screenY - this.swipeStart.screenY;
             console.log(diff)
             if (Math.abs(diff) < 10)
                 return 0;
             else
                 return diff;
-        };
-    };
+    }
 
     public checkScroll = (ev: Event) => {
+        if (this.checkScrollDisabled)
+            return;
         const _this = this;
         //enable only on body
-        if (this.main === ev.target) {
-            if (this.main.parentElement === document.activeElement) {
-                if (!this.scrollChecked) {
-                    this.scrollChecked = true;
-                    this.sectionScrolling2(ev);
-                    setTimeout(function () { _this.scrollChecked = false; }, 500);
-                };
-            }
-            if (ev.cancelable)
-                ev.preventDefault();
+        if (!this.scrollChecked) {
+            this.scrollChecked = true;
+            console.log(ev)
+            // if (this.main === ev.target) {
+                this.sectionScrolling2(ev);
+            // } 
+            // else if (ev.type === 'touchend') {
+                // ev.target.focus();
+                //disable event on click (loosing focus)
+                // console.log("dist:"+this.calcTouchDist(ev as TouchEvent))
+                // if(this.calcTouchDist(ev as TouchEvent)==0){
+                //     if (ev.cancelable){
+                //         console.log("touchend prevented")
+                //         ev.preventDefault();
+                //     }
+                // }
+            // }
+            setTimeout(function () { _this.scrollChecked = false; }, 500);
         }
-
         return false;
     }
 
 
-    public sectionScrolling2 = (e: Event) => {
-        if (this.scrollDirection(e) > 0) {
+    public sectionScrolling2 = (ev: Event) => {
+        if (this.scrollDirection(ev) > 0) {
             if (this.currentSection > 0) {
                 this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
                 this.cameraScrolling();
-
+                if (ev.cancelable)
+                    ev.preventDefault();
             }
-        } else if (this.scrollDirection(e) < 0) {
+        } else if (this.scrollDirection(ev) < 0) {
             if (this.currentSection < this.sections.length - 1) {
                 this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
                 this.cameraScrolling();
+                if (ev.cancelable)
+                    ev.preventDefault();
             }
         }
     }
@@ -240,14 +269,14 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        window.addEventListener('load',resetTimer,{ passive: true });
-        window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
-        window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
-        window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
-        window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
-        window.addEventListener('keydown', resetTimer,{ passive: true });
-        window.addEventListener('scroll', resetTimer, { passive: true });
-        window.addEventListener('wheel', resetTimer, { passive: true });
+        // window.addEventListener('load',resetTimer,{ passive: true });
+        // window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
+        // window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
+        // window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
+        // window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
+        // window.addEventListener('keydown', resetTimer,{ passive: true });
+        // window.addEventListener('scroll', resetTimer, { passive: true });
+        // window.addEventListener('wheel', resetTimer, { passive: true });
 
         const fadeInChevron = () => {
             if (!this.chevronVisible && !this.isLastSection()) {
@@ -275,5 +304,9 @@ export class ScrollbarUtils {
             fadeOutChevron();
         }
     }
+
+    public disableCheckScroll = ()=>{this.checkScrollDisabled = true};
+    
+    public enableCheckScroll = ()=>{this.checkScrollDisabled = false};
 
 }

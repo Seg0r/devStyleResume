@@ -200,9 +200,15 @@ function onDocumentMouseMove(event: any) {
 document.addEventListener('mousemove', throttle(onDocumentMouseMove,50), false);
 
 const loaderStart = document.getElementById("loader-start");
-loaderStart!.onclick = animateRock;
+loaderStart!.addEventListener('click', animateRock);
 
 landscapePrompt();
+
+
+document.addEventListener('popupOpened', scrollbarUtils.disableCheckScroll);
+document.addEventListener('popupClosed', scrollbarUtils.enableCheckScroll);
+
+// setInterval(()=>{console.log(document.activeElement)},1000);
 
 /////////////////////////////////////
 //SCENE

@@ -32,6 +32,7 @@ export class ScifiPopup extends HTMLElement {
     const { shadowRoot } = this;
     shadowRoot.innerHTML = `<style> `+ STYLE + `</style>
       <div class="modal" tabindex="0">
+        <div class="overlay"></div>
         <div class="modal-dialog" role="dialog" aria-labelledby="title" aria-describedby="content">     
           <button class="close" aria-label="Close">&#10006</button> 
           <div class="modal-content">
@@ -46,13 +47,13 @@ export class ScifiPopup extends HTMLElement {
 
 
     shadowRoot.querySelector('button').addEventListener('click', this.close);
-    // shadowRoot.querySelector('.modal').addEventListener('click', this.close);
+    shadowRoot.querySelector('.overlay').addEventListener('click', this.close);
     this.open = this.open;
   }
 
   disconnectedCallback() {
     this.shadowRoot.querySelector('button').removeEventListener('click', this.close);
-    // this.shadowRoot.querySelector('.modal').removeEventListener('click', this.close);
+    this.shadowRoot.querySelector('.overlay').removeEventListener('click', this.close);
   }
 
   get open() {
@@ -63,20 +64,24 @@ export class ScifiPopup extends HTMLElement {
     const { shadowRoot } = this;
     shadowRoot.querySelector('.modal').classList.toggle('open', isOpen);
     shadowRoot.querySelector('.modal').setAttribute('aria-hidden', !isOpen);
+    // var refocus = this._refocus.bind(this);
     if (isOpen) {
       this._wasFocused = document.activeElement;
       this.setAttribute('open', '');
-      // document.addEventListener('keydown', this._watchEscape);
+      document.addEventListener('keydown', this._watchEscape);
       this.focus();
       shadowRoot.querySelector('button').focus();
-      //refocus as touching popup on mobile make body focused
-      document.addEventListener('touchend',this._refocus);
+      // this.addEventListener('focusout',refocus);
+      console.log("open true")
+      const openEvent = new CustomEvent('popupOpened',{bubbles: true});
+      this.dispatchEvent(openEvent);
     } else {
+      console.log("open false")
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
       this.removeAttribute('open');
-      // document.removeEventListener('keydown', this._watchEscape);
+      document.removeEventListener('keydown', this._watchEscape);
       //refocus as touching popup on mobile make body focused
-      document.removeEventListener('touchend',this._refocus);
+      // this.removeEventListener('focusout',refocus);
       this.close();
     }
   }
@@ -99,7 +104,7 @@ export class ScifiPopup extends HTMLElement {
     if (this.open !== false) {
       this.open = false;
     }
-    const closeEvent = new CustomEvent('dialog-closed');
+    const closeEvent = new CustomEvent('popupClosed',{bubbles: true});
     this.dispatchEvent(closeEvent);
   }
 
@@ -120,8 +125,6 @@ export class ScifiPopup extends HTMLElement {
   }
 
   _refocus(ev){
-    setTimeout(()=>{ 
-      ev.target.focus(); 
-    }, 50)
+    ev.preventDefault();
   }
 }
