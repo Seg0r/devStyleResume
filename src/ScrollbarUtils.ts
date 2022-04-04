@@ -101,29 +101,18 @@ export class ScrollbarUtils {
     }
 
     public checkScroll = (ev: Event) => {
-        if (this.checkScrollDisabled)
+        console.log(ev)
+        if (this.checkScrollDisabled){
             return;
+        }
         const _this = this;
-        //enable only on body
         if (!this.scrollChecked) {
-            this.scrollChecked = true;
-            console.log(ev)
-            // if (this.main === ev.target) {
-                this.sectionScrolling2(ev);
-            // } 
-            // else if (ev.type === 'touchend') {
-                // ev.target.focus();
-                //disable event on click (loosing focus)
-                // console.log("dist:"+this.calcTouchDist(ev as TouchEvent))
-                // if(this.calcTouchDist(ev as TouchEvent)==0){
-                //     if (ev.cancelable){
-                //         console.log("touchend prevented")
-                //         ev.preventDefault();
-                //     }
-                // }
-            // }
+            this.scrollChecked = true;            
+            this.sectionScrolling2(ev);
             setTimeout(function () { _this.scrollChecked = false; }, 500);
         }
+        if (ev.cancelable)
+            ev.preventDefault();
         return false;
     }
 
@@ -133,15 +122,11 @@ export class ScrollbarUtils {
             if (this.currentSection > 0) {
                 this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
                 this.cameraScrolling();
-                if (ev.cancelable)
-                    ev.preventDefault();
             }
         } else if (this.scrollDirection(ev) < 0) {
             if (this.currentSection < this.sections.length - 1) {
                 this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                this.cameraScrolling();
-                if (ev.cancelable)
-                    ev.preventDefault();
+                this.cameraScrolling(); 
             }
         }
     }

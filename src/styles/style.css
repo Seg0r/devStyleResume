@@ -10,6 +10,7 @@
   --spacing: 50vh;
   --empty: 50000px;
   --color: white;
+  --theme-color: #fedd1f;
 
   font-size: calc(12px + 0.2vw);
   font-family: SofiaPro;
@@ -28,20 +29,14 @@ main {
   position: absolute;
   text-align: center;
   margin: 0px auto;
-  padding: 15vh 0px;
-  overflow-y: scroll;
-  
   display: grid;
   grid-template-columns: repeat(20, 1fr);
-  /* scroll-snap-type: y proximity;   */
-  /* scroll-snap-type: y mandatory; */
 }
 
 main > * {
   grid-column: 6 / span 10;
   margin-bottom: var(--spacing);
   margin-top: var(--spacing);
-  scroll-snap-align: center center;
 }
 
 h2, h3 {
@@ -117,16 +112,11 @@ header {
   /* background: var(--dark-bg); */
   font-family: Hyperion;
   grid-column: 2 / span 18;
-  font-size: min(42px,6vw);
+  font-size: min(48px,6vw);
   padding: 1vw;
-  margin-top: 0;
+  margin-top: calc(var(--spacing)/3);
   white-space: nowrap;
 }
-
-header span{
-  opacity: 0;
-}
-
 
 section{
   padding: 1rem;
@@ -134,13 +124,13 @@ section{
   font-size: 1.25rem;
   line-height: 1.5;
   text-align: center;  
+  list-style-type: none;
 }
 
 blockquote {
   font-family: Ailerons;
   padding: 0;
   display:grid;
-  scroll-snap-align: center;
 }
 
 blockquote p {
@@ -159,6 +149,22 @@ blockquote p.author {
   text-align: right;
 }
 
+footer {
+  font-family: Ailerons;
+  line-height: 1;
+  text-align: left;
+  padding: 0;
+  font-size: 1.5rem;
+  padding-bottom: calc(var(--spacing)/3);
+  display:grid;
+}
+
+footer a:link, a:visited {
+  color: var(--theme-color);
+  text-decoration: none;
+}
+
+
 .center {
   grid-column: 6 / span 10;
 }
@@ -172,7 +178,7 @@ blockquote p.author {
 }
 
 a:link, a:visited {
-  color: lightgray;
+  color: var(--theme-color);
   text-decoration: none;
 }
 

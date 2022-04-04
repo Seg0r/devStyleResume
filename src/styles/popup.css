@@ -72,8 +72,9 @@
 
 */
 .modal{
-  --color-red: #fedd1f;
-  --ui-border: 1px solid $color-red;
+  --theme-color: #fedd1f;
+  --ui-border: 1px solid $theme-color;
+  --modal-width: 80vw;
   position: fixed;
   display: -ms-flexbox;
   display: flex;
@@ -96,7 +97,7 @@
 }
 
 .overlay {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.2);
   height: 100%;
   position: fixed;
   top: 0;
@@ -104,6 +105,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
+  overflow: hidden;
 }
 
 .modal-dialog {
@@ -118,20 +120,34 @@
       #fedd1f, 
       rgba(0, 0, 0, 0)
     ) 1% 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(31, 32, 41, 0.897);
     -ms-flex-item-align: center;
     align-self: center;
     box-shadow: 0 12px 25px 0 rgba(199,175,189,.25);    
-    max-width: 80vw;
+    max-width: var(--modal-width);
     max-height: 80%;
     text-align: left;
     z-index: 10;
+    display: flex;
+}
+
+.modal-header{
+  width: var(--modal-width);
+  text-align: right;
+  position: fixed;
+  z-index: 20;
 }
 
 .modal-content{
-  margin: 20px;
+  text-align: left;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
   transition: opacity 250ms 0ms ease;
+  overflow: auto;
+
+  scrollbar-color:var(--theme-color) black;
+  scrollbar-width:thin;
 }
 
 .modal:not(.open) {
@@ -141,6 +157,7 @@
   opacity: 1;
   visibility: visible;
 }
+
 /* .modal-btn:checked ~ .modal .modal-corners{
   opacity: 1;
   transform: scale(1);
@@ -153,23 +170,19 @@
 } */
 
 
-@media screen and (max-width: 500px) {
+/* @media screen and (max-width: 500px) {
 	.modal-dialog {
 		width: calc(100% - 40px);
 		padding-bottom: 15px;
 	}
-}
+} */
 
 button.close {
-  position: fixed;
   all: unset;
   cursor: pointer;
   font-size: 1.25rem;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;  
   color: #b89f15;
-  z-index: 20;
+  margin: 1rem;
 }
 
 button.close:hover {

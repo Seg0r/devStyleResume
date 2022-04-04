@@ -92,6 +92,7 @@ controls.dampingFactor = 0.05;
 controls.enabled = true;
 controls.rotateSpeed = 0.2;
 controls.enableRotate = false;
+controls.enableZoom = false;
 // controls.autoRotate=true;
 
 //Loading big images
@@ -321,12 +322,14 @@ function prepareForSecondScene() {
 function toggleExplore(){
     if (main.style.visibility == "hidden") {
         main.style.visibility = "visible";
+        controls.enableZoom = false;
         cameraUtils.panEnabled = true;
         exploreTooltip.style.visibility = "hidden";
     }
     else {
         main.style.visibility = "hidden";
         cameraUtils.panEnabled = false;
+        controls.enableZoom = true;
         exploreTooltip.style.visibility = "visible";
     }
     return false;

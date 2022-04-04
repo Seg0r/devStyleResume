@@ -33,16 +33,14 @@ export class ScifiPopup extends HTMLElement {
     shadowRoot.innerHTML = `<style> `+ STYLE + `</style>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
-        <div class="modal-dialog" role="dialog" aria-labelledby="title" aria-describedby="content">     
-          <button class="close" aria-label="Close">&#10006</button> 
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <button class="close">&#10006</button> 
+          </div>
           <div class="modal-content">
-          <slot></slot>
+            <slot></slot>
           </div>            
         </div>
-        <span class='ui-corner'></span>
-        <span class='ui-corner'></span>
-        <span class='ui-corner'></span>
-        <span class='ui-corner'></span>
       </div>`;
 
 
@@ -63,7 +61,6 @@ export class ScifiPopup extends HTMLElement {
   set open(isOpen) {
     const { shadowRoot } = this;
     shadowRoot.querySelector('.modal').classList.toggle('open', isOpen);
-    shadowRoot.querySelector('.modal').setAttribute('aria-hidden', !isOpen);
     // var refocus = this._refocus.bind(this);
     if (isOpen) {
       this._wasFocused = document.activeElement;
