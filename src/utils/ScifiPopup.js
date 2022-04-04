@@ -4,7 +4,7 @@ import STYLE from '../styles/popup.css';
 
 export class ScifiPopup extends HTMLElement {
   static get observedAttributes() {
-    return ['open','opener'];
+    return ['open', 'opener'];
   }
 
   constructor() {
@@ -30,7 +30,7 @@ export class ScifiPopup extends HTMLElement {
 
   connectedCallback() {
     const { shadowRoot } = this;
-    shadowRoot.innerHTML = `<style> `+ STYLE + `</style>
+    shadowRoot.innerHTML = `<style> ` + STYLE + `</style>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
         <div class="modal-dialog">
@@ -68,9 +68,9 @@ export class ScifiPopup extends HTMLElement {
       document.addEventListener('keydown', this._watchEscape);
       this.focus();
       shadowRoot.querySelector('button').focus();
-      shadowRoot.querySelector('.modal-content').scrollTo(0,0);
+      shadowRoot.querySelector('.modal-content').scrollTo(0, 0);
       // this.addEventListener('focusout',refocus);
-      const openEvent = new CustomEvent('popupOpened',{bubbles: true});
+      const openEvent = new CustomEvent('popupOpened', { bubbles: true });
       this.dispatchEvent(openEvent);
     } else {
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
@@ -81,7 +81,7 @@ export class ScifiPopup extends HTMLElement {
     }
   }
 
-  
+
   get opener() {
     return this.getAttribute('opener');
   }
@@ -92,14 +92,14 @@ export class ScifiPopup extends HTMLElement {
     } else {
       this.removeAttribute('opener');
     }
-  } 
+  }
 
 
   close() {
     if (this.open !== false) {
       this.open = false;
     }
-    const closeEvent = new CustomEvent('popupClosed',{bubbles: true});
+    const closeEvent = new CustomEvent('popupClosed', { bubbles: true });
     this.dispatchEvent(closeEvent);
   }
 
@@ -109,17 +109,17 @@ export class ScifiPopup extends HTMLElement {
     }
   }
 
-  static registerOpeners(){
+  static registerOpeners() {
     const popups = document.querySelectorAll('scifi-popup');
     for (let index = 0; index < popups.length; index++) {
-        const element = popups[index];
-        const button = document.getElementById(element.opener);
-        button?.addEventListener('click', () => {element.open = true;})
-        button?.addEventListener('touchend', () => {element.open = true;})
+      const element = popups[index];
+      const button = document.getElementById(element.opener);
+      button?.addEventListener('click', () => { element.open = true; })
+      button?.addEventListener('touchend', () => { element.open = true; })
     }
   }
 
-  _refocus(ev){
+  _refocus(ev) {
     ev.preventDefault();
   }
 }
