@@ -137,6 +137,11 @@ export class ScrollbarUtils {
         }
     }
 
+    public scrollCurrent() {
+            this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            this.cameraScrolling();
+    }
+
     public cameraScrolling() {
         let cameraSection = this.currentSection;
 

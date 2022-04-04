@@ -187,6 +187,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     scrollbarUtils.updateScrollbarPosition();
+    scrollbarUtils.scrollCurrent();
     landscapePrompt();
 }
 window.addEventListener('resize', throttle(onWindowResize,50), false);
