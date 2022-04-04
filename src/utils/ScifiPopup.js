@@ -68,16 +68,14 @@ export class ScifiPopup extends HTMLElement {
       document.addEventListener('keydown', this._watchEscape);
       this.focus();
       shadowRoot.querySelector('button').focus();
+      shadowRoot.querySelector('.modal-content').scrollTo(0,0);
       // this.addEventListener('focusout',refocus);
-      console.log("open true")
       const openEvent = new CustomEvent('popupOpened',{bubbles: true});
       this.dispatchEvent(openEvent);
     } else {
-      console.log("open false")
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
       this.removeAttribute('open');
       document.removeEventListener('keydown', this._watchEscape);
-      //refocus as touching popup on mobile make body focused
       // this.removeEventListener('focusout',refocus);
       this.close();
     }

@@ -91,7 +91,6 @@ export class ScrollbarUtils {
     private calcTouchDist(ev: TouchEvent){
         let end = ev.changedTouches[0];
             const diff = end.screenY - this.swipeStart.screenY;
-            console.log(diff)
             if (Math.abs(diff) < 10)
                 return 0;
             else
@@ -99,7 +98,6 @@ export class ScrollbarUtils {
     }
 
     public checkScroll = (ev: Event) => {
-        console.log(ev)
         if (this.checkScrollDisabled){
             return;
         }
