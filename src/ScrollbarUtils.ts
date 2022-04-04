@@ -15,8 +15,6 @@ export class ScrollbarUtils {
     sections: HTMLCollection;
     main: HTMLElement;
     currentSection = 0;
-    scrollUp = 0;
-    scrollDown = 0;
 
     scrollBarMark: Object3D | undefined;
     lastScrollbarSection: number = 0;
@@ -117,20 +115,29 @@ export class ScrollbarUtils {
     }
 
 
-    public sectionScrolling2 = (ev: Event) => {
+    private sectionScrolling2 = (ev: Event) => {
         if (this.scrollDirection(ev) > 0) {
             if (this.currentSection > 0) {
-                this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                this.cameraScrolling();
+                this.scrollUp();
             }
         } else if (this.scrollDirection(ev) < 0) {
-            if (this.currentSection < this.sections.length - 1) {
-                this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-                this.cameraScrolling(); 
-            }
+            this.scrollDown();
         }
     }
 
+    private scrollDown() {
+        if (this.currentSection < this.sections.length - 1) {
+            this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            this.cameraScrolling(); 
+        }
+    }
+
+    private scrollUp() {
+        if (this.currentSection > 0) {
+            this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            this.cameraScrolling();
+        }
+    }
 
     public cameraScrolling() {
         let cameraSection = this.currentSection;
@@ -254,18 +261,19 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        // window.addEventListener('load',resetTimer,{ passive: true });
-        // window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
-        // window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
-        // window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
-        // window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
-        // window.addEventListener('keydown', resetTimer,{ passive: true });
-        // window.addEventListener('scroll', resetTimer, { passive: true });
-        // window.addEventListener('wheel', resetTimer, { passive: true });
+        const that=this;
+        const chevron = document.getElementById('chevron')!;
+        window.addEventListener('load',resetTimer,{ passive: true });
+        window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
+        window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
+        window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
+        window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
+        window.addEventListener('keydown', resetTimer,{ passive: true });
+        window.addEventListener('scroll', resetTimer, { passive: true });
+        window.addEventListener('wheel', resetTimer, { passive: true });
 
         const fadeInChevron = () => {
-            if (!this.chevronVisible && !this.isLastSection()) {
-                const chevron = document.getElementById('chevron')!;
+            if (!this.chevronVisible && !this.isLastSection()) {                
                 chevron.classList.add('chevron-container-fade-in');
                 chevron.classList.remove('chevron-container-fade');
                 this.chevronVisible = true;
@@ -274,7 +282,6 @@ export class ScrollbarUtils {
 
         const fadeOutChevron = () => {
             if (this.chevronVisible) {
-                const chevron = document.getElementById('chevron')!;
                 chevron.classList.add('chevron-container-fade');
                 chevron.classList.remove('chevron-container-fade-in');
                 this.chevronVisible = false;
@@ -283,10 +290,13 @@ export class ScrollbarUtils {
 
         let t = setTimeout(fadeInChevron, 6000);
 
-        function resetTimer() {
+        function resetTimer(ev:Event) {
             clearTimeout(t);
-            t = setTimeout(fadeInChevron, 6000);  // time is in milliseconds
+            t = setTimeout(fadeInChevron, 6000);
             fadeOutChevron();
+            if((ev.type === 'click' || ev.type === 'touchend') && ev.target == chevron){
+                that.scrollDown();
+            }
         }
     }
 

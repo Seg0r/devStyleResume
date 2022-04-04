@@ -4,7 +4,7 @@
 $base: 0.5rem;
 
 .chevron-container {
-    position: absolute;
+    position: fixed;
     top:75vh;
     display: flex;
     justify-content: center;

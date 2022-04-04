@@ -142,7 +142,7 @@
 .modal-content{
   text-align: left;
   padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-right: 2rem;
   transition: opacity 250ms 0ms ease;
   overflow: auto;
 
@@ -182,7 +182,7 @@ button.close {
   cursor: pointer;
   font-size: 1.25rem;
   color: #b89f15;
-  margin: 1rem;
+  margin-right: 1rem;
 }
 
 button.close:hover {
