@@ -111,15 +111,21 @@
 .modal-dialog {
     pointer-events:auto;
     position: relative;
-    border-radius: 0px;
-    border: 2px solid;
-    border-image: 
+    /*border-radius: 0px;
+    /*border: 2px solid;
+     border-image: 
     linear-gradient(
       to bottom, 
       rgba(0, 0, 0, 0),
       #fedd1f, 
       rgba(0, 0, 0, 0)
-    ) 1% 100%;
+    ) 1% 100%; */
+    border: 40px solid;
+    border-image-source: url(/assets/hud/border.svg);
+    border-image-slice: 50% 40% 50% 40%;
+    border-image-width: 20%;
+    border-image-outset: 1;
+    border-image-repeat: stretch;
     overflow: hidden;
     background-color: rgba(31, 32, 41, 0.897);
     -ms-flex-item-align: center;
