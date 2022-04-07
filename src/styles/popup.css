@@ -73,7 +73,6 @@
 */
 .modal{
   --theme-color: #fedd1f;
-  --ui-border: 1px solid $theme-color;
   --modal-width: 80vw;
   position: fixed;
   display: -ms-flexbox;
@@ -111,28 +110,22 @@
 .modal-dialog {
     pointer-events:auto;
     position: relative;
-    /*border-radius: 0px;
-    /*border: 2px solid;
-     border-image: 
+    border-radius: 0px;
+    border: 2px solid;
+    border-image: 
     linear-gradient(
-      to bottom, 
+      to right, 
       rgba(0, 0, 0, 0),
       #fedd1f, 
       rgba(0, 0, 0, 0)
-    ) 1% 100%; */
-    border: 40px solid;
-    border-image-source: url(/assets/hud/border.svg);
-    border-image-slice: 50% 40% 50% 40%;
-    border-image-width: 20%;
-    border-image-outset: 1;
-    border-image-repeat: stretch;
+    ) 100% 1%;
     overflow: hidden;
     background-color: rgba(31, 32, 41, 0.897);
     -ms-flex-item-align: center;
     align-self: center;
     box-shadow: 0 12px 25px 0 rgba(199,175,189,.25);    
     max-width: var(--modal-width);
-    max-height: 80%;
+    max-height: 80vh;
     text-align: left;
     z-index: 10;
     display: flex;
@@ -149,7 +142,7 @@
   text-align: left;
   padding-left: 1.5rem;
   padding-right: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1rem;
   transition: opacity 250ms 0ms ease;
   overflow: auto;
 
@@ -189,7 +182,7 @@ button.close {
   cursor: pointer;
   font-size: 1.25rem;
   color: #b89f15;
-  margin-right: 1rem;
+  margin-right: 0.3rem;
 }
 
 button.close:hover {
@@ -222,3 +215,22 @@ button.close:hover {
 .modal ::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
+
+.modal-corners{    
+  position: relative;
+  -ms-flex-item-align: center;
+  align-self: center;
+  border-radius: 2px;
+}
+
+.ui-corner {
+  --ui-border: 2px solid var(--theme-color);
+  width: 3vw;
+  height: 3vw;
+  position: absolute;
+}
+
+.ui-corner:nth-of-type(1) { top: -0.3rem; left: -0.3rem; border-left: var(--ui-border); border-top: var(--ui-border); }
+.ui-corner:nth-of-type(2) { top: -0.3rem; right: -0.3rem; border-right: var(--ui-border); border-top: var(--ui-border); }
+.ui-corner:nth-of-type(3) { bottom: -0.3rem; right: -0.3rem; border-bottom: var(--ui-border); border-right: var(--ui-border); }
+.ui-corner:nth-of-type(4) { bottom: -0.3rem; left: -0.3rem; border-bottom: var(--ui-border); border-left: var(--ui-border); }

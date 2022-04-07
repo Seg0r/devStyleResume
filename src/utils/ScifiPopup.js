@@ -33,16 +33,21 @@ export class ScifiPopup extends HTMLElement {
     shadowRoot.innerHTML = `<style> ` + STYLE + `</style>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
-        <div class="modal-dialog">
-          <div class="modal-header">
-            <button class="close">&#10006</button> 
+        <div class="modal-corners">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <button class="close">&#10006</button> 
+            </div>
+            <div class="modal-content">
+              <slot></slot>
+            </div>                     
           </div>
-          <div class="modal-content">
-            <slot></slot>
-          </div>            
-        </div>
-      </div>`;
-
+          <span class='ui-corner'></span>
+          <span class='ui-corner'></span>
+          <span class='ui-corner'></span>
+          <span class='ui-corner'></span>   
+        <div>
+      </div>`; 
 
     shadowRoot.querySelector('button').addEventListener('click', this.close);
     shadowRoot.querySelector('.overlay').addEventListener('click', this.close);
