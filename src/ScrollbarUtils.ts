@@ -2,6 +2,7 @@
 import { Easing, Tween } from '@tweenjs/tween.js';
 import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
 import { CameraUtils } from './CameraUtils';
+import { throttle } from './utils/utils';
 
 const LEAN_LEFT = 30;
 const LEAN_RIGHT = -LEAN_LEFT;
@@ -71,9 +72,17 @@ export class ScrollbarUtils {
             e.stopPropagation()
         }, { passive: false });
 
-        window.addEventListener('scroll', this.checkScroll, { passive: false });
-        window.addEventListener('wheel', this.checkScroll, { passive: false });
-        window.addEventListener('touchend', this.checkScroll, { passive: false });
+        const boundCheckScroll = this.checkScroll;
+        const boundScrollDown = this.scrollDown.bind(this);
+
+        window.addEventListener('scroll', throttle(boundCheckScroll,200), { passive: false });
+        window.addEventListener('wheel', throttle(boundCheckScroll,200), { passive: false });
+        window.addEventListener('touchend', boundCheckScroll, { passive: false });
+        
+        const chevron = document.getElementById('chevron')!;
+        chevron.addEventListener('click',boundScrollDown,{ passive: true });
+        chevron.addEventListener('touchend',boundScrollDown,{ passive: true });
+        
 
         this.userIdle();
     }
@@ -101,12 +110,7 @@ export class ScrollbarUtils {
         if (this.checkScrollDisabled){
             return;
         }
-        const _this = this;
-        if (!this.scrollChecked) {
-            this.scrollChecked = true;            
-            this.sectionScrolling2(ev);
-            setTimeout(function () { _this.scrollChecked = false; }, 500);
-        }
+        this.sectionScrolling2(ev);
         if (ev.cancelable)
             ev.preventDefault();
         return false;
@@ -266,14 +270,14 @@ export class ScrollbarUtils {
     public userIdle() {
         const that=this;
         const chevron = document.getElementById('chevron')!;
-        window.addEventListener('load',resetTimer,{ passive: true });
-        window.addEventListener('mousedown',resetTimer,{ passive: true });  // catches touchscreen presses as well      
-        window.addEventListener('touchstart',resetTimer,{ passive: true }); // catches touchscreen swipes as well      
-        window.addEventListener('touchmove',resetTimer,{ passive: true });  // required by some devices 
-        window.addEventListener('click',resetTimer,{ passive: true });      // catches touchpad clicks as well
-        window.addEventListener('keydown', resetTimer,{ passive: true });
-        window.addEventListener('scroll', resetTimer, { passive: true });
-        window.addEventListener('wheel', resetTimer, { passive: true });
+        window.addEventListener('load',throttle(resetTimer,100),{ passive: true });
+        window.addEventListener('mousedown',throttle(resetTimer,100),{ passive: true });  // catches touchscreen presses as well      
+        window.addEventListener('touchstart',throttle(resetTimer,100),{ passive: true }); // catches touchscreen swipes as well      
+        window.addEventListener('touchmove',throttle(resetTimer,100),{ passive: true });  // required by some devices 
+        window.addEventListener('click',throttle(resetTimer,100),{ passive: true });      // catches touchpad clicks as well
+        window.addEventListener('keydown', throttle(resetTimer,100),{ passive: true });
+        window.addEventListener('scroll', throttle(resetTimer,100), { passive: true });
+        window.addEventListener('wheel', throttle(resetTimer,100), { passive: true });
 
         const fadeInChevron = () => {
             if (!this.chevronVisible && !this.isLastSection()) {                
@@ -294,13 +298,11 @@ export class ScrollbarUtils {
         let t = setTimeout(fadeInChevron, 6000);
 
         function resetTimer(ev:Event) {
+            console.log(ev)
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);
-            fadeOutChevron();
-            if((ev.type === 'click' || ev.type === 'touchend') && ev.target == chevron){
-                that.scrollDown();
-            }
-        }
+            fadeOutChevron();            
+        }    
     }
 
     public disableCheckScroll = ()=>{this.checkScrollDisabled = true};
