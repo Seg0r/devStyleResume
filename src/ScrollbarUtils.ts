@@ -99,11 +99,11 @@ export class ScrollbarUtils {
 
     private calcTouchDist(ev: TouchEvent){
         let end = ev.changedTouches[0];
-            const diff = end.screenY - this.swipeStart.screenY;
-            if (Math.abs(diff) < 10)
-                return 0;
-            else
-                return diff;
+        const diff = end?.screenY - this.swipeStart.screenY;
+        if (Math.abs(diff) < 10)
+            return 0;
+        else
+            return diff;
     }
 
     public checkScroll = (ev: Event) => {
@@ -118,11 +118,12 @@ export class ScrollbarUtils {
 
 
     private sectionScrolling2 = (ev: Event) => {
-        if (this.scrollDirection(ev) > 0) {
+        const dir = this.scrollDirection(ev)
+        if (dir > 0) {
             if (this.currentSection > 0) {
                 this.scrollUp();
             }
-        } else if (this.scrollDirection(ev) < 0) {
+        } else if (dir < 0) {
             this.scrollDown();
         }
     }
@@ -298,7 +299,6 @@ export class ScrollbarUtils {
         let t = setTimeout(fadeInChevron, 6000);
 
         function resetTimer(ev:Event) {
-            console.log(ev)
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);
             fadeOutChevron();            
