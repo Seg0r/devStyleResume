@@ -74,14 +74,12 @@ export class ScifiPopup extends HTMLElement {
       this.focus();
       shadowRoot.querySelector('button').focus();
       shadowRoot.querySelector('.modal-content').scrollTo(0, 0);
-      // this.addEventListener('focusout',refocus);
       const openEvent = new CustomEvent('popupOpened', { bubbles: true });
       this.dispatchEvent(openEvent);
     } else {
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
       this.removeAttribute('open');
       document.removeEventListener('keydown', this._watchEscape);
-      // this.removeEventListener('focusout',refocus);
       this.close();
     }
   }
@@ -116,11 +114,15 @@ export class ScifiPopup extends HTMLElement {
 
   static registerOpeners() {
     const popups = document.querySelectorAll('scifi-popup');
+    var swipe = false;
     for (let index = 0; index < popups.length; index++) {
       const element = popups[index];
       const button = document.getElementById(element.opener);
       button?.addEventListener('click', () => { element.open = true; })
-      button?.addEventListener('touchend', () => { element.open = true; })
+      
+      button?.addEventListener('touchstart', () => { swipe = false;})
+      button?.addEventListener('touchmove', () => { swipe = true;})
+      button?.addEventListener('touchend', () => { if(!swipe)element.open = true;})
     }
   }
 
