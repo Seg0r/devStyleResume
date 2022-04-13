@@ -47,7 +47,7 @@ export class ScifiPopup extends HTMLElement {
           <span class='ui-corner'></span>
           <span class='ui-corner'></span>   
         <div>
-      </div>`; 
+      </div>`;
 
     shadowRoot.querySelector('button').addEventListener('click', this.close);
     shadowRoot.querySelector('.overlay').addEventListener('click', this.close);

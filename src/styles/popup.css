@@ -78,11 +78,11 @@
 }
 
 .modal:not(.open) {
-  animation: modal-out 1s 1 ease both;
+  animation: modal-out 0.5s 1 ease both;
 }
 
 .modal.open {
-  animation: modal-in 1s 1 ease both;
+  animation: modal-in 0.5s 1 ease both;
 }
 
 .modal:not(.open) .modal-dialog , .modal:not(.open) .modal-corners {

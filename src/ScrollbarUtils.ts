@@ -39,12 +39,12 @@ export class ScrollbarUtils {
     public set checkScrollDisabled(value: boolean) {
         this._checkScrollDisabled = value;
     }
-    
+
     public get checkScrollDisabled(): boolean {
         return this._checkScrollDisabled;
     }
 
-    
+
 
     constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
         this.main = main;
@@ -75,14 +75,14 @@ export class ScrollbarUtils {
         const boundCheckScroll = this.checkScroll;
         const boundScrollDown = this.scrollDown.bind(this);
 
-        window.addEventListener('scroll', throttle(boundCheckScroll,200), { passive: false });
-        window.addEventListener('wheel', throttle(boundCheckScroll,200), { passive: false });
+        window.addEventListener('scroll', throttle(boundCheckScroll, 200), { passive: false });
+        window.addEventListener('wheel', throttle(boundCheckScroll, 200), { passive: false });
         window.addEventListener('touchend', boundCheckScroll, { passive: false });
-        
+
         const chevron = document.getElementById('chevron')!;
-        chevron.addEventListener('click',boundScrollDown,{ passive: true });
-        chevron.addEventListener('touchend',boundScrollDown,{ passive: true });
-        
+        chevron.addEventListener('click', boundScrollDown, { passive: true });
+        chevron.addEventListener('touchend', boundScrollDown, { passive: true });
+
 
         this.userIdle();
     }
@@ -97,7 +97,7 @@ export class ScrollbarUtils {
         };
     };
 
-    private calcTouchDist(ev: TouchEvent){
+    private calcTouchDist(ev: TouchEvent) {
         let end = ev.changedTouches[0];
         const diff = end?.screenY - this.swipeStart.screenY;
         if (Math.abs(diff) < 10)
@@ -107,7 +107,7 @@ export class ScrollbarUtils {
     }
 
     public checkScroll = (ev: Event) => {
-        if (this.checkScrollDisabled){
+        if (this.checkScrollDisabled) {
             return;
         }
         this.sectionScrolling2(ev);
@@ -131,7 +131,7 @@ export class ScrollbarUtils {
     private scrollDown() {
         if (this.currentSection < this.sections.length - 1) {
             this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-            this.cameraScrolling(); 
+            this.cameraScrolling();
         }
     }
 
@@ -143,8 +143,8 @@ export class ScrollbarUtils {
     }
 
     public scrollCurrent() {
-            this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
-            this.cameraScrolling();
+        this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+        this.cameraScrolling();
     }
 
     public cameraScrolling() {
@@ -269,19 +269,19 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        const that=this;
+        const that = this;
         const chevron = document.getElementById('chevron')!;
-        window.addEventListener('load',throttle(resetTimer,100),{ passive: true });
-        window.addEventListener('mousedown',throttle(resetTimer,100),{ passive: true });  // catches touchscreen presses as well      
-        window.addEventListener('touchstart',throttle(resetTimer,100),{ passive: true }); // catches touchscreen swipes as well      
-        window.addEventListener('touchmove',throttle(resetTimer,100),{ passive: true });  // required by some devices 
-        window.addEventListener('click',throttle(resetTimer,100),{ passive: true });      // catches touchpad clicks as well
-        window.addEventListener('keydown', throttle(resetTimer,100),{ passive: true });
-        window.addEventListener('scroll', throttle(resetTimer,100), { passive: true });
-        window.addEventListener('wheel', throttle(resetTimer,100), { passive: true });
+        window.addEventListener('load', throttle(resetTimer, 100), { passive: true });
+        window.addEventListener('mousedown', throttle(resetTimer, 100), { passive: true });  // catches touchscreen presses as well      
+        window.addEventListener('touchstart', throttle(resetTimer, 100), { passive: true }); // catches touchscreen swipes as well      
+        window.addEventListener('touchmove', throttle(resetTimer, 100), { passive: true });  // required by some devices 
+        window.addEventListener('click', throttle(resetTimer, 100), { passive: true });      // catches touchpad clicks as well
+        window.addEventListener('keydown', throttle(resetTimer, 100), { passive: true });
+        window.addEventListener('scroll', throttle(resetTimer, 100), { passive: true });
+        window.addEventListener('wheel', throttle(resetTimer, 100), { passive: true });
 
         const fadeInChevron = () => {
-            if (!this.chevronVisible && !this.isLastSection()) {                
+            if (!this.chevronVisible && !this.isLastSection()) {
                 chevron.classList.add('chevron-container-fade-in');
                 chevron.classList.remove('chevron-container-fade');
                 this.chevronVisible = true;
@@ -298,15 +298,15 @@ export class ScrollbarUtils {
 
         let t = setTimeout(fadeInChevron, 6000);
 
-        function resetTimer(ev:Event) {
+        function resetTimer(ev: Event) {
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);
-            fadeOutChevron();            
-        }    
+            fadeOutChevron();
+        }
     }
 
-    public disableCheckScroll = ()=>{this.checkScrollDisabled = true};
-    
-    public enableCheckScroll = ()=>{this.checkScrollDisabled = false};
+    public disableCheckScroll = () => { this.checkScrollDisabled = true };
+
+    public enableCheckScroll = () => { this.checkScrollDisabled = false };
 
 }

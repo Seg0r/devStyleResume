@@ -10,12 +10,11 @@ $base: 0.5rem;
     transform: translateX(-50%);
     display: flex;
     justify-content: center;
-    // align-items: center;
     width: 10vh;
     height: 10vh;
     opacity: 0;
     transition: 2.5s opacity;
-    z-index: 30;
+    z-index: 10;
 }
 
 .chevron-container-fade {
