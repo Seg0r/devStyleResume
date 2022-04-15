@@ -38,7 +38,7 @@ export class ScifiPopup extends HTMLElement {
             <div class="modal-header">
               <button class="close">&#10006</button> 
             </div>
-            <div class="modal-content"> 
+            <div class="modal-content">
               <slot></slot>
             </div>                     
           </div>

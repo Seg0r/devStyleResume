@@ -12,6 +12,8 @@ interface TweenObject {
 declare type UnknownProps = Record<string, any>;
 declare type SplineDef = { vector: Vector3, mark: boolean }[]
 
+const panLimitFactor = 100;
+
 export class CameraUtils {
 
     camera: PerspectiveCamera;
@@ -88,7 +90,7 @@ export class CameraUtils {
         this.camera.lookAt(origin);
         this.setPanCameraConstants();
         this.orbitControls = controls;
-        this.cameraPanLimit = universeSize / 160;
+        this.cameraPanLimit = universeSize / panLimitFactor;
         this.deltaPos = universeSize / 800;
         this.universeFactor = DEFAULT_UNIVERSE_SIZE / universeSize;
         const calcSpline = this.calcSplinePoints(cameraSplineDefinition);
