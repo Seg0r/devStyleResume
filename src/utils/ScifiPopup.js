@@ -1,6 +1,6 @@
 'use strict';
 
-import STYLE from '../styles/popup.css';
+import STYLE from '../styles/popup.scss';
 
 export class ScifiPopup extends HTMLElement {
   static get observedAttributes() {
@@ -30,22 +30,34 @@ export class ScifiPopup extends HTMLElement {
 
   connectedCallback() {
     const { shadowRoot } = this;
-    shadowRoot.innerHTML = `<style> ` + STYLE + `</style>
+
+    const filter = `<div><svg><filter id="filter">
+    <feTurbulence type="turbulence" baseFrequency="0.01 0.01" numOctaves="2" seed="2" stitchTiles="stitch" result="turbulence"/>
+    <feColorMatrix type="saturate" values="30" in="turbulence" result="colormatrix"/>
+    <feColorMatrix type="matrix" values="1 0 0 0 0
+  0 1 0 0 0
+  0 0 1 0 0
+  0 0 0 150 -15" in="colormatrix" result="colormatrix1"/>
+    <feComposite in="SourceGraphic" in2="colormatrix1" operator="in" result="composite"/>
+    <feDisplacementMap in="SourceGraphic" in2="colormatrix1" scale="15" xChannelSelector="R" yChannelSelector="A" result="displacementMap"/>
+  </filter></svg></div>`
+    
+    shadowRoot.innerHTML =  filter + `<style> ` + STYLE + `</style>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
         <div class="modal-corners">
           <div class="modal-dialog">
             <div class="modal-header">
-              <button class="close">&#10006</button> 
+              <button class="close">&#10006</button>
             </div>
             <div class="modal-content">
               <slot></slot>
-            </div>                     
+            </div>
           </div>
           <span class='ui-corner'></span>
           <span class='ui-corner'></span>
           <span class='ui-corner'></span>
-          <span class='ui-corner'></span>   
+          <span class='ui-corner'></span>
         <div>
       </div>`;
 
@@ -122,7 +134,7 @@ export class ScifiPopup extends HTMLElement {
       
       button?.addEventListener('touchstart', () => { swipe = false;})
       button?.addEventListener('touchmove', () => { swipe = true;})
-      button?.addEventListener('touchend', () => { if(!swipe)element.open = true;})
+      button?.addEventListener('touchend', () => { if(!swipe)element.open = true; }) //TODO: add open/close audio
     }
   }
 
