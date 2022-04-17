@@ -41,8 +41,8 @@ export class ScifiPopup extends HTMLElement {
     <feComposite in="SourceGraphic" in2="colormatrix1" operator="in" result="composite"/>
     <feDisplacementMap in="SourceGraphic" in2="colormatrix1" scale="15" xChannelSelector="R" yChannelSelector="A" result="displacementMap"/>
   </filter></svg></div>`
-    
-    shadowRoot.innerHTML =  filter + `<style> ` + STYLE + `</style>
+
+    shadowRoot.innerHTML = filter + `<style> ` + STYLE + `</style>
       <audio id="audio_in" src="/sounds/popup_in.wav"></audio>
       <audio id="audio_out" src="/sounds/popup_out.wav"></audio>
       <div class="modal" tabindex="0">
@@ -138,10 +138,10 @@ export class ScifiPopup extends HTMLElement {
       const element = popups[index];
       const button = document.getElementById(element.opener);
       button?.addEventListener('click', () => { element.open = true; })
-      
-      button?.addEventListener('touchstart', () => { swipe = false;})
-      button?.addEventListener('touchmove', () => { swipe = true;})
-      button?.addEventListener('touchend', () => { if(!swipe)element.open = true; })
+
+      button?.addEventListener('touchstart', () => { swipe = false; })
+      button?.addEventListener('touchmove', () => { swipe = true; })
+      button?.addEventListener('touchend', () => { if (!swipe) element.open = true; })
     }
   }
 
