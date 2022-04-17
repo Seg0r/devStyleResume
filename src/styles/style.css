@@ -119,6 +119,7 @@ header {
   padding: 1vw;
   margin-top: calc(var(--spacing)/3);
   white-space: nowrap;
+  z-index: 20;
 }
 
 section{
