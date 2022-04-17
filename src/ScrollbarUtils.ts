@@ -158,7 +158,7 @@ export class ScrollbarUtils {
         }
 
         //move camera
-        this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 2000, MathUtils.degToRad(leanAngle));
+        this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 2250, MathUtils.degToRad(leanAngle));
 
         //update scrollbar
         this.updateScrollBar(cameraSection);

@@ -101,6 +101,6 @@ export class Stars {
 
 
     private distanceFactor(distance: number): number {
-        return Math.pow(distance*this.universeFactor, 1.85) / (this.univerSize / 8);
+        return Math.pow(distance*this.universeFactor, 1.85) / (this.univerSize / 10);
     }
 }
