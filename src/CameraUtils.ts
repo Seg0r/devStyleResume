@@ -290,7 +290,10 @@ export class CameraUtils {
 
         const _this=this;
         this.scrollSound.duration = duration/1000.0;     
-        setTimeout(function () { _this.scrollSound.play(); }, 100);
+        setTimeout(function () { 
+            if(!_this.scrollSound.isPlaying){
+                _this.scrollSound.play()}; 
+            }, 100);
     
     }
 

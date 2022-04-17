@@ -141,7 +141,7 @@ export class ScifiPopup extends HTMLElement {
       
       button?.addEventListener('touchstart', () => { swipe = false;})
       button?.addEventListener('touchmove', () => { swipe = true;})
-      button?.addEventListener('touchend', () => { if(!swipe)element.open = true; }) //TODO: add open/close audio
+      button?.addEventListener('touchend', () => { if(!swipe)element.open = true; })
     }
   }
 
