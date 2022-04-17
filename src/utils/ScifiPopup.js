@@ -43,6 +43,8 @@ export class ScifiPopup extends HTMLElement {
   </filter></svg></div>`
     
     shadowRoot.innerHTML =  filter + `<style> ` + STYLE + `</style>
+      <audio id="audio_in" src="/sounds/popup_in.wav"></audio>
+      <audio id="audio_out" src="/sounds/popup_out.wav"></audio>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
         <div class="modal-corners">
@@ -63,7 +65,8 @@ export class ScifiPopup extends HTMLElement {
 
     shadowRoot.querySelector('button').addEventListener('click', this.close);
     shadowRoot.querySelector('.overlay').addEventListener('click', this.close);
-    this.open = this.open;
+    // dont play audio_out on start
+    // this.open = this.open;
   }
 
   disconnectedCallback() {
@@ -88,10 +91,14 @@ export class ScifiPopup extends HTMLElement {
       shadowRoot.querySelector('.modal-content').scrollTo(0, 0);
       const openEvent = new CustomEvent('popupOpened', { bubbles: true });
       this.dispatchEvent(openEvent);
+      var audio = shadowRoot.getElementById('audio_in');
+      audio.play();
     } else {
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
       this.removeAttribute('open');
       document.removeEventListener('keydown', this._watchEscape);
+      var audio = shadowRoot.getElementById("audio_out");
+      audio.play();
       this.close();
     }
   }
