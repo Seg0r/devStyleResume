@@ -1,7 +1,8 @@
 #loading-screen > * {
     --size: 15vw;
     --margin: calc(-1*var(--size)/2);
-    font-size: calc(12px + 0.5vw);
+    --font-size: calc(12px + 0.5vw);
+    font-size: var(--font-size);
 }
 
 #loading-screen {
@@ -110,28 +111,53 @@
     flex-direction: column;      
 }
 
-#loader-prompt > pre{
+#loader-prompt {
     font-family: "Orbitron";
     font-weight: lighter ;
     font-style: normal;
     /* font-size: 20px; */
     color: #fedd1f;
     text-align: center;
-    margin: 4px;
+    margin: 4px;    
+}
+
+#loader-landscape {
+    opacity: 0;  
+    transition: 2s opacity;  
+}
+
+#loader-loading {
+    opacity: 1;
+    animation: blinking 2s 0s linear infinite;
+}
+
+#loader-start {
     opacity: 0;
 }
 
-
-.blink {   
-    animation: fadein 1.5s 0s 1 linear both, blinking 3s 1.5s linear infinite;
+#loader-loaded {
+    display: grid;
+}
+ 
+#loader-loading , #loader-start{
+    grid-column: 1;
+    grid-row: 1;
 }
 
-.fadein {   
-    animation: fadein 1.5s 0s 1 linear both;
+#loader-loaded.loaded > #loader-loading {
+    animation: fadeout 0.5s 0s 1 ease-in both;
+}
+#loader-loaded.loaded > #loader-start {
+    animation: fadein 1.5s 0.5s 1 ease-out both;
+    cursor: pointer;
+}
+
+.fadein {
+    opacity:1 !important;
 }
 
 .fadeout {   
-    animation: fadeout 1.5s 0s 1 linear both;
+    opacity:0 !important;
 }
 
 @keyframes fadein {
@@ -149,29 +175,6 @@
     50% {opacity: 0.2;}
     100% {opacity: 1;}
 }
-
-
-/* #f1 {
-    animation: fade 0.7s 0s 1 linear both, blinking 1.5s 0.8s 1 linear forwards;
-}
-
-#f2 {
-    animation: fade 0.7s 3s 1 linear both, blinking 1.5s 3.7s 1 linear forwards;
-}
-
-#f3 {
-    animation: fade 0.7s 5.9s 1 linear both, blinking 1.5s 6.6s linear infinite;
-}
-
-
-@keyframes slide {
-    0%   {-webkit-transform: translate(0%, 0%);  -ms-transform:translate(0%, 0%);  transform: translate(0%, 0%);}
-    31%  {-webkit-transform: translate(0%, 0%);  -ms-transform:translate(0%, 0%);  transform: translate(0%, 0%);}
-    35%  {-webkit-transform: translate(0%, -30%);-ms-transform:translate(0%, -30%);transform: translate(0%, -30%);}
-    64%  {-webkit-transform: translate(0%, -30%);-ms-transform:translate(0%, -30%);transform: translate(0%, -30%);}
-    68%  {-webkit-transform: translate(0%, -60%);-ms-transform:translate(0%, -60%);transform: translate(0%, -60%);}
-    100% {-webkit-transform: translate(0%, -60%);-ms-transform:translate(0%, -60%);transform: translate(0%, -60%);}
-} */
 
 
 /* show page */

@@ -103,8 +103,8 @@ const loadingManager = new LoadingManager(() => {
     const timeDiff = new Date().getTime() - startDate;
     const timeout = timeDiff >= minDiff ? 1 : minDiff - timeDiff;
     setTimeout(() => {
-        const continueButton = document.getElementById('loader-start')!;
-        continueButton.classList.add('blink');
+        const continueButton = document.getElementById('loader-loaded')!;
+        continueButton.classList.add('loaded');
     }, timeout);
 
     return;
@@ -224,11 +224,11 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (true) {
+if (false) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
-    minDiff = 10;
-    listener.gain.gain.value = 0;
+    minDiff = 5000;
+    // listener.gain.gain.value = 0;
     //scene.overrideMaterial = new MeshBasicMaterial({ color: "green" });
 }
 
