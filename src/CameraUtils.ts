@@ -101,7 +101,7 @@ export class CameraUtils {
 
         const _this=this;
         const audioLoader = new AudioLoader();
-        audioLoader.load( 'sounds/scroll2.wav', function( buffer ) {
+        audioLoader.load( 'sounds/scroll2.mp3', function( buffer ) {
             _this.scrollSound.setBuffer( buffer );
         });
     }

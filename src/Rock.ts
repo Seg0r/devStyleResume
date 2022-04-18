@@ -73,9 +73,9 @@ export class Rock {
         this.camera.add( this.listener );
         this.createHalo();
         this.importRock();
-        this.loadSound(this.listener, 'sounds/lava.wav');
-        this.loadSound(this.listener, 'sounds/explosion.wav');   
-        this.loadSound(this.listener, 'sounds/explosion2.wav');
+        this.loadSound(this.listener, 'sounds/lava.mp3');
+        this.loadSound(this.listener, 'sounds/explosion.mp3');   
+        this.loadSound(this.listener, 'sounds/explosion2.mp3');
         // this.createGUI();
     }
 
@@ -370,9 +370,9 @@ export class Rock {
             }  
         }        
 
-        this.playSound('sounds/lava.wav',0,6,8,0.3,17);
-        this.playSound('sounds/explosion.wav',13.2,1.3,1.8,0.7,undefined);   
-        this.playSound('sounds/explosion2.wav',16.5,0,1,1,2);
+        this.playSound('sounds/lava.mp3',0,6,8,0.3,17);
+        this.playSound('sounds/explosion.mp3',13.2,1.3,1.8,0.7,undefined);   
+        this.playSound('sounds/explosion2.mp3',16.5,0,1,1,2);
     }
 
     playSound(soundName: string, delay:number,offset: number, fadeInTime: number, rate:number, duration:number|undefined){

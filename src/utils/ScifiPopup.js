@@ -54,8 +54,8 @@ export class ScifiPopup extends HTMLElement {
 </filter></svg></div>`
 
     shadowRoot.innerHTML = filter + filter2 + `<style> ` + STYLE + `</style>
-      <audio id="audio_in" src="/sounds/popup_in.wav"></audio>
-      <audio id="audio_out" src="/sounds/popup_out.wav"></audio>
+      <audio id="audio_in" src="/sounds/popup_in.mp3"></audio>
+      <audio id="audio_out" src="/sounds/popup_out.mp3"></audio>
       <div class="modal" tabindex="0">
         <div class="overlay"></div>
         <div class="modal-corners">

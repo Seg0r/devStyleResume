@@ -117,7 +117,7 @@ const listener = new AudioListener();
 camera.add( listener );
 const ambienceSound = new Audio( listener );
 const audioLoader = new AudioLoader(loadingManager);
-audioLoader.load( 'sounds/ambience3.wav', function( buffer ) {
+audioLoader.load( 'sounds/ambience3.mp3', function( buffer ) {
     ambienceSound.setBuffer( buffer );
     ambienceSound.setLoop( true );  
     ambienceSound.setVolume(0.2);    
@@ -227,7 +227,7 @@ universe.addToScene(scene);
 if (false) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
-    minDiff = 5000;
+    minDiff = 10;
     // listener.gain.gain.value = 0;
     //scene.overrideMaterial = new MeshBasicMaterial({ color: "green" });
 }
