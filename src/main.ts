@@ -93,8 +93,7 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.enabled = true;
 controls.rotateSpeed = 0.2;
-controls.enableRotate = false;
-controls.enableZoom = false;
+toggleControls(false);
 // controls.autoRotate=true;
 
 //Loading big images
@@ -312,7 +311,7 @@ function prepareForSecondScene() {
     main.style.visibility = "visible";
     cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
     cameraUtils.panEnabled = true;
-    controls.enableRotate = true;
+    toggleControls(false);
 
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
@@ -325,15 +324,17 @@ function prepareForSecondScene() {
 function toggleExplore(){
     if (main.style.visibility == "hidden") {
         main.style.visibility = "visible";
-        controls.enableZoom = false;
+        toggleControls(false);
         cameraUtils.panEnabled = true;
         exploreTooltip.style.visibility = "hidden";
+        scrollbarUtils.enableCheckScroll();
     }
     else {
         main.style.visibility = "hidden";
         cameraUtils.panEnabled = false;
-        controls.enableZoom = true;
+        toggleControls(true);
         exploreTooltip.style.visibility = "visible";
+        scrollbarUtils.disableCheckScroll();
     }
     return false;
 }
@@ -378,4 +379,10 @@ function landscapePrompt(){
             loaderLandscape?.classList.remove('fadein');
         }
     }
+}
+
+function toggleControls(val: boolean){
+    controls.enableRotate = val;
+    controls.enableZoom = val;
+    controls.enablePan = val;
 }
