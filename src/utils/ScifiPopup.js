@@ -42,7 +42,7 @@ export class ScifiPopup extends HTMLElement {
     <feDisplacementMap in="SourceGraphic" in2="colormatrix1" scale="15" xChannelSelector="R" yChannelSelector="A" result="displacementMap"/>
   </filter></svg></div>`
 
-  const filter2 = `<div><svg><filter id="filter2">
+    const filter2 = `<div><svg><filter id="filter2">
   <feTurbulence type="turbulence" baseFrequency="0.007 0.008" numOctaves="2" seed="2" stitchTiles="stitch" result="turbulence"/>
   <feColorMatrix type="saturate" values="30" in="turbulence" result="colormatrix"/>
   <feColorMatrix type="matrix" values="1 1 0 0 0

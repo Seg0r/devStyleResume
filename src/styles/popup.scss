@@ -201,3 +201,14 @@ button.close:hover {
   95%  {filter: url(#filter);}
   100% {filter: none;}
 }
+
+svg {
+  /* absolute positioning takes svg out of flow of the document, it is positioned relative to it's closest parent with 'relative' or 'absolute' positioning, in this case the body */
+  position: absolute;
+  /* setting this makes it so that the svg won't eat up any clicks meant for elements underneath it */
+  pointer-events: none;
+  
+  /* you can use these offsets to change where exactly the svg is positioned */
+  top: 0;
+  left: 0;
+}
