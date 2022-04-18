@@ -42,7 +42,18 @@ export class ScifiPopup extends HTMLElement {
     <feDisplacementMap in="SourceGraphic" in2="colormatrix1" scale="15" xChannelSelector="R" yChannelSelector="A" result="displacementMap"/>
   </filter></svg></div>`
 
-    shadowRoot.innerHTML = filter + `<style> ` + STYLE + `</style>
+  const filter2 = `<div><svg><filter id="filter2">
+  <feTurbulence type="turbulence" baseFrequency="0.007 0.008" numOctaves="2" seed="2" stitchTiles="stitch" result="turbulence"/>
+  <feColorMatrix type="saturate" values="30" in="turbulence" result="colormatrix"/>
+  <feColorMatrix type="matrix" values="1 1 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+0 0 0 200 -20" in="colormatrix" result="colormatrix1"/>
+  <feComposite in="SourceGraphic" in2="colormatrix1" operator="in" result="composite"/>
+  <feDisplacementMap in="SourceGraphic" in2="colormatrix1" scale="20" xChannelSelector="R" yChannelSelector="A" result="displacementMap"/>
+</filter></svg></div>`
+
+    shadowRoot.innerHTML = filter + filter2 + `<style> ` + STYLE + `</style>
       <audio id="audio_in" src="/sounds/popup_in.wav"></audio>
       <audio id="audio_out" src="/sounds/popup_out.wav"></audio>
       <div class="modal" tabindex="0">
