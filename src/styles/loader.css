@@ -92,8 +92,8 @@
 }
 
 #loader-text:after{
-      content: "|";
-      animation: fadein 500ms linear infinite alternate;
+    content: "|";
+    animation: fadein 500ms linear infinite alternate;
 }
 
 
@@ -108,22 +108,17 @@
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;   
-    flex-direction: column;      
-}
-
-#loader-prompt {
+    flex-direction: column;   
     font-family: "Orbitron";
     font-weight: lighter ;
     font-style: normal;
-    /* font-size: 20px; */
     color: #fedd1f;
     text-align: center;
-    margin: 4px;    
+    margin: 4px;       
 }
 
 #loader-landscape {
-    opacity: 0;  
-    transition: 2s opacity;  
+    opacity: 0;
 }
 
 #loader-loading {
@@ -153,11 +148,11 @@
 }
 
 .fadein {
-    opacity:1 !important;
+    animation: fadein 1.5s 0s 1 linear both;
 }
 
 .fadeout {   
-    opacity:0 !important;
+    animation: fadeout 1.5s 0s 1 linear both;
 }
 
 @keyframes fadein {
