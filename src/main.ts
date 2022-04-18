@@ -22,7 +22,9 @@ import { Nebula } from './Nebula';
 import { ScrollbarUtils } from './ScrollbarUtils';
 import { Rock } from './Rock';
 
+// @ts-ignore 
 import { ScifiPopup } from './utils/ScifiPopup';
+// @ts-ignore 
 import { throttle } from './utils/utils';
 
 
@@ -156,7 +158,7 @@ const nebula = new Nebula(UNIVERSE_SIZE, scene, loadingManager);
 const stars = new Stars(UNIVERSE_SIZE, UNIVERSE_SIZE * 0.7, cameraUtils);
 
 //SolarSystem
-const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager, camera, listener);
+const solarSystem = new SolarSystem(SOLAR_CENTER, SOLAR_SIZE, 800, initAngles, loadingManager, listener);
 
 //Magnetic field
 // const magneticField: MagneticField = new MagneticField(SOLAR_CENTER, SOLAR_SIZE, 20, initAngles, renderer, camera);

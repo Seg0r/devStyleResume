@@ -1,5 +1,5 @@
 
-import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight,AudioListener, PositionalAudio, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3, AudioLoader, Camera } from "three";
+import { BoxBufferGeometry, Group, LoadingManager, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, PointLight,AudioListener, PositionalAudio, RepeatWrapping, Scene, SphereBufferGeometry, Texture, TextureLoader, Vector3, AudioLoader } from "three";
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 import { GUI } from 'lil-gui';
@@ -79,7 +79,7 @@ export class SolarSystem {
     loadingManager: LoadingManager;
     sound: PositionalAudio;
 
-    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, camera: Camera, listener: AudioListener) {
+    public constructor(center: Vector3, size: number, count: number, initAngles: DirectionAngles, loadingManager: LoadingManager, listener: AudioListener) {
 
         this.solarSystem = new Group();
         this.vector3 = new Vector3();

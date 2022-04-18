@@ -2,6 +2,7 @@
 import { Easing, Tween } from '@tweenjs/tween.js';
 import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
 import { CameraUtils } from './CameraUtils';
+// @ts-ignore 
 import { throttle } from './utils/utils';
 
 const LEAN_LEFT = 30;
@@ -269,7 +270,6 @@ export class ScrollbarUtils {
 
 
     public userIdle() {
-        const that = this;
         const chevron = document.getElementById('chevron')!;
         window.addEventListener('load', throttle(resetTimer, 100), { passive: true });
         window.addEventListener('mousedown', throttle(resetTimer, 100), { passive: true });  // catches touchscreen presses as well      
@@ -298,7 +298,7 @@ export class ScrollbarUtils {
 
         let t = setTimeout(fadeInChevron, 6000);
 
-        function resetTimer(ev: Event) {
+        function resetTimer() {
             clearTimeout(t);
             t = setTimeout(fadeInChevron, 6000);
             fadeOutChevron();
