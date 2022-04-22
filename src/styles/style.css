@@ -25,16 +25,13 @@ main {
   width: 100vw;
   height: 100%;
   color: var(--color);
-  /* main can't have z-index so chevron can be 
-     clickable without overlaping popup */
-  /* z-index: 20; */
   position: absolute;
   text-align: center;
   margin: 0px auto;
   display: grid;
   grid-template-columns: repeat(20, 1fr);
-  /* need 1 for Safari - canvas overlaping main */
-  z-index: 1;
+  /* need z-index for Safari - canvas overlaping main */
+  z-index: 5;
 }
 
 main > * {

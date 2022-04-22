@@ -104,6 +104,7 @@ export class ScifiPopup extends HTMLElement {
       this.dispatchEvent(openEvent);
       var audio = shadowRoot.getElementById('audio_in');
       audio.play();
+      document.getElementById('chevron').style.visibility='hidden';
     } else {
       this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
       this.removeAttribute('open');
@@ -111,6 +112,7 @@ export class ScifiPopup extends HTMLElement {
       var audio = shadowRoot.getElementById("audio_out");
       audio.play();
       this.close();
+      document.getElementById('chevron').style.visibility='visible';
     }
   }
 
