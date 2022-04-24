@@ -6,3 +6,5 @@ temp
 .firebaserc
 firebase-debug.*
 .firebase
+cypress/screenshots
+cypress/videos
