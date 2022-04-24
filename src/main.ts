@@ -303,9 +303,11 @@ function prepareForSecondScene() {
 
     //exlore links from end of page
     const exploreLink = document.getElementById("exploreLink");
-    exploreLink!.onclick = toggleExplore;
+    exploreLink!.addEventListener('click',toggleExplore);
+    exploreLink!.addEventListener('touchend',toggleExplore);
     const unExploreLink = document.getElementById("unExploreLink");
-    unExploreLink!.onclick = toggleExplore;
+    unExploreLink!.addEventListener('click',toggleExplore);
+    unExploreLink!.addEventListener('touchend',toggleExplore);
 
     //Scene setup
     main.style.visibility = "visible";
