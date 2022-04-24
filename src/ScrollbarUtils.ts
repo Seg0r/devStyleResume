@@ -67,22 +67,24 @@ export class ScrollbarUtils {
             if (_this.checkScrollDisabled)
                 return;
             _this.swipeStart = e.changedTouches[0];
-            if (_this.main.parentElement === document.activeElement && e.cancelable) {
-                e.preventDefault();
-            }
-            e.stopPropagation()
+            // const target = e.target as HTMLElement;
+            // if (e.cancelable) {
+            //     //need to prevent for scroll working properly
+            //     e.preventDefault();
+            // }
+            // e.stopPropagation()
         }, { passive: false });
 
         const boundCheckScroll = this.checkScroll;
         const boundScrollDown = this.scrollDown.bind(this);
 
-        window.addEventListener('scroll', throttle(boundCheckScroll, 200), { passive: false });
+        // window.addEventListener('scroll', throttle(boundCheckScroll, 200), { passive: false });
         window.addEventListener('wheel', throttle(boundCheckScroll, 200), { passive: false });
         window.addEventListener('touchend', boundCheckScroll, { passive: false });
 
         const chevron = document.getElementById('chevron')!;
-        chevron.addEventListener('click', boundScrollDown, { passive: true });
-        chevron.addEventListener('touchend', boundScrollDown, { passive: true });
+        chevron.addEventListener('click', boundScrollDown, { passive: false });
+        chevron.addEventListener('touchend', boundScrollDown, { passive: false });
 
 
         this.userIdle();
@@ -100,7 +102,7 @@ export class ScrollbarUtils {
 
     private calcTouchDist(ev: TouchEvent) {
         let end = ev.changedTouches[0];
-        const diff = end?.screenY - this.swipeStart.screenY;
+        const diff = end?.screenY - this.swipeStart?.screenY;
         if (Math.abs(diff) < 10)
             return 0;
         else
@@ -111,9 +113,12 @@ export class ScrollbarUtils {
         if (this.checkScrollDisabled) {
             return;
         }
+        // console.log(ev)
         this.sectionScrolling2(ev);
-        if (ev.cancelable)
-            ev.preventDefault();
+        if (ev.type == "wheel" && ev.cancelable){
+            ev.preventDefault();            
+        }
+        ev.stopPropagation();
         return false;
     }
 
@@ -121,17 +126,20 @@ export class ScrollbarUtils {
     private sectionScrolling2 = (ev: Event) => {
         const dir = this.scrollDirection(ev)
         if (dir > 0) {
-            if (this.currentSection > 0) {
-                this.scrollUp();
-            }
+            this.scrollUp();
         } else if (dir < 0) {
             this.scrollDown();
-        }
+        } 
+        // else{
+        //     console.log(dir)
+        // }
     }
 
     private scrollDown() {
         if (this.currentSection < this.sections.length - 1) {
             this.sections[++this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            // this.sections[++this.currentSection].scrollIntoView(true);
+            // console.log("Scrolled down to section "+this.currentSection)
             this.cameraScrolling();
         }
     }
@@ -139,12 +147,16 @@ export class ScrollbarUtils {
     private scrollUp() {
         if (this.currentSection > 0) {
             this.sections[--this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            // this.sections[--this.currentSection].scrollIntoView(true);
+            // console.log("Scrolled up to section "+this.currentSection)
             this.cameraScrolling();
         }
     }
 
     public scrollCurrent() {
         this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+        // this.sections[this.currentSection].scrollIntoView(true);
+        // console.log("Scrolled current section "+this.currentSection+" into view")
         this.cameraScrolling();
     }
 

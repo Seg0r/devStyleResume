@@ -18,6 +18,7 @@
   font-style: normal;
   overflow: hidden;
   cursor: url('../assets/hud/pointer.png'), pointer;
+  touch-action: none;
 }
 
 
