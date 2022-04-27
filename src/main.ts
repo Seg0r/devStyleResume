@@ -3,7 +3,7 @@
 import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
-
+import './styles/gallery.scss';
 
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
@@ -225,7 +225,7 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (false) {
+if (true) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
     minDiff = 10;

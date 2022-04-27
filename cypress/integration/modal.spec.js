@@ -2,9 +2,23 @@ const { lstat } = require("fs")
 
 describe('tests', () => {
     beforeEach(() => {
-      cy.viewport('iphone-x', 'landscape')
       cy.visitMobile('http://localhost:3000')
-      cy.get('#loader-start > a').click()
+      cy.get('#loader-start').click()
+    })
+
+    it('scroll to first paragraph', () => {
+        cy.viewport('iphone-x', 'landscape')
+        cy.get('blockquote').first().isNotInViewport()
+        cy.get('#main').swipe('bottom', 'top')
+        cy.get('blockquote').first().isWithinViewport()
+    })
+
+    it('scroll to last paragraph', () => {
+        cy.viewport('iphone-x', 'landscape')
+        cy.get('#main > p').each(
+            ()=>{swipe('bottom', 'top')}
+        )
+        cy.get('#footer').isWithinViewport()
     })
 
     context('test popup', () => {
@@ -35,6 +49,8 @@ describe('tests', () => {
             cy.get('#popup1 > p').last().isNotInViewport()
 
         })
+
+        
     })
 })
   

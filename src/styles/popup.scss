@@ -1,7 +1,7 @@
 
 .modal{
   --theme-color: #fedd1f;
-  --modal-width: 80vw;
+  --modal-width:  var(--max-modal-width, 80vw);
   --scale-out: 0.1,0.05;
   --scale-mid: 0.8,0.1;
   position: fixed;
@@ -62,7 +62,7 @@
 }
 
 .modal-header{
-  width: var(--modal-width);
+  width: 100%;
   text-align: right;
   position: fixed;
   z-index: 20;
@@ -73,7 +73,8 @@
   padding-left: 1.5rem;
   padding-right: 2rem;
   margin-bottom: 1rem;  
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-color:var(--theme-color) black;
   scrollbar-width:thin;
   pointer-events:auto;
