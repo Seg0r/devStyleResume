@@ -226,7 +226,7 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (true) {
+if (false) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
     minDiff = 10;
