@@ -3,7 +3,17 @@ $rows: 2;
 $cols: 3;
 $scale: 1.2;
 $shift: 10%;
+$yshift: 5%;
 $nshift: -10%;
+$ynshift: -5%;
+$scale-factor:3;
+$trans-factor:11;
+$maxh: 50vh;
+$maxw: 85vw;
+
+.gallery-header {
+  z-index: 1;
+}
 
 .gallery {
   place-items: center;
@@ -16,13 +26,13 @@ $nshift: -10%;
   grid-gap: 1em;
   overflow: hidden;
   z-index: 5;
-  width: max-content;
-  height: 50vh;
+  width: 85vw;
+  height: 70vh;
 }
   
 .gallery input:not(:checked) + label > img {
     
-    object-fit: cover;
+    // object-fit: cover;
     width: 100%;
     height: 100%;
     left: 0;
@@ -31,59 +41,106 @@ $nshift: -10%;
     position: relative;
     box-shadow: 0 0 0 #0000;
     opacity: 0.67;
-    filter: sepia(60%);
+    filter: sepia(80%);
     will-change: transform, opacity;
     z-index:5;
   
     &:hover {
       opacity: 1;
-      z-index: 1;
+      z-index: 10;
       transition: all $time ease;
       filter: sepia(0%);
       border-radius: 5px;
-      transform: scale($scale);
       cursor: zoom-in;
-      object-fit: contain;
+
+      // transform: scale($scale);
     }
 }
 
-.gallery input:nth-child(1):not(:checked) + label > img:hover{
-  // left: 25%;
-  transform: translate($shift, $shift) scale($scale);
-}
+// .gallery input:nth-child(1):not(:checked) + label > img:hover{
+//   transform: translate($shift, $shift) scale($scale);
+// }
 
-.gallery input:nth-child(5):not(:checked) + label > img:hover{
-  transform: translate($nshift, $shift) scale($scale);
-}
+// .gallery input:nth-child(3):not(:checked) + label > img:hover{
+//   transform: translate(0, $shift) scale($scale);
+// }
 
-.gallery input:nth-child(7):not(:checked) + label > img:hover{
-  transform: translate($shift, $nshift) scale($scale);
-}
+// .gallery input:nth-child(5):not(:checked) + label > img:hover{
+//   transform: translate($nshift, $shift) scale($scale);
+// }
 
-.gallery input:nth-child(11):not(:checked) + label > img:hover{
-  transform: translate($nshift, $nshift) scale($scale);
-}
+// .gallery input:nth-child(7):not(:checked) + label > img:hover{
+//   transform: translate($shift, $nshift) scale($scale);
+// }
+
+// .gallery input:nth-child(9):not(:checked) + label > img:hover{
+//   transform: translate(0, $nshift) scale($scale);
+// }
+
+// .gallery input:nth-child(11):not(:checked) + label > img:hover{
+//   transform: translate($nshift, $nshift) scale($scale);
+// }
 
 .gallery input {
     display: none;
 }
 
 .gallery input:checked + label > img {
-  position:fixed;
   width: 100%;
   height: 100%;
-  z-index: 10;
+  position: relative;
   opacity: 1;
-  will-change: transform, opacity;
-  transition: transform $time ease;
-  // position: relative;
+  z-index: 20;
+  transition: all $time ease;
   filter: sepia(0%);
-  border-radius: 5px;
   object-fit:scale-down;
-  transform: scale(4);
-  left: 0;
-  top: 0;
-  // transform: translate(-50%, -50%) ;
-  visibility: visible;
+  
   cursor: zoom-out;
+  transform: scale($scale*$scale-factor);
 }
+
+.gallery input:nth-child(1):checked + label > img{
+  transform: translate($shift*$trans-factor, $yshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+.gallery input:nth-child(3):checked + label > img{
+  transform: translate(0, $yshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+.gallery input:nth-child(5):checked + label > img{
+  transform: translate($nshift*$trans-factor, $yshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+.gallery input:nth-child(7):checked + label > img{
+  transform: translate($shift*$trans-factor, $ynshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+.gallery input:nth-child(9):checked + label > img{
+  transform: translate(0, $ynshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+.gallery input:nth-child(11):checked + label > img{
+  transform: translate($nshift*$trans-factor, $ynshift*$trans-factor) scale($scale*$scale-factor);
+}
+
+
+
+
+
+// .gallery input:checked + label > img {
+//   position:absolute;
+//   width: 100%;
+//   height: 100%;
+//   z-index: 10;
+//   opacity: 1;
+//   will-change: transform, opacity;
+//   // transition: all $time ease;
+//   // position: relative;
+//   filter: sepia(0%);
+//   border-radius: 5px;
+//   object-fit:scale-down;
+//   left: 50%;
+//   top: 50%;
+//   transform: translate(-50%, -50%);
+//   cursor: zoom-out;
+// }
