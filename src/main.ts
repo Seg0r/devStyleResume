@@ -134,9 +134,9 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new Vector3(-800, 400, 10).multiplyScalar(UNIVERSE_FACTOR), mark: false },
     { vector: new Vector3(-400, 600, 600).multiplyScalar(UNIVERSE_FACTOR), mark: true },
     { vector: new Vector3(-1000, 100, 0).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new Vector3(100, 600, 500).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new Vector3(1000, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new Vector3(300, 700, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
+    { vector: new Vector3(200, 400, -200).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(1000, -200, -700).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(500, 500, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
 ];
 
 let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition, listener);
