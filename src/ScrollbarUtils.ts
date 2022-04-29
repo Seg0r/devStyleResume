@@ -157,10 +157,10 @@ export class ScrollbarUtils {
         this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
         // this.sections[this.currentSection].scrollIntoView(true);
         // console.log("Scrolled current section "+this.currentSection+" into view")
-        this.cameraScrolling();
+        this.cameraScrolling(false);
     }
 
-    public cameraScrolling() {
+    public cameraScrolling(playAudio: boolean = true) {
         let cameraSection = this.currentSection;
 
         let leanAngle = 0;
@@ -171,7 +171,7 @@ export class ScrollbarUtils {
         }
 
         //move camera
-        this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 2250, MathUtils.degToRad(leanAngle));
+        this.cameraUtils.moveCameraAlongSplineAndLean(cameraSection, 2250, MathUtils.degToRad(leanAngle),playAudio);
 
         //update scrollbar
         this.updateScrollBar(cameraSection);

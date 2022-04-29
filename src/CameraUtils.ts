@@ -228,7 +228,7 @@ export class CameraUtils {
         })
     }
 
-    public moveCameraAlongSplineAndLean(section: number, time: number, leanAngle: number) {
+    public moveCameraAlongSplineAndLean(section: number, time: number, leanAngle: number, playAudio:boolean) {
 
         if (section >= this.cameraSplineVectors.length)
             return;
@@ -262,7 +262,7 @@ export class CameraUtils {
                 currentTarget.copy(this.orbitControls.target);
                 // endQuaternion.copy(CameraUtils.calcCameraLookAtQuaternion(this.camera, curve.getPoint(endPosition), this.origin, leanAngle));
                 endTarget.copy(CameraUtils.calcCameraLookAtVector3(this.camera, this.cameraSpline.getPoint(splinePoint), this.origin, leanAngle));
-                this.playScrollEffect(duration);
+                if(playAudio)this.playScrollEffect(duration);
             })
             .to({ t: 1, pos: splinePoint }, duration)
             .onUpdate((tween) => {
