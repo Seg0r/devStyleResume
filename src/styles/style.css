@@ -59,7 +59,7 @@ h1 {
 }
 
 .left h1{
-  transform: rotateY(7deg) rotateZ(-2deg);
+  transform: rotateY(7deg) rotateZ(-2deg) translateZ(-50px);
   text-shadow: 0px 0px 0 rgb(230,230,230),
     -1px 0px 0 rgb(205,205,205),
     -2px 0px 0 rgb(180,180,180),
@@ -71,7 +71,7 @@ h1 {
 }
 
 .right h1{
-  transform: rotateY(-7deg) rotateZ(2deg);
+  transform: rotateY(-7deg) rotateZ(2deg) translateZ(-50px);
   text-shadow: 0px 0px 0 rgb(230,230,230),
     1px 0px 0 rgb(205,205,205),
     2px 0px 0 rgb(180,180,180),
