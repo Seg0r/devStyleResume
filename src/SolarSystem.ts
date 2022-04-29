@@ -191,10 +191,10 @@ export class SolarSystem {
 
         let geometry: ConvexGeometry;
 
-        const stoneTexture = new TextureLoader(this.loadingManager).load('assets/moons/stoneTexture.jpg');
+        const stoneTexture = new TextureLoader(this.loadingManager).load('assets/moons/stoneTexture.webp');
         stoneTexture.wrapS = RepeatWrapping;
         stoneTexture.wrapT = RepeatWrapping;
-        const stoneNormalMap = new TextureLoader(this.loadingManager).load('assets/moons/stoneNormalMap.jpg');
+        const stoneNormalMap = new TextureLoader(this.loadingManager).load('assets/moons/stoneNormalMap.webp');
         const material = new MeshStandardMaterial({
             map: stoneTexture,
             normalMap: stoneNormalMap,
@@ -288,8 +288,8 @@ export class SolarSystem {
     // Effect is not suitable for this solution
     // @ts-ignore
     private createLensflare(size: number): Lensflare {
-        //const textureFlare0 = textureLoader.load('assets/lensflare0.png');
-        const textureFlare3 = new TextureLoader(this.loadingManager).load('assets/lensflare3.png');
+        //const textureFlare0 = textureLoader.load('assets/lensflare0.webp');
+        const textureFlare3 = new TextureLoader(this.loadingManager).load('assets/lensflare3.webp');
 
         const lensflare = new Lensflare();
         //lensflare.addElement(new LensflareElement(textureFlare0, size / 10, 0, new Color(0xfe9b14)));

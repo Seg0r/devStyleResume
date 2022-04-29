@@ -82,8 +82,8 @@ export class Rock {
 
     createHalo() {
 
-        const halo = new TextureLoader().load('../assets/rock/halo2.png');
-        const corona = new TextureLoader().load('../assets/rock/corona3.png');
+        const halo = new TextureLoader().load('../assets/rock/halo2.webp');
+        const corona = new TextureLoader().load('../assets/rock/corona3.webp');
         const haloMat = new SpriteMaterial({
             map: halo,
             blending: AdditiveBlending,
