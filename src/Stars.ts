@@ -46,6 +46,12 @@ export class Stars {
             mesh.position.set(x, y, z);
             const distanceX = new Vector2(x, z).distanceTo(new Vector2(this.center.x, this.center.z));
             const distance = mesh.position.distanceTo(this.center);
+
+            if(distance < this.univerSize/2){
+                --i;
+                continue;
+            }
+
             mesh.scale.set(0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor, 0.01 + distance / meshScaleFactor);
             mesh.lookAt(this.center);
 
