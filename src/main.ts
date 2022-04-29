@@ -96,7 +96,7 @@ toggleControls(false);
 // controls.autoRotate=true;
 
 //Loading big images
-let minDiff = 11000;
+let minDiff = 9000;
 let skipAnimateRock = false;
 const startDate = new Date().getTime();
 const loadingManager = new LoadingManager(() => {
