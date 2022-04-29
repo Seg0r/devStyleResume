@@ -61,7 +61,6 @@ typewriter.type();
 
 //Define popups
 customElements.define('scifi-popup', ScifiPopup);
-ScifiPopup.registerOpeners();
 
 
 //Scene
@@ -204,7 +203,7 @@ function onDocumentMouseMove(event: any) {
 document.addEventListener('mousemove', throttle(onDocumentMouseMove,50), false);
 
 const loaderStart = document.getElementById("loader-start");
-loaderStart!.addEventListener('click', animateRock);
+loaderStart!.addEventListener('click', animateIntro);
 
 landscapePrompt();
 
@@ -295,6 +294,9 @@ function prepareForSecondScene() {
     scrollbarUtils.prepareListeners();
     scrollbarUtils.addScrollbar();
 
+    //do not change touch behaviour until second scene
+    ScifiPopup.registerOpeners();
+
     //enable OrbitControls on ctrl+y
     document.addEventListener('keydown', function (event) {
         if (event.ctrlKey && event.key === 'y') {
@@ -343,7 +345,10 @@ function toggleExplore(){
 }
 
 
-function animateRock(){
+function animateIntro(){
+    if(isMobile()){
+        openFullscreen();
+    }
     const loadingScreen = document.getElementById('loading-screen')!;
     loadingScreen.classList.add('fade-out');
     loadingScreen.addEventListener('transitionend', onTransitionEnd);
@@ -388,4 +393,23 @@ function toggleControls(val: boolean){
     controls.enableRotate = val;
     controls.enableZoom = val;
     controls.enablePan = val;
+}
+
+
+function openFullscreen() {
+  var elem: any = window.document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+
+function isMobile(){
+    if( "ontouchstart" in document.documentElement)
+        return true;    
+    else
+        return false;
 }

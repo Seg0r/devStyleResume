@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "test": "cypress run --browser chrome"
+    "test": "cypress run --browser chrome",
+    "emulate": "npm run build && firebase emulators:start"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
