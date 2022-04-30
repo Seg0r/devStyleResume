@@ -143,7 +143,7 @@ export class Rock {
     prepareMaterial() {
         let that = this;
 
-        const rock = new TextureLoader().load('../assets/moons/stoneTexture.jpg');
+        const rock = new TextureLoader().load('../assets/moons/stoneTexture.webp');
         rock.wrapS = rock.wrapT = MirroredRepeatWrapping;
 
         const noise = new TextureLoader().load('../assets/noise1.png');
