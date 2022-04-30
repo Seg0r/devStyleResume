@@ -1,0 +1,72 @@
+
+// animations
+h1[tooltip] {
+	&:before,
+	&:after {
+		transform: translateY(10px);
+	}
+	
+	&:hover:after,
+	&:hover:before {
+		transform: translateY(0px);
+	}
+}
+
+
+h1[tooltip] {
+
+	&:after,
+	&:before {
+        text-shadow: none;
+		position: absolute;
+		visibility: hidden;
+		opacity: 0;
+		transition: transform 200ms ease, opacity 200ms;
+		// box-shadow: 0 0 10px rgba(black,0.3);
+		z-index: 99;
+        
+	}
+
+	&:before {
+		content: "CLICK ME!";
+		background: rgba(0, 0, 0, 0.6);
+		color: #fedd1f;
+		font-size: 2rem;
+		font-weight: bold;
+		padding: 5px 7px;
+		border-radius: 10px;
+		white-space: nowrap;
+		text-decoration: none;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	&:after {
+		width: 0;
+		height: 0;
+		border: 11px solid transparent;
+		content: '';
+	}
+
+	&:hover:after,
+	&:hover:before {
+		visibility: visible;
+		opacity: 0.85;
+		transform: translateY(0px);
+	}
+}
+
+// top tooltip
+h1[tooltip]:before {
+	bottom: 80%;
+	left: 38%;
+	margin-bottom: 10px;
+}
+
+h1[tooltip]:after {
+	border-top-color: rgba(0, 0, 0, 0.6);
+	border-bottom: none;
+	bottom: 79%;
+	left: calc(49%);
+	margin-bottom: 0px;
+}

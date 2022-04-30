@@ -4,6 +4,7 @@ import './styles/style.css';
 import './styles/loader.css';
 import './styles/chevron.scss';
 import './styles/gallery.scss';
+import './styles/tooltip.scss';
 
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
@@ -96,7 +97,7 @@ toggleControls(false);
 // controls.autoRotate=true;
 
 //Loading big images
-let minDiff = 9000;
+let minDiff = 8000;
 let skipAnimateRock = false;
 const startDate = new Date().getTime();
 const loadingManager = new LoadingManager(() => {
@@ -225,7 +226,7 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (false) {
+if (true) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
     minDiff = 10;
@@ -314,9 +315,16 @@ function prepareForSecondScene() {
 
     //Scene setup
     main.style.visibility = "visible";
+    var letters = document.querySelectorAll('[id^="header"]');
+    for (var i = 0; i < letters.length; i++) {
+        letters[i].classList.add('print');
+    }
     cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
     cameraUtils.panEnabled = true;
     toggleControls(false);
+
+    //reset to top of page on reload
+    window.scrollTo(0, 0); 
 
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
@@ -361,12 +369,7 @@ function animateIntro(){
     animationPromise.then(() => {
         const fadeScreen = document.getElementById('loadOverlay')!;
         fadeScreen.classList.add('fade-in-out');
-        setTimeout(() => {                
-            main.style.visibility == "visible";
-            var letters = document.querySelectorAll('[id^="header"]');
-            for (var i = 0; i < letters.length; i++) {
-                letters[i].classList.add('print');
-            }
+        setTimeout(() => {
             fadeScreen.addEventListener('animationend', onTransitionEnd);
             prepareForSecondScene();
         }, 1000);
