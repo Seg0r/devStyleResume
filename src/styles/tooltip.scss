@@ -21,10 +21,9 @@ h1[tooltip] {
 		position: absolute;
 		visibility: hidden;
 		opacity: 0;
-		transition: transform 200ms ease, opacity 200ms;
-		// box-shadow: 0 0 10px rgba(black,0.3);
-		z-index: 99;
-        
+		transition: transform 300ms ease, opacity 200ms;
+		z-index: 99;	
+
 	}
 
 	&:before {
@@ -48,12 +47,18 @@ h1[tooltip] {
 		content: '';
 	}
 
-	&:hover:after,
-	&:hover:before {
-		visibility: visible;
-		opacity: 0.85;
-		transform: translateY(0px);
-	}
+	// &:hover:after,
+	// &:hover:before {
+	// 	visibility: visible;
+	// 	opacity: 0.85;
+	// 	transform: translateY(0px);
+	// }
+}
+
+h1[tooltip].show-tooltip:before,h1[tooltip].show-tooltip:after{
+	visibility: visible;
+	opacity: 0.85;
+	transform: translateY(0px);
 }
 
 // top tooltip

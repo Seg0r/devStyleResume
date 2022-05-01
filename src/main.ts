@@ -8,7 +8,7 @@ import './styles/tooltip.scss';
 
 // @ts-ignore 
 import { setupTypewriter } from './utils/loader.js';
-import {update as tweenUpdate} from '@tweenjs/tween.js';
+import { update as tweenUpdate } from '@tweenjs/tween.js';
 import Stats from 'stats.js'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -115,13 +115,13 @@ const loadingManager = new LoadingManager(() => {
 //Sounds
 ///////////////////////////
 const listener = new AudioListener();
-camera.add( listener );
-const ambienceSound = new Audio( listener );
+camera.add(listener);
+const ambienceSound = new Audio(listener);
 const audioLoader = new AudioLoader(loadingManager);
-audioLoader.load( 'sounds/ambience3.mp3', function( buffer ) {
-    ambienceSound.setBuffer( buffer );
-    ambienceSound.setLoop( true );  
-    ambienceSound.setVolume(0.2);    
+audioLoader.load('sounds/ambience3.mp3', function (buffer) {
+    ambienceSound.setBuffer(buffer);
+    ambienceSound.setLoop(true);
+    ambienceSound.setVolume(0.2);
 });
 
 
@@ -192,7 +192,7 @@ function onWindowResize() {
     scrollbarUtils.scrollCurrent();
     landscapePrompt();
 }
-window.addEventListener('resize', throttle(onWindowResize,50), false);
+window.addEventListener('resize', throttle(onWindowResize, 50), false);
 window.addEventListener('orientationchange', onWindowResize, false);
 
 let mouse = new Vector2(0, 0);
@@ -201,18 +201,18 @@ function onDocumentMouseMove(event: any) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
-document.addEventListener('mousemove', throttle(onDocumentMouseMove,50), false);
+document.addEventListener('mousemove', throttle(onDocumentMouseMove, 50), false);
 
 const loaderStart = document.getElementById("loader-start");
 loaderStart!.addEventListener('click', animateIntro);
 
 landscapePrompt();
 
-
 document.addEventListener('popupOpened', scrollbarUtils.disableCheckScroll);
 document.addEventListener('popupClosed', scrollbarUtils.enableCheckScroll);
 
-// setInterval(()=>{console.log(document.activeElement)},1000);
+tooltipListeners();
+
 
 /////////////////////////////////////
 //SCENE
@@ -273,7 +273,7 @@ function render() {
     //magneticField.render();
     cameraUtils.render(mouse);
     rock.render();
-    
+
 
     // renderer.clearDepth();
     //render rest
@@ -307,11 +307,11 @@ function prepareForSecondScene() {
 
     //exlore links from end of page
     const exploreLink = document.getElementById("exploreLink");
-    exploreLink!.addEventListener('click',toggleExplore);
-    exploreLink!.addEventListener('touchend',toggleExplore);
+    exploreLink!.addEventListener('click', toggleExplore);
+    exploreLink!.addEventListener('touchend', toggleExplore);
     const unExploreLink = document.getElementById("unExploreLink");
-    unExploreLink!.addEventListener('click',toggleExplore);
-    unExploreLink!.addEventListener('touchend',toggleExplore);
+    unExploreLink!.addEventListener('click', toggleExplore);
+    unExploreLink!.addEventListener('touchend', toggleExplore);
 
     //Scene setup
     main.style.visibility = "visible";
@@ -324,17 +324,17 @@ function prepareForSecondScene() {
     toggleControls(false);
 
     //reset to top of page on reload
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
 
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
-    rock.toggleVisibility();    
+    rock.toggleVisibility();
 
     //Sound
     ambienceSound.play();
 }
 
-function toggleExplore(){
+function toggleExplore() {
     if (main.style.visibility == "hidden") {
         main.style.visibility = "visible";
         toggleControls(false);
@@ -353,14 +353,14 @@ function toggleExplore(){
 }
 
 
-function animateIntro(){
-    if(isMobile()){
+function animateIntro() {
+    if (isMobile()) {
         openFullscreen();
     }
     const loadingScreen = document.getElementById('loading-screen')!;
     loadingScreen.classList.add('fade-out');
     loadingScreen.addEventListener('transitionend', onTransitionEnd);
-    let animationPromise: Promise<void>;    
+    let animationPromise: Promise<void>;
     if (!skipAnimateRock) {
         animationPromise = rock.startAnimation();
     } else {
@@ -378,21 +378,21 @@ function animateIntro(){
     return false;
 }
 
-function landscapePrompt(){
+function landscapePrompt() {
     const loaderLandscape = document.getElementById("loader-landscape");
-    if(window.innerWidth<window.innerHeight){
+    if (window.innerWidth < window.innerHeight) {
         loaderLandscape?.classList.add('fadein');
         loaderLandscape?.classList.remove('fadeout');
-    } else{
+    } else {
         //no initial fadeout
-        if(loaderLandscape?.classList.contains('fadein')){
+        if (loaderLandscape?.classList.contains('fadein')) {
             loaderLandscape?.classList.add('fadeout');
             loaderLandscape?.classList.remove('fadein');
         }
     }
 }
 
-function toggleControls(val: boolean){
+function toggleControls(val: boolean) {
     controls.enableRotate = val;
     controls.enableZoom = val;
     controls.enablePan = val;
@@ -400,19 +400,57 @@ function toggleControls(val: boolean){
 
 
 function openFullscreen() {
-  var elem: any = window.document.documentElement;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.webkitRequestFullscreen) { /* Safari */
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { /* IE11 */
-    elem.msRequestFullscreen();
-  }
+    var elem: any = window.document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+    }
 }
 
-function isMobile(){
-    if( "ontouchstart" in document.documentElement)
-        return true;    
+function isMobile() {
+    if ("ontouchstart" in document.documentElement)
+        return true;
     else
         return false;
+}
+
+function tooltipListeners() {
+    const tooltipedElement = document.querySelectorAll('h1[tooltip]');
+    tooltipedElement.forEach(element => {
+        element.addEventListener('click',removetTooltips);
+    });
+
+    document.addEventListener('scroll',throttle(()=>{
+        hideTooltip();
+        setTimeout(showTooltip,3000);
+    },200));
+}
+
+function removetTooltips() {
+    const tooltipedElement = document.querySelectorAll('h1[tooltip]');
+    tooltipedElement.forEach(element => {
+        element.removeAttribute('tooltip');
+        element.removeEventListener('click',removetTooltips);
+    });
+}
+
+function showTooltip() {
+    const tooltipedElement = document.querySelectorAll('h1[tooltip]');
+    tooltipedElement.forEach(element => {
+        if (!element.classList.contains('show-tooltip')) {
+            element.classList.add('show-tooltip');
+        }
+    });
+}
+
+function hideTooltip() {
+    const tooltipedElement = document.querySelectorAll('h1[tooltip]');
+    tooltipedElement.forEach(element => {
+        if (element.classList.contains('show-tooltip')) {
+            element.classList.remove('show-tooltip');
+        }
+    });
 }
