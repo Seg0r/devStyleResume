@@ -226,7 +226,7 @@ universe.addToScene(scene);
 
 
 //DEBUG
-if (true) {
+if (false) {
     cameraUtils.panEnabled = false;
     skipAnimateRock = true;
     minDiff = 10;
@@ -240,6 +240,8 @@ controls.target.copy(SOLAR_CENTER);
 cameraUtils.setPositionAndTarget(cameraSplineDefinition[0].vector, SOLAR_CENTER);
 cameraUtils.panEnabled = false;
 main.style.visibility = "hidden";
+//reset to top of page (sometimes needed after reload)
+window.scrollTo(0, 0);
 
 
 //animate loop
@@ -305,6 +307,9 @@ function prepareForSecondScene() {
         }
     });
 
+    //reset to top of page (sometimes needed after reload)
+    window.scrollTo(0, 0);
+
     //exlore links from end of page
     const exploreLink = document.getElementById("exploreLink");
     exploreLink!.addEventListener('click', toggleExplore);
@@ -323,15 +328,13 @@ function prepareForSecondScene() {
     cameraUtils.panEnabled = true;
     toggleControls(false);
 
-    //reset to top of page on reload
-    window.scrollTo(0, 0);
-
     solarSystem.toggleVisibility();
     nebula.toggleVisibility();
     rock.toggleVisibility();
 
     //Sound
     ambienceSound.play();
+    
 }
 
 function toggleExplore() {
@@ -425,7 +428,7 @@ function tooltipListeners() {
 
     document.addEventListener('scroll',throttle(()=>{
         hideTooltip();
-        setTimeout(showTooltip,3000);
+        setTimeout(showTooltip,3500);
     },200));
 }
 
