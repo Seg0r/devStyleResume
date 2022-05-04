@@ -1,6 +1,6 @@
 
 import { Easing, Tween } from '@tweenjs/tween.js';
-import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer } from 'three';
+import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer, Vector3, Raycaster, Vector2 } from 'three';
 import { CameraUtils } from './CameraUtils';
 // @ts-ignore 
 import { throttle } from './utils/utils';
@@ -36,6 +36,11 @@ export class ScrollbarUtils {
     swipeStart!: Touch;
     swipeDir: number = 0;
     private _checkScrollDisabled: boolean = false;
+    raycaster: Raycaster;
+    mouse: Vector2;
+    renderer: WebGLRenderer;
+    scrollBarClickable: Mesh[]=[];
+    waiting: boolean;
 
     public set checkScrollDisabled(value: boolean) {
         this._checkScrollDisabled = value;
@@ -47,7 +52,7 @@ export class ScrollbarUtils {
 
 
 
-    constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation) {
+    constructor(main: HTMLElement, cameraUtils: CameraUtils, color: ColorRepresentation,renderer: WebGLRenderer) {
         this.main = main;
         this.sections = main.children
         this.cameraUtils = cameraUtils;
@@ -59,6 +64,18 @@ export class ScrollbarUtils {
         this.cameraOrtho = new OrthographicCamera(- width / 2, width / 2, height / 2, - height / 2, 1, 10);
         this.cameraOrtho.position.z = 10;
         this.sceneOrtho = new Scene();
+
+        this.raycaster = new Raycaster();
+        this.mouse = new Vector2();
+
+        this.renderer = renderer;
+
+        const boundCheckIntersect = this.checkIntersect.bind(this);
+
+        document.addEventListener('mousedown', boundCheckIntersect, false);
+        document.addEventListener('touchstart', boundCheckIntersect, false);
+
+        this.waiting = false;
     }
 
     prepareListeners() {
@@ -79,12 +96,12 @@ export class ScrollbarUtils {
         const boundScrollDown = this.scrollDown.bind(this);
 
         // window.addEventListener('scroll', throttle(boundCheckScroll, 200), { passive: false });
-        window.addEventListener('wheel', throttle(boundCheckScroll, 200), { passive: false });
+        window.addEventListener('wheel', boundCheckScroll, { passive: false });
         window.addEventListener('touchend', boundCheckScroll, { passive: false });
 
         const chevron = document.getElementById('chevron')!;
         chevron.addEventListener('click', boundScrollDown, { passive: false });
-        chevron.addEventListener('touchend', boundScrollDown, { passive: false });
+        // chevron.addEventListener('touchend', boundScrollDown, { passive: false });
 
 
         this.userIdle();
@@ -93,17 +110,17 @@ export class ScrollbarUtils {
 
 
     private scrollDirection = (ev: any) => {
-        if (ev.type === 'wheel')
-            return ev.wheelDelta ? ev.wheelDelta : -1 * ev.deltaY
-        if (ev.type === 'touchend') {
-            return this.calcTouchDist(ev);
-        };
-    };
-
-    private calcTouchDist(ev: TouchEvent) {
-        let end = ev.changedTouches[0];
-        const diff = end?.screenY - this.swipeStart?.screenY;
-        if (Math.abs(diff) < 10)
+        let diff = 0;
+        let minDiff = 10;
+        if (ev.type === 'wheel'){
+            diff =  ev.wheelDelta ? ev.wheelDelta : -1 * ev.deltaY
+            minDiff = 2; //smaller for trackpads
+        }
+        else if (ev.type === 'touchend') {
+            let end = ev.changedTouches[0];
+            diff = end?.screenY - this.swipeStart?.screenY;
+        }
+        if (Math.abs(diff) < minDiff)
             return 0;
         else
             return diff;
@@ -114,9 +131,19 @@ export class ScrollbarUtils {
             return;
         }
         // console.log(ev)
-        this.sectionScrolling2(ev);
-        if (ev.type == "wheel" && ev.cancelable){
-            ev.preventDefault();            
+        const _that=this;
+        //throttle scrolling
+        if (!this.waiting) {                       
+            this.sectionScrolling2(ev);
+            this.waiting = true;                   
+            setTimeout(function () {          
+                _that.waiting = false;
+            }, 500);
+        }
+        
+        //prevent all scrolling events (while throttling too)
+        if ((ev.type == "wheel") && ev.cancelable){
+            ev.preventDefault();
         }
         ev.stopPropagation();
         return false;
@@ -129,10 +156,7 @@ export class ScrollbarUtils {
             this.scrollUp();
         } else if (dir < 0) {
             this.scrollDown();
-        } 
-        // else{
-        //     console.log(dir)
-        // }
+        }
     }
 
     private scrollDown() {
@@ -158,6 +182,16 @@ export class ScrollbarUtils {
         // this.sections[this.currentSection].scrollIntoView(true);
         // console.log("Scrolled current section "+this.currentSection+" into view")
         this.cameraScrolling(false);
+    }
+
+    private scrollToSection(section:number) {
+        if (section < this.sections.length && section>=0) {
+            this.currentSection=section;
+            this.sections[this.currentSection].scrollIntoView({ block: "center", behavior: 'smooth' });
+            // this.sections[++this.currentSection].scrollIntoView(true);
+            // console.log("Scrolled down to section "+this.currentSection)
+            this.cameraScrolling();
+        }
     }
 
     public cameraScrolling(playAudio: boolean = true) {
@@ -231,25 +265,33 @@ export class ScrollbarUtils {
         }
     }
 
-    public render(renderer: WebGLRenderer) {
-        renderer.render(this.sceneOrtho, this.cameraOrtho);
+    public render() {
+        this.renderer.render(this.sceneOrtho, this.cameraOrtho);
     }
 
     createScrollbar() {
 
         const geometry = new RingBufferGeometry(1.5, 2, 20);
+        const circleGeo = new CircleBufferGeometry(2);
         const material = new MeshBasicMaterial({
             depthTest: false,
             opacity: 0.2,
             transparent: true
+        });
+        const circleMaterial = new MeshBasicMaterial({
+            visible: false,
         });
         this.scrollbar = new Group();
 
         this.updateScrollbarPosition();
 
         for (let index = 0; index < this.sections.length; index++) {
-            const circleMesh = new Mesh(geometry, material);
-            circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0)
+            const ringMesh = new Mesh(geometry, material);
+            ringMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0);
+            this.scrollbar.add(ringMesh);
+            const circleMesh = new Mesh(circleGeo,circleMaterial);
+            circleMesh.position.set(0, index * SCROLL_BAR_DISTANCE, 0);
+            this.scrollBarClickable.push(circleMesh);
             this.scrollbar.add(circleMesh);
             this.scrollbar.position.setY(index * 15)
         }
@@ -321,4 +363,25 @@ export class ScrollbarUtils {
 
     public enableCheckScroll = () => { this.checkScrollDisabled = false };
 
+    
+
+    checkIntersect(e:any) {
+        var bounds = this.renderer.domElement.getBoundingClientRect()
+        if(e.clientX){
+            this.mouse.x = ( (e.clientX - bounds.left) / this.renderer.domElement.clientWidth ) * 2 - 1;
+            this.mouse.y = - ( (e.clientY - bounds.top) / this.renderer.domElement.clientHeight ) * 2 + 1;
+        }else if(e.touches[0].clientX){
+            this.mouse.x = ( (e.touches[0].clientX - bounds.left) / this.renderer.domElement.clientWidth ) * 2 - 1;
+            this.mouse.y = - ( (e.touches[0].clientY - bounds.top) / this.renderer.domElement.clientHeight ) * 2 + 1;
+        }
+        this.raycaster.setFromCamera( this.mouse, this.cameraOrtho );
+        var intersects = this.raycaster.intersectObjects(this.sceneOrtho.children, true);
+        if (intersects.length > 0) {
+            console.log("trafiony")
+            const section = this.scrollBarClickable.findIndex(elem=>
+                elem.uuid===intersects[0].object.uuid
+            );
+            this.scrollToSection(section)
+        }
+    }
 }

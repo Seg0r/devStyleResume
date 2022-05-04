@@ -136,7 +136,8 @@ const cameraSplineDefinition: { vector: Vector3, mark: boolean }[] = [
     { vector: new Vector3(-1000, 100, 0).multiplyScalar(UNIVERSE_FACTOR), mark: true },
     { vector: new Vector3(200, 400, -200).multiplyScalar(UNIVERSE_FACTOR), mark: true },
     { vector: new Vector3(1000, -200, -700).multiplyScalar(UNIVERSE_FACTOR), mark: true },
-    { vector: new Vector3(500, 500, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true }
+    { vector: new Vector3(500, 500, 700).multiplyScalar(UNIVERSE_FACTOR), mark: true },
+    { vector: new Vector3(-400, 300, 500).multiplyScalar(UNIVERSE_FACTOR), mark: true }
 ];
 
 let cameraUtils = new CameraUtils(camera, SOLAR_CENTER, controls, UNIVERSE_SIZE, cameraSplineDefinition, listener);
@@ -176,7 +177,7 @@ scene.add(ambientLight);
 //scene.add(worldAxis);
 
 //Scrollbar
-let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR);
+let scrollbarUtils = new ScrollbarUtils(main, cameraUtils, MAIN_COLOR,renderer);
 
 
 
@@ -281,7 +282,7 @@ function render() {
     //render rest
     renderer.render(scene, camera);
     renderer.clearDepth();
-    scrollbarUtils.render(renderer);
+    scrollbarUtils.render();
 }
 
 function onTransitionEnd(event: any) {
