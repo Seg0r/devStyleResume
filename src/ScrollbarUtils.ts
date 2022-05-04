@@ -1,6 +1,6 @@
 
 import { Easing, Tween } from '@tweenjs/tween.js';
-import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer, Vector3, Raycaster, Vector2 } from 'three';
+import { Scene, Group, Mesh, MeshBasicMaterial, RingBufferGeometry, CircleBufferGeometry, Object3D, MathUtils, ColorRepresentation, OrthographicCamera, WebGLRenderer, Raycaster, Vector2 } from 'three';
 import { CameraUtils } from './CameraUtils';
 // @ts-ignore 
 import { throttle } from './utils/utils';
@@ -377,7 +377,7 @@ export class ScrollbarUtils {
         this.raycaster.setFromCamera( this.mouse, this.cameraOrtho );
         var intersects = this.raycaster.intersectObjects(this.sceneOrtho.children, true);
         if (intersects.length > 0) {
-            console.log("trafiony")
+            // console.log("trafiony")
             const section = this.scrollBarClickable.findIndex(elem=>
                 elem.uuid===intersects[0].object.uuid
             );
